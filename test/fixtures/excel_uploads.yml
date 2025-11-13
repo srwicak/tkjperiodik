@@ -1,0 +1,30 @@
+# == Schema Information
+#
+# Table name: excel_uploads
+#
+#  id         :bigint           not null, primary key
+#  file_data  :text
+#  status     :integer          default("pending")
+#  unit       :string
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  exam_id    :bigint           not null
+#
+# Indexes
+#
+#  index_excel_uploads_on_exam_id  (exam_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (exam_id => exams.id)
+#
+
+one:
+  exam: one
+  status: 1
+  file_data: MyText
+
+two:
+  exam: two
+  status: 1
+  file_data: MyText

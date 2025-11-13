@@ -1,0 +1,57 @@
+- content_for :title do
+  Daftar Ujian - Dasbor
+
+- content_for :content do
+  - if !@police
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Mohon maaf laman ini hanya bisa diakses oleh personil Polisi.
+  - else
+    .max-w-4xl.mx-auto.w-full.my-8
+      .divider.divider-start.text-3xl.text-red-500.font-black.mb-8.uppercase ujian yang tersedia
+
+      - if @exams.empty?
+        .bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+          %p.font-bold Tidak ada ujian yang tersedia saat ini, mohon cek berkala.
+
+      - else
+        .space-y-6
+          - @exams.each do |exam|
+            - exam_days = (exam.exam_date_end - exam.exam_date_start).to_i + 1
+            .bg-white.shadow-lg.rounded-lg.overflow-hidden
+              .p-6
+                %p.text-2xl.font-bold.mb-4= exam.name
+                .divider.uppercase.text-sm.text-gray-400.font-bold detil ujian
+                %p.text-gray-600
+                  %i.ri-calendar-event-line
+                  %span.font-semibold= I18n.l(exam.exam_date_start, format: :date_only)
+                  sampai
+                  %span.font-semibold= I18n.l(exam.exam_date_end, format: :date_only)
+                %p.text-gray-600
+                  %i.ri-time-line
+                  Mulai dari
+                  %span= I18n.l(exam.exam_start, format: :time_wib)
+                %p.text-gray-600.mb-2
+                  %i.ri-team-fill
+                  Kuota: #{exam.batch * exam.size * exam_days } Personil
+                %p.text-gray-700.mb-4= truncate(exam.descriptions, length: 100)
+                .divider.uppercase.text-sm.text-gray-400.font-bold info pendaftaran
+                %p.text-red-500 Waktu pendaftaran
+                %p.text-gray-600
+                  %i.ri-calendar-event-line
+                  %span.text-red-500.font-bold #{I18n.l(exam.start_register, format: :date_only)}
+                %p.text-gray-600.mb-2
+                  %i.ri-team-fill
+                  %span.text-red-500.font-bold Terdaftar: #{exam.registered_count} Personil
+
+                .flex.justify-end
+                  - registerable = Date.today >= exam.start_register && Date.today < exam.exam_date_end ? true : false
+                  - if registerable
+                    %a.btn.btn-success.text-white.font-bold.uppercase.mt-4{ href: show_module_exam_path(exam.slug), role: "button" } lihat detil
+                  - else 
+                    %a.btn.btn-success.text-white.font-bold.uppercase.mt-4{ role: "button", disabled: "disabled" } pendaftaran belum dibuka
+
+
+
+
+
+= render "layouts/dashboard"

@@ -1,0 +1,19 @@
+- content_for :title do
+  Cetak Masal Surat - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .mt-8.w-full.max-w-4xl
+      .p-6.bg-white.rounded-xl
+        .font-bold.text-2xl.uppercase Cetak Massal Surat
+        %p.text-red-500.uppercase.mt-4.font-bold.text-small catatan: hanya mencetak yang telah dinilai
+        = render "exam_info"
+
+        .divider.font-bold.uppercase.text-gray-600.text-sm informasi kesatuan    
+
+        = render "unit_info"
+
+= render "layouts/dashboard"

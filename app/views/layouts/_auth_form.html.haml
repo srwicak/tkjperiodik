@@ -1,0 +1,15 @@
+.bg-gray-100.min-h-screen.h-full.flex.items-center.justify-center.relative
+  .fixed.inset-0.z-0
+    = image_tag "bg.webp", alt: "", class: "w-full h-full object-cover filter blur-sm brightness-50"
+  .relative.z-10.p-8.rounded-md.shadow-lg{ style: "background: linear-gradient(120deg, rgba(255,255,255,0.9) 55%, rgba(59,130,246,0.35) 100%);", class: "max-w-[400px]" }
+    = image_tag "siberdiri.webp", alt: "Logo TKJ PERIODIK", class: "mb-6 w-20 h-20 rounded-full shadow-lg border-4 border-red-300 bg-white"
+    %h1.text-xl.font-bold.mb-4.text-center
+      = yield :page_title
+      %span - TKJPERIODIK
+    = yield
+    .flex.flex-col.items-center.justify-between.gap-1
+      - if @forgot_page || @otp_page
+        = link_to "Masuk", new_user_session_path, class: "inline-block align-baseline font-bold text-sm text-red-500 hover:text-red-800"
+        = link_to "Daftar", new_user_registration_path, class: "inline-block align-baseline font-bold text-sm text-red-500 hover:text-red-800"
+      - else
+        = render "users/shared/links"

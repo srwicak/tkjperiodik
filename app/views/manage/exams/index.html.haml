@@ -1,0 +1,80 @@
+- content_for :title do
+  Manajemen Ujian - Dasbor
+
+- content_for :content do
+  .mobile-message
+    %div.flex.items-center.justify-center.h-screen
+      %p.text-center.text-red-500.font-semibold.mt-10.text-xl Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold daftar pengguna aktif
+    .text-sm 
+      %i.ri-information-line.text-xl
+      %span.text-gray-500.italic Dikarenakan data terenkripsi pada tingkat database maka tidak bisa pencarian secara fuzzy/parsial, mohon masukkan keseluruhan nomor NRP/NIP.
+    .mt-4 
+      %input#filter-value.input{ type: "text", placeholder: "Masukkan NRP/NIP" }
+      %button#filter-search.btn.btn-accent Cari
+      %button#filter-clear.btn.btn-error Muat ulang
+    .mt-8#data
+
+= render "layouts/dashboard"
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    filterMode: "remote",
+    ajaxURL: "/manajemen/pengguna/data",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center",
+      vertAlign: "middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "NRP/NIP", field: "identity", width: 180, resizable: false, headerSort: false, vertAlign: "middle" },
+      { title: "Nama", field: "name", width: 250, headerSort: false, vertAlign: "middle" },
+      { title: "Waktu Daftar", field: "created_at", width: 150, formatter: "datetime", headerSort: false, vertAlign: "middle", formatterParams: {
+        inputFormat: "iso",
+        outputFormat: "HH:mm:ss dd/MM/yy",
+        invalidPlaceholder: "[invalid date]",
+        timezone: "Asia/Jakarta"
+      }},
+      { 
+        title: "Aksi" ,
+        width: 100,
+        hozAlign: "center",
+        vertAlign:"middle",
+        headerHozAlign: "center",
+        headerSort: false,
+        formatter: (cell, formatterParams, onRendered) => {
+          let button = document.createElement("a")
+          button.className =  "btn btn-sm rounded-lg btn-accent uppercase"
+          button.innerHTML = "detil"
+          button.href = "/manajemen/pengguna/#{@code_front}" + cell.getRow().getData().id + "#{@code_last}"
+          
+          return button;
+        }
+      }
+    ]
+  })
+
+  function updateFilter() {
+    let search_param = document.getElementById("filter-value").value
+
+    if(search_param) {
+      table.setFilter("identity", "=", search_param)
+    }
+  }
+
+
+
+  document.getElementById("filter-search").addEventListener("click", updateFilter)
+
+  document.getElementById("filter-clear").addEventListener("click", () => { window.location.reload() });

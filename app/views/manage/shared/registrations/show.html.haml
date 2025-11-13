@@ -1,0 +1,83 @@
+- content_for :title do
+  Detil Riwayat Ujian Pengguna - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .text-3xl.font-black.my-8
+      %span.ml-2 #{@exam.name}
+
+    .max-w-4xl.w-full
+      .p-6.bg-white.rounded-xl
+        .divider.divider-start.uppercase.text-xl.font-black detil pendaftaran
+        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+          %tbody
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Waktu Daftar
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= I18n.l(@registration.created_at, format: :full_wib)
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Keperluan 
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @registration.registration_type.titleize
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Berkas Pendaftaran
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                - if @registration.pdf_data.nil?
+                  %div.text-xs.text-gray-800.my-2
+                    %p Berkas belum dibuat
+                    %a.btn.bg-green-600.text-white{ class:"hover:bg-green-700", href: download_pdf_module_history_path(@registration.slug), target: "_blank" }
+                      %i.ri-download-2-line
+                      Buat Berkas Pendaftaran
+
+                - elsif @registration.doc_processing?
+                  %div.text-xs.text-gray-800
+                    %p Berkas masih diproses... 
+                    %p (mohon dicek berkala)
+
+                - elsif @registration.doc_completed?
+                  %a.btn.bg-green-600.text-white.my-2{ class:"hover:bg-green-700", href: download_pdf_module_history_path(@registration.slug), target: "_blank" }
+                    %i.ri-download-2-line
+                    Unduh Pendaftaran
+
+                - elsif @registration.doc_error?
+                  %div.text-xs
+                    %p.text-red-600 Terjadi Kesalahan! 
+      
+        .divider.divider-start.uppercase.text-xl.font-black detil ujian
+        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+          %tbody
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tanggal Ujian
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= I18n.l(@exam_session.start_time, format: :date_only)
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Sesi Ujian (perkiraan)
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) #{I18n.l(@exam_session.start_time, format: :time_only)} - #{I18n.l(@exam_session.end_time, format: :time_only)} WIB
+
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Aksi 
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                %a.btn.my-2.bg-indigo-600.text-white.font-bold.uppercase{ class:"hover:bg-indigo-700" ,href: show_manage_exam_active_path(@exam.slug) } lihat detil ujian
+        
+        .divider.divider-start.uppercase.text-xl.font-black detil hasil ujian
+        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+          %tbody
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Status Penilaian
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @is_scored
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Terkahir diubah
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @when_scored
+
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Nilai 
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @thescore
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Aksi 
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                %a.btn.my-2.bg-red-600.text-white.font-bold.uppercase{ class:"hover:bg-red-700" ,href: show_manage_score_path(@score.slug) } lihat detil nilai
+                
+= render "layouts/dashboard"

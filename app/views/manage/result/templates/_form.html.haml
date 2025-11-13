@@ -1,0 +1,75 @@
+.mb-8( x-data="mailForm(#{@content.to_json.html_safe}, '#{@result_template.exam.name}', '#{@result_template.exam.short_name}')" ) 
+  .divider.divider-start.font-bold.uppercase.text-sm.text-gray-600 Konten surat keseluruhan
+  %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+    %tbody
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[300px]" ) Nama Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          %input.input.input-bordered.my-2{ type: "text", "x-model": "generalData.exam_name" }
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[300px]" ) Nama Singkat Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          %input.input.input-bordered.my-2{ type: "text", "x-model": "generalData.exam_name_short" }
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[300px]" ) Nama Lain Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          %input.input.input-bordered.my-2{ type: "text", "x-model": "generalData.exam_name_other" }
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[300px]" ) Nomor SK Polri
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          %input.input.input-bordered.my-2{ type: "text", "x-model": "generalData.sk_number" }
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[300px]" ) Tanggal SK Polri
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          %input.input.input-bordered.my-2{ type: "text","x-model": "generalData.sk_date" }
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[300px]" ) Nama Penanda Tangan
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          %input.input.input-bordered.my-2{ type: "text", "x-model": "generalData.signer_name" }
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[300px]" ) NRP Penanda Tangan
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          %input.input.input-bordered.my-2{ type: "text", "x-model": "generalData.signer_nrp" }
+
+  .divider.divider-start.font-bold.uppercase.text-sm.text-gray-600 Konten surat tiap kesatuan
+  %table.w-full.text-left.border.border-separate.rounded.border-slate-200{ cellspacing: 0 }
+    %thead
+      %tr
+        %th(class="h-12 px-6 text-sm border-b border-slate-200") Unit
+        %th(class="h-12 px-6 text-sm border-b border-slate-200") Nomor SK
+    %tbody
+      - UserDetail.units.each do |unit_key, unit_value|
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.px-6.text-sm.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{class:"w-[300px]"}
+            Nomor SK #{unit_key.to_s.titlecase}
+          %td.h-12.px-6.text-sm.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+            %input.input.input-bordered.my-2{ type: "text", "x-model": "unitData['#{unit_key}']", "data-unit-key": "#{unit_key}" }
+  
+  = form_with(model: @result_template, url: @url, method: :patch, local: true) do |form|
+    = form.hidden_field :content, "x-bind:value": "JSON.stringify(contents)"
+
+    %button.btn.btn-success.w-full.btn-lg.font-bold.uppercase.text-white.mt-6 Simpan Surat
+
+:javascript
+  function mailForm(contents, exam_name, exam_name_short){
+    const parsedContents = contents || { general: {}, units: {} };
+    return {
+      contents: parsedContents,
+      generalData: {
+        exam_name: parsedContents.general.exam_name || exam_name || '',
+        exam_name_short: parsedContents.general.exam_name_short || exam_name_short || exam_name || '',
+        exam_name_other: parsedContents.general.exam_name_other || '',
+        sk_number: parsedContents.general.sk_number || '',
+        sk_date: parsedContents.general.sk_date || '',
+        signer_name: parsedContents.general.signer_name || '',
+        signer_nrp: parsedContents.general.signer_nrp || ''
+      },
+      unitData: parsedContents.units || {},
+      get contents() {
+        return {
+          general: this.generalData,
+          units: this.unitData
+        }
+      }
+    }
+  }

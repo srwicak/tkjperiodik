@@ -1,0 +1,453 @@
+= form_with(model: @exam, url: @url, method: @method, local: true) do |form|
+  - if @exam.errors.any?
+    #error_explanation
+      %h2= pluralize(@exam.errors.count, "error") + " prohibited this exam from being saved:"
+      %ul
+        - @exam.errors.full_messages.each do |message|
+          %li= message
+
+  %div( x-data="multiStepForm()" x-init="init()" )
+    %div( x-show="step === 1")
+      .mb-6
+        %h2.text-lg.font-bold Langkah 1: Informasi Ujian
+        %p.text-sm.italic.text-red-500 (*)Wajib diisi
+      
+      .mb-4.w-full.max-w-4xl
+        %p.text-red-600.text-xs.mt-1.text-right(x-show="errors.start_register" x-text="errors.start_register")
+        %p.text-red-600.text-xs.mt-1.text-right(x-show="errors.end_register" x-text="errors.end_register")
+        .flex.justify-end.items-center.space-x-4.mt-2
+          %div
+            %p.font-bold.text-lg.text-red-500 Mulai Daftar(*)
+            .relative.max-w-sm
+              %div( class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none" )
+                %svg(class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" )
+                  %path( d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" )
+              %input( datepicker id="start-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Pilih tanggal mulai" datepicker-format="dd/mm/yyyy" datepicker-buttons datepicker-autoselect-today datepicker-autohide )
+              = form.hidden_field :start_register, "x-bind:value":"formData.start_register"
+              
+                        
+          %div
+            %p.font-bold.text-lg.text-red-500 Batas Daftar(*)
+            .relative.max-w-sm
+              %div( class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none" )
+                %svg(class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" )
+                  %path( d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" )
+              %input( datepicker id="end-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Pilih tanggal mulai" datepicker-format="dd/mm/yyyy" datepicker-buttons datepicker-autoselect-today datepicker-autohide )
+              = form.hidden_field :end_register, "x-bind:value":"formData.end_register"
+            
+          
+          %div
+            %p.font-bold.text-lg.text-red-500 Status Ujian: 
+            = form.select :status, Exam.statuses.keys.map { |key, value| [I18n.t("exam.statuses.#{key}"), key] }, {}, { class: "select select-bordered select-error w-[125px]",  "x-model": "formData.status" }
+        .flex.justify-end.mt-2
+          %p.text-xs.text-right.max-w-2xl
+            Contoh: mulai pendaftaran tanggal 16 Agustus 1945 jam 00.00 WIB dan selesai pada tanggal 17 Agustus 1945 jam 23.59 WIB, maka masukkan parameter
+            %span.text-red-500 Mulai Daftar
+            pada 
+            %span.text-red-500.font-bold 16 Agustus 1945
+            dan
+            %span.text-red-500 Batas Daftar
+            pada 
+            %span.text-red-500.font-bold 17 Agustus 1945
+      
+      
+      / Exam information
+      .mb-4
+        %label.form-control.w-full.max-w-4xl
+          .label
+            %span.label-text Nama Ujian(*)
+          = form.text_field :name, class: "input input-lg input-bordered w-full max-w-4xl", type: "text", placeholder: "Masukkan nama ujian", "x-model": "formData.name", required: true
+          %p.text-red-600.text-xs.mt-1(x-show="errors.name" x-text="errors.name")
+      
+      .mb-2
+        %label.form-control.w-full.max-w-4xl
+          .label
+            %span.label-text Nama Singkat Ujian
+          = form.text_field :short_name, class: "input input-bordered w-full max-w-4xl", type: "text", placeholder: "Masukkan nama singkat ujian", "x-model": "formData.short_name"
+          .label
+            / Component: Bottom base sized tooltip
+            %span.label-text-alt.relative.overflow-hidden.cursor-pointer.group.hover:overflow-visible.focus-visible:outline-none{"aria-describedby" => "tooltip"}
+              / Tooltip trigger
+              Nama singkat ujian adalah teks yang akan muncul pada surat rekomendasi hasil poin 2(e), jika tidak diisi maka teks akan mengambil dari nama ujian. ( ? - geser tetikus ke sini untuk melihat contoh)
+              / End Tooltip trigger
+              %span#tooltip.invisible.absolute.top-full.z-10.mt-2.rounded.bg-slate-700.p-4.text-sm.text-white.opacity-0.transition-all.before:invisible.before:absolute.before:bottom-full.before:z-10.before:mt-2.before:-ml-2.before:border-x-8.before:border-b-8.before:border-x-transparent.before:border-b-slate-700.before:opacity-0.before:transition-all.group-hover:visible.group-hover:block.group-hover:opacity-100.group-hover:before:visible.group-hover:before:opacity-100{class: "left-1/2 -translate-x-1/2 before:left-1/2 before:content-['']", role: "tooltip"} 
+                = image_tag "contoh-nama-singkat.webp", alt: "Contoh Nama Singkat Ujian"
+            / End Bottom base sized tooltip
+
+      .mb-4.w-full.max-w-4xl
+        %span.label-text Deskripsi Ujian
+        = form.text_area :descriptions, class: "textarea bg-white rounded-lg w-full max-w-4xl", placeholder: "Masukkan deskripsi ujian (jika dibutuhkan)", "x-model": "formData.descriptions", rows: "8", "x-on:input": "formData.descriptions = formData.descriptions.substring(0, 5000)", maxlength: "5000"
+        .label
+          .label-text-alt Deskripsi ujian akan ditampilkan untuk peserta ketika mendaftar, dapat diisi berupa informasi yang terkait dengan ujian.
+          .label-text-alt.text-red-500
+            %span sisa
+            %span.font-bold( x-text="5000 - formData.descriptions.length" )
+            %span karakter
+    
+      .divider.divider-start.uppercase.italic.font-bold.text-gray-600.text-sm pengaturan jumlah peserta ujian
+
+      %p.text-red-600.text-xs.mt-1(x-show="errors.size" x-text="errors.size")
+      %p.text-red-600.text-xs.mt-1(x-show="errors.batch" x-text="errors.batch")
+
+
+      / Participant calculation
+      .flex.mb-6
+        .flex.flex-col.items-center{ class: "w-[150px]" }
+          %p.label.text-sm Peserta per sesi(*)
+          = form.text_field :size, class: "input text-center input-bordered w-[100px]", type: "text", placeholder: "Peserta", "x-model": "formData.size", inputmode: 'numeric', pattern: '\d*', oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+
+        .content-center.mt-8
+          %i.ri-close-fill.text-3xl.font-black.text-red-500
+        .flex.flex-col.items-center{ class: "w-[150px]" }
+          %p.label.text-sm Jumlah sesi(*)
+          = form.text_field :batch, class: "input text-center input-bordered w-[100px]", type: "text", placeholder: "Sesi", "x-model": "formData.batch", inputmode: 'numeric', pattern: '\d*', oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+
+        .content-center.mt-8
+          %i.ri-equal-fill.text-3xl.text-red-500
+        .flex.flex-col.items-center.ml-6
+          %p.text-sm.mt-2.font-medium Jumlah Peserta
+          %p.text-2xl.text-red-500.font-black.mt-3{ "x-text": "`${formData.size * formData.batch}`" }
+
+      / Schedule
+      .divider.divider-start.uppercase.italic.font-bold.text-gray-600.text-sm pengaturan jadwal ujian
+
+
+      %h2.mb-4.font-bold.text-gray-800 Hari dan jam mulai ujian
+
+      .flex.space-x-8
+        #datepicker-inline( inline-datepicker data-date="02/25/2024" datepicker-title="Tanggal Ujian(*)" datepicker-min-date="06/04/2024" datepicker-format="dd-mm-yyyy" )
+        = form.hidden_field :exam_date, "x-bind:value":"formData.exam_date"
+        %p.text-red-600.text-xs.mt-1(x-show="errors.exam_date" x-text="errors.exam_date")
+
+        .flex.flex-col 
+          %div
+            %label( for="time" class="block mb-2 text-sm font-medium text-gray-900" ) Waktu mulai ujian(*)
+            .relative
+              %div( class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none" )
+                %svg( class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" )
+                  %path( fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" )
+              = form.time_field :exam_start, class:"bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5", required:true, "x-model": "formData.exam_start"
+            .label
+              .label-text-alt Waktu dalam WIB
+            %p.text-red-600.text-xs.mt-1(x-show="errors.exam_start" x-text="errors.exam_start")
+          
+          .mt-4
+            %label( for="duration" class="block mb-2 text-sm font-medium text-gray-900" ) Durasi ujian tiap sesi(*)
+
+            = form.text_field :exam_duration, class: "input text-center input-bordered w-[80px]", type: "text", placeholder: "Menit", "x-model": "formData.exam_duration", inputmode: 'numeric', pattern: '\d*', oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+            .label
+              .label-text-alt Dalam menit
+            %p.text-red-600.text-xs.mt-1(x-show="errors.exam_duration" x-text="errors.exam_duration")
+          
+          .mt-2
+            %label( for="batch" class="block mb-2 text-sm font-medium text-gray-900" ) Jeda antar sesi(*)
+
+            = form.text_field :break_time, class: "input text-center input-bordered w-[80px]", type: "text", placeholder: "Menit", "x-model": "formData.break_time", inputmode: 'numeric', pattern: '\d*', oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+            .label
+              .label-text-alt Dalam menit
+            %p.text-red-600.text-xs.mt-1(x-show="errors.break_time" x-text="errors.break_time")
+          
+          %a.mt-2.btn.btn-accent{ "@click": "scheduleSimulation" } Simulasi
+          
+        .flex.flex-col.space-y-4
+          %div
+            %p.text-sm.font-bold.mb-2 Simulasi Jadwal Ujian
+            %p.text-sm.italic Hanya menampilkan maksimal 10 sesi pertama
+          %div
+            %p.text-sm
+              %span Tanggal:
+              %span.font-bold( x-text="formData.exam_date" )
+            %p.text-sm.mb-4
+              %span Jam mulai:
+              %span.font-bold( x-text="formData.exam_start" )
+              %span WIB
+          
+            %template( x-for="(session, index) in simulation.slice(0, 10)" :key="index" )
+              %div
+                %p.text-sm
+                  %span Sesi
+                  %span( x-text="index + 1")
+                  %span( x-text="session.start" )
+                  %span WIB -
+                  %span( x-text="session.end" )
+                  %span WIB
+
+      .divider.divider-start.uppercase.italic.font-bold.text-gray-600.text-sm.mt-8 catatan operator          
+
+      .w-full.max-w-4xl
+        %span.label-text Catatan
+        = form.text_area :notes, class: "textarea bg-white rounded-lg w-full max-w-4xl", placeholder: "Catatan Operator", "x-model": "formData.notes", rows: "4", "x-on:input": "formData.notes = formData.notes.substring(0, 2000)", maxlength: "2000"
+        .label
+          .label-text-alt
+          .label-text-alt.text-red-500
+            %span sisa
+            %span.font-bold( x-text="2000 - formData.notes.length" )
+            %span karakter
+
+      .mt-4
+        %a.btn.btn-primary{ class: "w-[200px]", "@click": "nextStep()" } Selanjutnya
+        %span.ml-8.text-sm.text-red-500.font-bold( x-text="error_notification")
+    
+    / Step 2
+    %div( x-show="step === 2")
+      .mb-6
+        %h2.text-lg.font-bold Langkah 2: Konfirmasi Ujian
+      
+      .w-full.max-w-4xl.bg-white.p-8.rounded-lg.shadow-lg{ class: "shadow-red-500/50 hover:shadow-indigo-500/40"}
+        %p.text-2xl.text-center
+          %span( x-text="formData.name" )
+        %p.text-sm.text-center.text-gray-500.font-bold.mb-6
+          %span.uppercase.italic nama ujian
+        
+        %table.table
+          %tbody 
+            %tr 
+              %td( class="w-[200px]") Nama Ujian Singkat 
+              %td( x-text="formData.short_name")
+            %tr 
+              %td Mulai daftar ujian
+              %td( x-text="formData.start_register")
+            %tr 
+              %td Batas daftar ujian
+              %td( x-text="formData.end_register")
+            %tr 
+              %td Status ujian
+              %td( x-text="formatStatus()")
+            %tr
+              %td( colspan="2")  Deskripsi Ujian
+            %tr
+              %td.whitespace-pre-line( colspan="2" x-text="formData.descriptions")
+            %tr 
+              %td Jumlah peserta per sesi
+              %td
+                %span( x-text="formData.size")
+                %span Personel
+            %tr 
+              %td Jumlah sesi
+              %td
+                %span( x-text="formData.batch")
+                %span Sesi
+            %tr 
+              %td Tanggal ujian
+              %td( x-text="formData.exam_date")
+            %tr 
+              %td Waktu mulai ujian
+              %td
+                %span( x-text="formData.exam_start")
+                %span WIB
+            %tr 
+              %td Durasi ujian
+              %td
+                %span( x-text="formData.exam_duration")
+                %span Menit
+            %tr 
+              %td Jeda antar sesi
+              %td
+                %span( x-text="formData.break_time")
+                %span Menit
+            %tr
+              %td( colspan="2") Catatan
+            %tr
+              %td.whitespace-pre-line( colspan="2" x-text="formData.notes")      
+      
+      .mt-6.w-full.max-w-4xl.flex.space-x-4.justify-between
+        %a.btn.btn-primary{ class: "w-[200px]", "@click": "prevStep()" } Kembali
+        %button.btn.btn-secondary{ class: "w-[200px]" } Simpan
+
+:javascript
+  function multiStepForm(){
+    return {
+      step: 1,
+      simulation: [],
+      error_notification: '',
+      formData: {
+        start_register: '',
+        end_register: '',
+        status: '',
+        name: '',
+        short_name: '',
+        descriptions: '',
+        size: 1,
+        batch: 1,
+        exam_date: '',
+        exam_start: '',
+        exam_duration: '',
+        break_time: '',
+        notes: '',
+      },
+      errors: {},
+      validate() {
+        let errors = {};
+        if(!this.formData.start_register) {
+          errors.start_register = "Tanggal mulai pendaftaran diperlukan"
+        }
+        if(!this.formData.end_register) {
+          errors.end_register = "Tanggal batas pendaftaran ujian diperlukan"
+        }
+        if(this.parseDate(this.formData.start_register) >= this.parseDate(this.formData.end_register)) {
+          errors.end_register = "Tanggal batas pendaftaran ujian minimal beda 1 hari kedepan dari tanggal mulai pendaftaran"
+        }
+        if(this.parseDate(this.formData.end_register) >= this.parseDate(this.formData.exam_date)) {
+          errors.end_register = "Tanggal batas pendaftaran ujian tidak boleh sama atau melebihi tanggal ujian"
+        }
+        if(!this.formData.name) {
+          errors.name = "Nama ujian diperlukan"
+        }
+        if(this.formData.size <= 0) {
+          errors.size = "Tidak boleh di bawah 1 peserta"
+        }
+        if(this.formData.batch <= 0) {
+          errors.batch = "Tidak boleh di bawah 1 sesi"
+        }
+        if(!this.formData.exam_date) {
+          errors.exam_date = "Tanggal ujian diperlukan"
+        }
+        if(!this.formData.exam_start) {
+          errors.exam_start = "Waktu mulai diperlukan"
+        }
+        if(!this.formData.exam_duration) {
+          errors.exam_duration = "Durasi ujian diperlukan"
+        }
+        if(!this.formData.break_time) {
+          errors.break_time = "Jeda antar sesi diperlukan"
+        }
+        return errors;
+      },
+      init() {
+        this.formData.start_register = document.getElementById('exam_start_register').value
+        document.getElementById('start-datepicker').value = this.formatDatex(this.formData.start_register)
+        this.formData.end_register = document.getElementById('exam_end_register').value
+        document.getElementById('end-datepicker').value = this.formatDatex(this.formData.end_register)
+        this.formData.end_register = document.getElementById('end-datepicker').value
+        this.formData.status = document.getElementById('exam_status').value
+        this.formData.name = document.getElementById('exam_name').value
+        this.formData.short_name = document.getElementById('exam_short_name').value
+        this.formData.descriptions = document.getElementById('exam_descriptions').value
+        this.formData.size = document.getElementById('exam_size').value
+        this.formData.batch = document.getElementById('exam_batch').value
+        this.formData.exam_date = this.formatDatex(document.getElementById('exam_exam_date').value)
+        this.formData.exam_start = this.getterTime(document.getElementById('exam_exam_start').value)
+        this.formData.exam_duration = document.getElementById('exam_exam_duration').value
+        this.formData.break_time = document.getElementById('exam_break_time').value
+        this.formData.notes = document.getElementById('exam_notes').value
+        const today = new Date()
+        const formattedToday = today.toLocaleDateString('id-ID');
+        const dp = document.getElementById('datepicker-inline')
+        dp.setAttribute('data-date', this.formData.exam_date)
+        dp.setAttribute('datepicker-min-date', formattedToday)
+        dp.addEventListener('click', (event) => {
+          this.updateSelectedate();
+        });
+
+        if (this.formData.exam_date == 'undefined/undefined/' ) {
+          this.updateSelectedate();
+        }
+
+        const sr = document.getElementById('start-datepicker')
+        const er = document.getElementById('end-datepicker')
+        
+        sr.addEventListener('blur', (event) => {
+          this.formData.start_register = sr.value;
+        })
+        
+        er.addEventListener('blur', (event) => {
+          this.formData.end_register = er.value;
+        })
+
+        if (this.formData.start_register == '') {
+          this.formData.start_register = ''
+          sr.value = this.formData.start_register          
+        }
+        
+        if (this.formData.end_register == 'undefined/undefined/') {
+          this.formData.end_register = ''
+          er.value = this.formData.end_register
+        }
+      },
+      formatDatex(ds) {
+        const [year, month, day] = ds.split('-');
+        return `${day}/${month}/${year}`;
+      },
+      updateSelectedate() {
+        const selectedDateCell = document.querySelector('.datepicker-cell.selected');
+        if (selectedDateCell) {
+          this.formData.exam_date = new Date(Number(selectedDateCell.getAttribute('data-date'))).toLocaleDateString('id-ID');
+        } else {
+          const today = new Date();
+          this.formData.exam_date = today.toLocaleDateString('id-ID');
+        }
+      },
+      scheduleSimulation() {
+        this.simulation = [];
+        let currentStart = this.parseTime(this.formData.exam_start);
+        for (let i = 0; i < Math.min(this.formData.batch, 10); i++) {
+          let currentEnd = new Date(currentStart.getTime() + this.formData.exam_duration * 60000);
+          this.simulation.push({
+            start: this.formatTime(currentStart),
+            end: this.formatTime(currentEnd)
+          });
+          currentStart = new Date(currentEnd.getTime() + this.formData.break_time * 60000);
+        }
+      },
+      parseDate(dateString) {
+        const [day, month, year] = dateString.split('/').map(Number);
+        return new Date(year, month - 1, day);
+      },
+      parseTime(timeStr) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours);
+        date.setMinutes(minutes);
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+        return date;
+      },
+      formatTime(tiempo) {
+        return tiempo.toTimeString().slice(0, 5);
+      },
+      getterTime(tempos) {
+        if (tempos != '')
+        {
+          const [hour, minute] = tempos.split(':');
+          return `${hour}:${minute}`;
+        } else {
+          return `00:00`;
+        }
+      },
+      formatStatus(){
+        if (this.formData.status == '' || this.formData.status == 'draft') {
+          return "Draf"
+        } else if (this.formData.status == 'active') {
+          return "Aktif"
+        } else if (this.formData.status == 'archieve') {
+          return "Arsip"
+        }
+      },
+      nextStep() {
+        this.errors = this.validate();
+        if (Object.keys(this.errors).length === 0) {
+          this.step++;
+          window.scrollTo(0, 0);
+          this.error_notification = "";
+        } else {
+          this.error_notification = "Ada kesalahan input mohon cek lagi dari atas laman";
+        }
+      },
+      prevStep() {
+        this.step--;
+        window.scrollTo(0, 0);
+      },
+      formatDescription() {
+        let formatted = this.formData.description
+          .replace(/\n\n+/g, '<br><br>')
+          .replace(/\n/g, '<br>')
+          .replace(/(\+ul .+?)(?=\n\+ul|\n\+ol|\n\n|$)/g, match => {
+              return '<ul class="list-disc">' + match.replace(/\+ul /g, '<li>').replace(/\n/g, '</li><li>') + '</li></ul>';
+          })
+          .replace(/(\+ol .+?)(?=\n\+ul|\n\+ol|\n\n|$)/g, match => {
+              return '<ol class="list-decimal">' + match.replace(/\+ol /g, '<li>').replace(/\n/g, '</li><li>') + '</li></ol>';
+          });
+        return formatted;
+        }
+      }
+  }

@@ -1,0 +1,22 @@
+- content_for :title do
+  Ubah Surat - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .mt-8.w-full.max-w-4xl
+      .p-6.bg-white.rounded-xl
+        .font-bold.text-2xl.uppercase Ubah surat
+
+        = render "exam_info"
+
+        .divider.font-bold.uppercase.text-gray-600.text-sm petunjuk pengisian
+        
+        = image_tag "letter-info-2.webp", alt: "Informasi pengisian"
+
+        = render "form"
+    
+
+= render "layouts/dashboard"

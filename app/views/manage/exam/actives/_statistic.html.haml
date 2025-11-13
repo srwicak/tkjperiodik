@@ -1,0 +1,29 @@
+.w-full.max-w-4xl.bg-white.p-8.rounded-lg.shadow-lg{ class: "shadow-blue-500/50 hover:shadow-green-500/40"}
+  .p.uppercase.text-sm.font-bold.mb-2 statistik peserta tiap kesatuan
+  .p.uppercase.text-xs.text-gray-600.mb-4.italic kehadiran peserta berdasarkan pengisian nilai
+
+  %table( class="text-left border border-collapse rounded-xl sm:border-separate border-slate-200 bg-white w-full" cellspacing="0" )
+    %thead
+      %tr
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-tl-xl font-bold uppercase text-center" ) kesatuan
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 font-bold uppercase text-center" ) daftar
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-tr-xl font-bold uppercase text-center" ) hadir
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-tr-xl font-bold uppercase text-center w-[120px]" ) % hadir
+        
+      
+    %tbody
+      - @units.each do |unit|
+        %tr
+          %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+            %a{ class:"underline decoration-dashed", href: show_manage_exam_unit_path(slug: @exam.slug, unit: unit.parameterize) }= unit
+          %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" )= @registrations_count[unit] || 0
+          %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" )= @attendance_count[unit] || 0
+          %td(class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center")= (@attendance_count[unit].to_f > 0 ? (@attendance_count[unit].to_f / @registrations_count[unit] * 100).round(2) : 0)
+          
+    %tfoot
+      %tr
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-bl-xl font-bold uppercase text-center" ) TOTAL
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 font-bold uppercase text-center" )= @reg_count || 0
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 font-bold uppercase text-center" )= @att_count || 0
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-br-xl font-bold uppercase text-center w-[120px]" )= (@att_count > 0 ? (@att_count.to_f / @reg_count * 100).round(2) : 0)
+        

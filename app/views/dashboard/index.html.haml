@@ -1,0 +1,58 @@
+- content_for :title do
+  Beranda - Dasbor
+
+- content_for :content do
+  - if @admin || @police
+    .my-8.bg-white.rounded-lg.shadow-lg.text-slate-500.shadow-red-300.p-8.w-full.max-w-xl.mx-auto{ class:"hover:shadow-green-200" }
+      - if @nearest_exam
+        .text-center.mb-6
+          %p.text-xl.text-red-500.font-bold.uppercase Pendaftaran Ujian terdekat
+          %p.text-xl.font-bold.my-4 #{@nearest_exam.name}
+          %p
+            %i.ri-calendar-event-line
+            %span.font-semibold.text-red-500= I18n.l(@nearest_exam.exam_date_start, format: :date_only)
+            sampai
+            %span.font-semibold.text-red-500= I18n.l(@nearest_exam.exam_date_end, format: :date_only)
+          %p
+            %i.ri-time-line
+            Mulai dari
+            %span.font-semibold.text-red-500= I18n.l(@nearest_exam.exam_start, format: :time_wib)
+        %p 
+          Kuota: 
+          %span.font-black.text-red-500 #{@nearest_exam.batch * @nearest_exam.size * @exam_days} 
+          Personel
+        %p
+          Mulai pendaftaran:
+          %span.font-bold.text-green-600= I18n.l(@start_time, format: :def_wib)
+        .mt-6
+          %a.btn.bg-red-500.text-white.w-full.uppercase.text-lg{ href: show_module_exam_path(@nearest_exam.slug), class: "hover:bg-red-600 !important", disabled: !@registerable } lihat detil
+      - else
+        .text-center
+          %p.text-xl.text-red-500.font-bold.mb-6.uppercase Pendaftaran Ujian terdekat
+          %p.text-gray-400.text-sm.font-bold.italic.text-center Belum ada informasi terkini terkait pendaftaran ujian
+
+  - if @admin
+    - admin_top_panel = [ { number: @active_user, 
+      subject: "Pengguna Aktif", link: index_manage_user_active_path },
+      { number: @unverified_user, subject: "Pengguna Belum Terverifikasi", link: index_manage_user_verification_path },
+      { number: @forgot_user, subject: "Pengguna Lupa Kata Sandi", link: index_manage_user_forgot_path },
+      { number: @nonactive_user, subject: "Pengguna Non Aktif", link: index_manage_user_nonactive_path } ]
+
+    .divider.divider-start.uppercase.text-sm.text-gray-600.font-bold.italic.mt-8 statistik pengguna
+    .grid.grid-cols-1.md:grid-cols-2.xl:grid-cols-4.gap-6.mb-6
+      - admin_top_panel.each do |item|
+        = render partial: "shared/component/dashboard/card_panel", locals: { number: item[:number], subject: item[:subject],link: item[:link] }
+    
+  // 2025 update
+  - if @polda_staff
+    - if current_user.polda_staff.name == nil
+      .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4.rounded.shadow
+        %p.font-bold.text-lg.mb-2 Profil Penanggung Jawab Polda Belum Lengkap
+        %p.text-sm.mb-2 Silakan lengkapi profil PJ anda terlebih dahulu agar dapat menggunakan fitur aplikasi secara penuh.
+        %a.btn.btn-warning.mt-2{ href: edit_module_polda_staff_profile_path }
+          %i.ri-user-settings-line.mr-1
+          Lengkapi Profil Sekarang
+  - else
+    .mt-8.bg-white.rounded-lg.shadow-lg.text-slate-500.shadow-red
+
+= render "layouts/dashboard"

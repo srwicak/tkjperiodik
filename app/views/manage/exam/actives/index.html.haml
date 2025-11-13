@@ -1,0 +1,102 @@
+- content_for :title do
+  Ujian Aktif - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold daftar ujian aktif dan draf
+	
+    .flex.justify-between.items-center.my-6.mb-2
+      %div 
+        .text-lg 
+          %p Total data ujian
+          %span Draf: 
+          %span.font-bold.text-yellow-500 #{@draft} 
+          %span | Aktif: 
+          %span.font-bold.text-green-500 #{@active}
+          %span | Arsip: 
+          %span.font-bold.text-blue-500 #{@archieve}
+      %div
+        %a.btn.btn-primary.font-black{ href: new_manage_exam_active_path }
+          %i.ri-add-fill
+          %span.uppercase.text-xs buat ujian
+    %p.text-right.text-gray-600.font-bold.uppercase.text-sm
+      %span Catatan: [
+      %i.ri-search-line.text-red-500
+      %span Melihat ujian ] | [
+      %i.ri-edit-line.text-red-500
+      %span Mengubah ujian ]
+    .mt-8#data
+    
+
+= render "layouts/dashboard"
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    filterMode: "remote",
+    ajaxURL: "/kelola/ujian/data",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center",
+      vertAlign: "middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "Nama Ujian", field: "name", minWidth: 250, maxWidth: 500, headerSort: false, vertAlign: "middle", headerFilter: true },
+      { 
+        title: "Status", 
+        field: "status", 
+        width: 100, 
+        headerSort: false, 
+        vertAlign: "middle", 
+        editor:"list", 
+        editorParams: { values: { "active": "Aktif", "draft": "Draf", "archieve" : "Arsip", clearable: true }}, 
+        headerFilter: true, 
+        headerFilterParams: {values:{"active": "Aktif", "draft": "Draf", "archieve" : "Arsip"}, 
+        clearable: true} 
+      },
+      { title: "Tanggal Ujian", field: "exam_date", width: 300, headerSort: false, vertAlign: "middle" },
+      { title: "Jam Ujian", field: "exam_start", width: 90, headerSort: false, vertAlign: "middle", hozAlign: "center", headerHozAlign: "center" },
+      { title: "Mulai Daftar", field: "start_register", width: 140, headerSort: false, vertAlign: "middle" },
+      { title: "Catatan", field: "notes", width: 150, headerSort: false, vertAlign: "middle" },
+      { title: "Dibuat pada", field: "created_at", width: 220, headerSort: false, vertAlign: "middle" },
+      { 
+        title: "Aksi" ,
+        hozAlign: "center",
+        vertAlign:"middle",
+        headerHozAlign: "center",
+        frozen:true,
+        headerSort: false,
+        width: 100,
+        formatter: (cell, formatterParams, onRendered) => {
+          let showButton = document.createElement("a")
+          showButton.className =  "btn btn-sm rounded-lg btn-primary uppercase"
+          showButton.innerHTML = "<i class=ri-search-line></i>"
+          showButton.href = "/kelola/ujian/" + cell.getRow().getData().slug
+
+          let editButton = document.createElement("a")
+          editButton.className =  "btn btn-sm rounded-lg btn-secondary uppercase"
+          editButton.innerHTML = "<i class=ri-edit-line></i>"
+          editButton.href = "/kelola/ujian/" + cell.getRow().getData().slug + "/ubah"
+
+          let container = document.createElement("div")
+          container.className = "flex space-x-2"
+          container.appendChild(showButton)
+          container.appendChild(editButton)
+
+          return container          
+        }
+      }
+    ]
+  })

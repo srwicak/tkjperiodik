@@ -1,0 +1,26 @@
+.w-full.max-w-4xl.bg-white.p-8.rounded-lg.shadow-lg{ class: "shadow-blue-500/50 hover:shadow-green-500/40"}
+  %p.mb-4
+    %span.font-bold.text-red-600.uppercase catatan:
+    %span.text-sm.font-semibold Peserta yang diberikan nilai merupakan peserta yang hadir.
+
+  %table( class="text-left border border-collapse rounded-xl sm:border-separate border-slate-200 bg-white w-full" cellspacing="0" )
+    %thead
+      %tr
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-tl-xl font-bold uppercase text-center w-[200px]" ) jenis pendaftaran
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 font-bold uppercase text-center" ) daftar
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-tr-xl font-bold uppercase text-center" ) dinilai
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-tr-xl font-bold uppercase text-center w-[120px]" ) % dinilai
+        
+      
+    %tbody
+      %tr
+        %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Kenaikan Pangkat
+        %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" )= @registration_counts[:rankup][@unit] || 0
+        %td(class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center")= @score_counts[:rankup][@unit] || 0
+        %td(class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center w-[125px]")= (@score_counts[:rankup][@unit].to_f > 0 ? sprintf("%.2f", (@score_counts[:rankup][@unit].to_f / @registration_counts[:rankup][@unit] * 100)) : "0.00")
+      %tr
+        %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Berkala
+        %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" )= @registration_counts[:reguler][@unit] || 0
+        %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" )= @score_counts[:reguler][@unit] || 0
+        %td(class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center w-[125px]")= (@score_counts[:reguler][@unit].to_f > 0 ? sprintf("%.2f", (@score_counts[:reguler][@unit].to_f / @registration_counts[:reguler][@unit] * 100)) : "0.00")
+        

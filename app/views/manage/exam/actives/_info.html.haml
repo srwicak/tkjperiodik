@@ -1,0 +1,48 @@
+.flex.justify-end.max-w-4xl.mb-8
+  .max-w-2xl
+    %table( class="text-left border border-collapse rounded-xl sm:border-separate border-slate-200 bg-white" cellspacing="0" )
+      %tbody
+        %tr
+          %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-t-xl font-bold" colspan="2" ) Informasi Ujian
+
+        %tr
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Status ujian
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+            .flex.items-center
+              %span.flex.relative.h-3.w-3
+                - if @exam.status == 'active'
+                  %span.animate-ping.absolute.inline-flex.h-full.w-full.rounded-full.bg-green-400.opacity-75
+                  %span.relative.inline-flex.rounded-full.h-3.w-3.bg-green-500
+                - elsif @exam.status == 'draft'
+                  %span.relative.inline-flex.rounded-full.h-3.w-3.bg-blue-500
+                - elsif @exam.status == 'archieve'
+                  %span.relative.inline-flex.rounded-full.h-3.w-3.bg-gray-500
+              %span.ml-2
+                #{@exam.status_label}
+
+        %tr
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Ujian dibuat
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+            %div( tabindex="0" class="collapse collapse-arrow" )
+              %div( class="collapse-title pl-0 min-h-0" ) 
+                %i.ri-user-line
+                #{@created_by}
+              .collapse-content.pl-0
+                %i.ri-time-line
+                #{@created_at}
+
+        %tr
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Terakhir diubah
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+            %div( tabindex="0" class="collapse collapse-arrow" )
+              %div( class="collapse-title pl-0 min-h-0" ) 
+                %i.ri-user-line
+                #{@updated_by}
+              .collapse-content.pl-0
+                %i.ri-time-line
+                #{@updated_at}
+
+        %tr
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Peserta terdaftar
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) #{@exam.registered_count} dari #{@exam.batch * @exam.size * @exam_days} peserta
+                   

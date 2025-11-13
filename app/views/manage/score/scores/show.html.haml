@@ -1,0 +1,38 @@
+- content_for :title do
+  Detil Nilai - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 informasi kepesertaan
+
+    .max-w-4xl.w-full
+      = render "exam_user_info"
+
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 nilai ujian
+
+    .max-w-4xl.w-full
+      - if @is_scored
+        .p-6.bg-white.rounded-xl
+          .divider.uppercase.text-sm.font-bold.text-red-500.italic nilai belum diinput
+          .flex.justify-center
+            %a.btn.bg-green-500.text-white.uppercase{ class:"hover:bg-green-600", href: edit_manage_score_path(@score.slug) } input nilai
+      - else
+        .bg-white.p-6.rounded-xl
+          .flex.items-center.justify-between.mb-4
+            %p.p-2.bg-red-500.text-white.font-bold.text-sm Kode: #{@score.code[0, 3]}-#{@score.code[-4, 4]}
+            %a.btn.btn-success.text-white{ href: edit_manage_score_path(@score.slug) } Ubah Nilai
+
+          = render "score_spoiler"
+
+    - if !@is_scored
+      .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 dokumen hasil
+
+      .max-w-4xl.w-full
+        .p-6.bg-white.rounded-xl
+          =render "document"
+        
+        
+= render "layouts/dashboard"

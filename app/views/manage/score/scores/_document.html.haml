@@ -1,0 +1,48 @@
+.font-semibold.text-xs.mb-2.uppercase.text-gray-600 
+  Catatan: Setiap ada perubahan nilai atau 
+  %span.italic template
+  maka perlu proses dokumen ulang sebelum unduh
+%table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+  %tbody
+    %tr
+      %th( scope="col" class="h-12 px-6 text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="2" ) Informasi Dokumen Hasil
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Keperluan Ujian
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @registration.registration_type.humanize.titlecase
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Status Dokumen
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+        - if !@score.doc_status.nil?
+          - if @score.doc_processing?
+            %div.text-xs.text-gray-800
+              %p Berkas masih diproses... 
+              %p (mohon dicek berkala)
+          - elsif @score.doc_completed?
+            %a.btn.bg-green-600.text-white.my-2{ class:"hover:bg-green-700", href: download_doc_manage_score_path(@score.slug), target: "_blank" }
+              %i.ri-download-2-line
+              Unduh Hasil
+          - elsif @score.doc_error?
+            %div.text-xs
+              %p.text-red-600 Terjadi Galat!
+        - else 
+          Dokumen belum dibuat.
+
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" )
+        Status
+        %span.italic template
+        surat
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+        - if !@content
+          Belum ada
+          %span.italic template
+        - else
+          Sudah ada
+          %span.italic template
+        %a.btn.bg-lime-600.text-white.ml-2.my-2{ class:"hover:bg-lime-700", href: edit_manage_result_template_path(@exam.result_doc.slug)}
+          Kelola Surat
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Aksi
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+        %a.btn.bg-indigo-600.text-white.my-2{ class:"hover:bg-indigo-700", href: generate_doc_manage_score_path(@score.slug)}
+          Proses dokumen

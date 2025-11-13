@@ -1,0 +1,20 @@
+- content_for :title do
+  Detil Ujian - Dasbor
+
+- content_for :content do
+  .max-w-4xl.mx-auto.w-full.my-8
+    .divider.divider-start.text-3xl.text-red-500.font-black.mb-8.uppercase Detil Ujian
+    .rounded-lg.p-8.bg-white.mb-8
+      = render "exam_info"
+
+    .flex.justify-center
+      - if @is_registered 
+        %a.btn.btn-success.text-white.font-bold.uppercase{ disabled: "disabled" } anda sudah terdaftar
+      - elsif @full_capacity
+        %a.btn.btn-success.text-white.font-bold.uppercase{ disabled: "disabled" } kuota sudah penuh atau hari ujian telah berakhir
+      -else
+        %a.btn.btn-success.text-white.font-bold.uppercase{ href: new_module_exam_path(@exam.slug) } pendaftaran ujian
+
+
+
+= render "layouts/dashboard"

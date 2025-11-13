@@ -1,0 +1,61 @@
+.bg-white.p-6.rounded-xl
+  %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+    %tbody
+      %tr
+        %th( scope="col" class="h-12 px-6 text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="2" ) 
+          .flex.justify-between
+            .flex
+              Informasi Peserta
+            .flex
+              - if @user.account_status == "active"
+                %a.btn.btn-sm{href: show_manage_user_active_path(@user.slug)} 
+                  %i.ri-search-line 
+                  detil
+              - else
+                %a.btn.btn-sm{href: show_manage_user_nonactive_path(@user.slug)} 
+                  %i.ri-search-line 
+                  detil
+  
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama Peserta
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @user.user_detail.name
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Pangkat/NRP
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )#{@user.user_detail.rank}/#{@user.identity}
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kesatuan
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )#{@user.user_detail.unit}
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jabatan
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )#{@user.user_detail.position}
+
+      %tr
+        %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 font-bold" colspan="2" ) 
+          .flex.justify-between
+            .flex
+              Informasi Ujian
+            .flex
+              %a.btn.btn-sm{href: show_manage_exam_active_path(@exam.slug)} 
+                %i.ri-search-line 
+                detil
+  
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          .my-2
+            = @exam.name
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tanggal Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          .my-2
+            = I18n.l(@exam.exam_date_start, format: :date_only)
+            sampai
+            = I18n.l(@exam.exam_date_end, format: :date_only)
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Sesi Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )#{I18n.l(@exam_session.start_time, format: :simple_no_sec)} - #{I18n.l(@exam_session.end_time, format: :time_only)} WIB

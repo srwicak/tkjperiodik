@@ -1,0 +1,75 @@
+- content_for :title do
+  Ubah Profil - Dasbor
+
+- content_for :content do
+  .max-w-4xl.mx-auto.w-full.mt-8
+    .p-6.bg-white.rounded-xl
+      %p.text-2xl.font-bold.mb-6 Ubah Profile
+      .divider.divider-start.uppercase.font-bold.text-gray-500.text-sm identitas pengguna
+      .text-sm.font-semibold.uppercase.mb-4.text-white.bg-red-600.p-4.rounded 
+        %p.mb-2 Kosongkan bagian kata sandi jika anda tidak ingin mengubah kata sandi
+        %p.text-xs.mb-2.italic Syarat kata sandi: minimal 8 karakter dengan gabungan antara huruf dan angka
+        %p.text-xs.text-center perhatian: ketika anda mengubah kata sandi, anda akan keluar dari aplikasi dan perlu masuk ulang
+      = form_with(model: @user_detail, url: @url, method: :patch, local: true) do |form|
+        = render 'shared/error_messages', errors: @user_detail.errors.full_messages, subject: "" if @user_detail.errors.any?
+        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+          %tbody
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) NRP/NIP
+              %td( class="h-12 px-6 transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 " )
+                .my-4 
+                  = current_user.identity
+
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama
+              // 2025 update
+              - if current_user.is_polda_staff?
+                %td( class="h-12 px-6 transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 " )
+                  .my-4 
+                    = @user_detail.name
+              - else 
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.text_field :name, class: "input input-bordered my-2 w-full"
+            
+            // 2025 update
+            - if !current_user.is_polda_staff?
+              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jenis Kelamin
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                  .flex.items-center.space-x-2
+                    = form.radio_button :gender, 1, class: "radio", checked: @user_detail.gender == true
+                    = form.label :gender, "PRIA"
+                    = form.radio_button :gender, 0, class: "radio", checked: @user_detail.gender == false
+                    = form.label :gender, "WANITA"
+
+            - if current_user.is_police?
+              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Pangkat
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                  = form.select :rank, UserDetail.ranks.keys.map { |key| [key.humanize.upcase, key] }, { include_blank: 'Pilih Pangkat' }, class: "select select-bordered my-2 w-full"
+              
+              
+              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jabatan
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.text_field :position, class: "input input-bordered my-2 w-full"
+        
+              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kesatuan
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                  = form.select :unit, UserDetail.units.keys.map { |key| [key.humanize.upcase, key] }, { include_blank: 'Pilih Kesatuan' }, class: "select select-bordered my-2 w-full"
+                
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kata sandi
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.password_field :current_password, class: "input input-bordered my-2 w-full"
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kata sandi baru
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.password_field :password, class: "input input-bordered my-2 w-full"
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Konfirmasi kata sandi
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.password_field :password_confirmation, class: "input input-bordered my-2 w-full"
+
+        = form.submit "Simpan Profile", class: "btn btn-primary mt-4 w-full text-white font-bold uppercase"               
+
+       
+= render "layouts/dashboard"

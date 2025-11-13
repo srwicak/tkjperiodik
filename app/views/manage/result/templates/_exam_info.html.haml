@@ -1,0 +1,18 @@
+.mb-8 
+  .divider.divider-start.font-bold.uppercase.text-sm.text-gray-600 Detil Ujian 
+  %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+    %tbody
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @exam.name
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tanggal Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          .my-2 
+            %span.text-red-500.font-semibold= I18n.l(@exam.exam_date_start, format: :date_only)
+            sampai
+            %span.text-red-500.font-semibold= I18n.l(@exam.exam_date_end, format: :date_only)
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Waktu Mulai
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= I18n.l(@exam.exam_start, format: :time_wib)

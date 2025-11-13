@@ -1,0 +1,28 @@
+%div
+  %h2.text-xl.font-semibold.mb-2  Data Diri
+  .text-red-500.font-black.uppercase.mb-8
+    %p pastikan data Anda benar
+    %span selalu cek dan perbarui profil Anda
+    %a.underline.bg-green-500.text-white.px-4.py-2.rounded.ml-2{ href: edit_module_profile_path } disini
+  
+  %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+    %tbody
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Nama Lengkap
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @user.user_detail.name
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) NRP
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @user.identity
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Pangkat
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @user.user_detail.rank
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Satuan Kerja
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @user.user_detail.unit
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Jabatan
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @user.user_detail.position

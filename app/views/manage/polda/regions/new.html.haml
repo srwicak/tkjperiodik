@@ -1,0 +1,19 @@
+- content_for :title do
+  Tambah Daerah Baru - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .text-3xl.font-black.my-8
+      %a{ class:"p-1 bg-gray-400 rounded-full hover:bg-gray-600 hover:text-white text-3xl", href: index_manage_polda_region_path } 
+        %i.ri-arrow-left-line
+      %span.ml-2.mb-6 Tambah daerah baru
+    .p-6.bg-white.rounded-xl
+      .text-lg.font-bold.mb-4 Daftar daerah polisi adalah daftar wilayah yang dikelola oleh Polda. Setiap daerah memiliki nama unik dan dapat digunakan untuk mengelompokkan data terkait kepolisian.
+      .text-sm.text-gray-500.mb-4 Silakan isi form berikut untuk menambahkan daerah baru. Pastikan nama daerah unik dan tidak ada duplikasi. Pola nama daerah adalah "Polda [Nama Daerah]".
+
+      = render 'form'
+
+= render "layouts/dashboard"

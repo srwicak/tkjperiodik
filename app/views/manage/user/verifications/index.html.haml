@@ -1,0 +1,170 @@
+- content_for :title do
+  Verifikasi Pengguna - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold daftar pengguna belum terverifikasi
+    .text-sm 
+      %i.ri-information-line.text-xl
+      %span.text-gray-500.italic Informasi: Karena data terenkripsi di tingkat database, pencarian fuzzy atau parsial tidak bisa dilakukan. Mohon masukkan nomor NRP/NIP secara lengkap.
+    .mt-4 
+      %input#filter-value.input{ type: "text", placeholder: "Masukkan NRP/NIP" }
+      %button#filter-search.btn.btn-accent Cari
+      %button#filter-clear.btn.btn-error Muat ulang
+    .mt-8#data
+    %dialog#user_modal.modal
+      .modal-box
+        %h3.text-lg.font-bold.uppercase detil pengguna
+        %p.py-4#user_details
+        .mt-4
+          %label{ for: "status" } Status:
+          .flex.items-center.mt-2
+            %input#approved{name: "status", type: "radio", value: "approved", class: "radio radio-success"}
+            %label{ for: "approved", class: "ml-2" } Setujui
+            %input#rejected{name: "status", type: "radio", value: "rejected", class: "radio radio-error ml-4"}
+            %label{ for: "rejected", class: "ml-2" } Tidak Disetujui
+          .hidden#comment_section.mt-4
+            %label{ for: "comment" } Alasan (maksimum 120 karakter):
+            %textarea#comment{name: "comment", class: "textarea textarea-bordered w-full mt-2", rows: "3", maxlength: "120"}         
+        .modal-action 
+          %form{ method:"dialog" }
+            %button#save_button.btn.btn-success Simpan
+            %button#cancel_button.btn Batal
+
+= render "layouts/dashboard"
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    filterMode: "remote",
+    ajaxURL: "/kelola/pengguna/verifikasi/data",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center", 
+      vertAlign:"middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "NRP/NIP", field: "identity", width: 180, resizable: false, headerSort: false, vertAlign:"middle" },
+      { title: "Waktu Daftar", field: "created_at", width: 150, formatter: "datetime", headerSort: false, vertAlign:"middle", formatterParams: {
+        inputFormat: "iso",
+        outputFormat: "HH:mm:ss dd/MM/yy",
+        invalidPlaceholder: "[invalid date]",
+        timezone: "Asia/Jakarta"
+      }},
+      { 
+        title: "Aksi" ,
+        width: 100,
+        hozAlign: "center", 
+        headerHozAlign: "center", 
+        vertAlign:"middle",
+        headerSort: false,
+        formatter: (cell, formatterParams, onRendered) => {
+          let button = document.createElement("button")
+          button.className =  "btn btn-sm rounded-lg btn-accent uppercase"
+          button.innerHTML = "detil"
+
+          // Showing user modal
+          button.addEventListener("click", () => {
+            let rowData = cell.getRow().getData();
+
+            let formattedDate = luxon.DateTime.fromISO(rowData.created_at).setZone("Asia/Jakarta").toFormat("dd/MM/yyyy HH:mm:ss")
+
+            document.getElementById("user_details").innerHTML = "NRP/NIP: " 
+              + rowData.identity 
+              + "<br>Waktu daftar: " 
+              + formattedDate
+
+            let saveButton = document.getElementById("save_button")
+            saveButton.dataset.id = rowData.id
+
+            document.getElementById("user_modal").showModal()
+          })
+          return button;
+        }
+      }
+    ]
+  })
+
+  // toggle textarea comment
+  document.getElementsByName("status").forEach(function(radio){
+    radio.addEventListener("change", function() {
+      let commentSection = document.getElementById("comment_section");
+      if (this.value === "rejected") {
+        commentSection.classList.remove("hidden");
+      } else {
+        commentSection.classList.add("hidden");
+      }
+    });
+  });
+
+  document.getElementById("save_button").addEventListener("click", function() {
+    let userId = this.dataset.id;
+    let status = document.querySelector('input[name="status"]:checked').value;
+    let comment = document.getElementById("comment").value;
+
+    const data = { 
+      user: {
+        is_verified: true, 
+        account_status: (status === "approved"? 0 : 2),
+        account_status_reason: comment
+      } 
+    }
+
+    fetch(`/kelola/pengguna/verifikasi/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        table.clearFilter(); 
+        table.setData();
+        document.getElementById("user_modal").close();
+      } else {
+        console.error("Error verifying user:", data.error);
+      }
+    })
+    .catch(error => console.error("Error:", error));
+  });
+
+  document.getElementById("user_modal").addEventListener("close", function() {
+    var selectedRadio = document.querySelector('input[name="status"]:checked');
+    
+    if (selectedRadio) {
+      selectedRadio.checked = false;
+    }
+
+    document.getElementById("comment").value = "";
+    document.getElementById("comment_section").classList.add("hidden");
+  });
+
+  function updateFilter() {
+    let search_param = document.getElementById("filter-value").value
+
+    if(search_param) {
+      table.setFilter("identity", "=", search_param)
+    }
+  }
+
+  document.getElementById("filter-search").addEventListener("click", updateFilter)
+
+  document.getElementById("filter-clear").addEventListener("click", () => { window.location.reload() });
+
+
+

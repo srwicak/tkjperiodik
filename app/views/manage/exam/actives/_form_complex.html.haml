@@ -1,0 +1,592 @@
+= form_with(model: @exam, url: @url, method: @method, local: true) do |form|
+  - if @exam.errors.any?
+    #error_explanation
+      %h2= pluralize(@exam.errors.count, "error") + " prohibited this exam from being saved:"
+      %ul
+        - @exam.errors.full_messages.each do |message|
+          %li= message
+
+  %div( x-data="multiStepForm()" x-init="init()" )
+    %div( x-show="step === 1")
+      .mb-6
+        %h2.text-lg.font-bold Langkah 1: Informasi Ujian
+        %p.text-sm.italic.text-red-500 (*)Wajib diisi
+      
+      .mb-4.w-full.max-w-4xl
+        %p.text-red-600.text-xs.mt-1.text-right(x-show="errors.start_register" x-text="errors.start_register")
+        .flex.justify-end.items-center.space-x-4.mt-2
+          %div
+            %p.font-bold.text-lg.text-red-500 Mulai Pendaftaran(*)
+            .relative.max-w-sm
+              %div( class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none" )
+                %svg(class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" )
+                  %path( d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" )
+              %input( datepicker id="start-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Pilih tanggal mulai" datepicker-format="dd/mm/yyyy" datepicker-buttons datepicker-autoselect-today datepicker-autohide )
+              = form.hidden_field :start_register, "x-bind:value":"formData.start_register"
+         
+          %div
+            %p.font-bold.text-lg.text-red-500 Status Ujian: 
+            = form.select :status, Exam.statuses.keys.map { |key, value| [I18n.t("exam.statuses.#{key}"), key] }, {}, { class: "select select-bordered select-error w-[125px]",  "x-model": "formData.status" }
+        .flex.justify-end.mt-2
+          .text-xs.text-right.max-w-2xl
+            %p Catatan: Pendaftaran di mulai dari jam 00.00 WIB pada hari mulai pendaftaran. 
+            %p Pendaftaran akan ditutup H-1 tanggal ujian berakhir.
+      
+      
+      / Exam information
+      .mb-4
+        %label.form-control.w-full.max-w-4xl
+          .label
+            %span.label-text Nama Ujian(*)
+          = form.text_field :name, class: "input input-lg input-bordered w-full max-w-4xl", type: "text", placeholder: "Masukkan nama ujian", "x-model": "formData.name", required: true
+          %p.text-red-600.text-xs.mt-1(x-show="errors.name" x-text="errors.name")
+      
+      .mb-2
+        %label.form-control.w-full.max-w-4xl
+          .label
+            %span.label-text Nama Singkat Ujian
+          = form.text_field :short_name, class: "input input-bordered w-full max-w-4xl", type: "text", placeholder: "Masukkan nama singkat ujian", "x-model": "formData.short_name"
+          .label
+            / Component: Bottom base sized tooltip
+            %span.label-text-alt.relative.overflow-hidden.cursor-pointer.group.hover:overflow-visible.focus-visible:outline-none{"aria-describedby" => "tooltip"}
+              / Tooltip trigger
+              Nama singkat ujian adalah teks yang akan muncul pada surat rekomendasi hasil poin 2(e), jika tidak diisi maka teks akan mengambil dari nama ujian. ( ? - geser tetikus ke sini untuk melihat contoh)
+              / End Tooltip trigger
+              %span#tooltip.invisible.absolute.top-full.z-10.mt-2.rounded.bg-slate-700.p-4.text-sm.text-white.opacity-0.transition-all.before:invisible.before:absolute.before:bottom-full.before:z-10.before:mt-2.before:-ml-2.before:border-x-8.before:border-b-8.before:border-x-transparent.before:border-b-slate-700.before:opacity-0.before:transition-all.group-hover:visible.group-hover:block.group-hover:opacity-100.group-hover:before:visible.group-hover:before:opacity-100{class: "left-1/2 -translate-x-1/2 before:left-1/2 before:content-['']", role: "tooltip"} 
+                = image_tag "contoh-nama-singkat.webp", alt: "Contoh Nama Singkat Ujian"
+            / End Bottom base sized tooltip
+
+      .mb-4.w-full.max-w-4xl
+        %span.label-text Deskripsi Ujian
+        = form.text_area :descriptions, class: "textarea bg-white rounded-lg w-full max-w-4xl", placeholder: "Masukkan deskripsi ujian (jika dibutuhkan)", "x-model": "formData.descriptions", rows: "8", "x-on:input": "formData.descriptions = formData.descriptions.substring(0, 5000)", maxlength: "5000"
+        .label
+          .label-text-alt Deskripsi ujian akan ditampilkan untuk peserta ketika mendaftar, dapat diisi berupa informasi yang terkait dengan ujian.
+          .label-text-alt.text-red-500
+            %span sisa
+            %span.font-bold( x-text="5000 - formData.descriptions.length" )
+            %span karakter
+    
+      .divider.divider-start.uppercase.italic.font-bold.text-gray-600.text-sm pengaturan jumlah peserta ujian
+      %h2.mb-4.font-bold.text-gray-800.text-xs.text-red-500 Catatan: Ketika jumlah hari di baca NaN maka tanggal ujian belum dipilih
+
+      %p.text-red-600.text-xs.mt-1(x-show="errors.size" x-text="errors.size")
+      %p.text-red-600.text-xs.mt-1(x-show="errors.batch" x-text="errors.batch")
+
+
+      / Participant calculation
+      .flex.mb-6
+        .flex.flex-col.items-center{ class: "w-[120px]" }
+          %p.label.text-xs Peserta per sesi(*)
+          = form.text_field :size, class: "input text-center input-bordered w-[100px]", type: "text", placeholder: "Peserta", "x-model": "formData.size", inputmode: 'numeric', pattern: '\d*', oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+
+        .content-center.mt-8
+          %i.ri-close-fill.text-3xl.font-black.text-red-500
+        .flex.flex-col.items-center{ class: "w-[120px]" }
+          %p.label.text-xs Sesi per hari(*)
+          = form.text_field :batch, class: "input text-center input-bordered w-[100px]", type: "text", placeholder: "Sesi", "x-model": "formData.batch", inputmode: 'numeric', pattern: '\d*', oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+        
+        .content-center.mt-8
+          %i.ri-close-fill.text-3xl.font-black.text-red-500
+        .flex.flex-col.items-center{ class: "w-[120px]" }
+          %p.label.text-xs Jumlah Hari
+          %p.text-2xl.text-red-500.font-black.mt-2{ "x-text": "`${formData.day_count}`" }
+
+        .content-center.mt-8
+          %i.ri-equal-fill.text-3xl.text-red-500
+        .flex.flex-col.items-center.ml-6
+          %p.text-xs.mt-2.font-medium Jumlah Peserta
+          %p.text-2xl.text-red-500.font-black.mt-4{ "x-text": "`${formData.size * formData.batch * formData.day_count}`" }
+
+      / Schedule
+      .divider.divider-start.uppercase.italic.font-bold.text-gray-600.text-sm pengaturan jadwal ujian
+
+
+      %h2.mb-2.font-bold.text-gray-800 Hari dan jam mulai ujian
+      %h2.mb-2.font-bold.text-gray-800.text-xs.text-red-500
+        Tip: Selalu coba simulasikan terlebih dahulu
+      %h2.mb-2.font-bold.text-gray-800.text-xs.text-red-500
+        Catatan: Hari sabtu dan ahad/minggu tidak dihitung
+      %h2.mb-2.font-bold.text-gray-800.text-xs.text-red-500
+        Catatan: Perhatikan AM dan PM, jika ada 
+        %span.italic error
+        muat ulang atau 
+        %span.italic refresh
+        laman
+
+      .flex.space-x-8
+        .flex.flex-col{class:"w-[200px]"}
+          .block.mb-2.text-sm.font-medium.text-gray-900 Tanggal ujian(*)
+          #date-range-picker.flex.flex-col.items-center{"date-rangepicker" => "", "datepicker-format" => "dd/mm/yyyy"}
+
+            .relative
+              .absolute.inset-y-0.start-0.flex.items-center.ps-3.pointer-events-none
+                %svg{class:"w-4 h-4 text-gray-500 dark:text-gray-400", "aria-hidden" => "true", fill: "currentColor", viewbox: "0 0 20 20", xmlns: "http://www.w3.org/2000/svg"}
+                  %path{d: "M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"}
+              %input#datepicker-range-start{class:"bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5", placeholder: "Pilih tanggal mulai", type: "text"}
+            %p.text-red-600.text-xs.mt-1(x-show="errors.exam_date_start" x-text="errors.exam_date_start")
+            
+            .divider.uppercase.font-bold.text-gray-600.italic.text-sm sampai
+            
+            .relative
+              .absolute.inset-y-0.start-0.flex.items-center.ps-3.pointer-events-none
+                %svg{class:"w-4 h-4 text-gray-500 dark:text-gray-400", "aria-hidden" => "true", fill: "currentColor", viewbox: "0 0 20 20", xmlns: "http://www.w3.org/2000/svg"}
+                  %path{d: "M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"}
+              %input#datepicker-range-end{class:"bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5", placeholder: "Pilih tanggal terakhir", type: "text"}
+            %p.text-red-600.text-xs.mt-1(x-show="errors.exam_date_end" x-text="errors.exam_date_end")
+
+            = form.hidden_field :exam_date_start, "x-bind:value":"formData.exam_date_start"
+            = form.hidden_field :exam_date_end, "x-bind:value":"formData.exam_date_end"
+      
+
+        .flex.flex-col 
+          %div
+            %p.text-xs Catatan:
+            %p.text-xs Jam 00.00 adalah 12:00 AM
+            %p.text-xs Jam 12.00 adalah 12:00 PM
+            %p.text-xs.mb-2 Semua Waktu dalam WIB
+            %p.text-xs Tip: Tekan icon jam
+            %p.text-xs.mb-2 untuk memudahkan input
+            %label( for="time" class="block mb-2 text-sm font-medium text-gray-900" ) Waktu mulai ujian(*)
+            .relative
+              %div( class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none" )
+                %svg( class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" )
+                  %path( fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" )
+              = form.time_field :exam_start, class:"bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mb-2", required:true, "x-model": "formData.exam_start"
+            
+            %p.text-red-600.text-xs.mt-1(x-show="errors.exam_start" x-text="errors.exam_start")
+            
+            %label( for="time" class="block mb-2 text-sm font-medium text-gray-900" ) Jam mulai istirahat(*)
+            .relative
+              %div( class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none" )
+                %svg( class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" )
+                  %path( fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" )
+              = form.time_field :exam_rest_start, class:"bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mb-2", required:true, "x-model": "formData.exam_rest_start"
+            
+            %p.text-red-600.text-xs.mt-1(x-show="errors.exam_rest_start" x-text="errors.exam_rest_start")
+            
+            %label( for="time" class="block mb-2 text-sm font-medium text-gray-900" ) Jam akhir istirahat(*)
+            .relative
+              %div( class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none" )
+                %svg( class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" )
+                  %path( fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd" )
+              = form.time_field :exam_rest_end, class:"bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5", required:true, "x-model": "formData.exam_rest_end"
+            
+            %p.text-red-600.text-xs.mt-1(x-show="errors.exam_rest_end" x-text="errors.exam_rest_end")
+        .flex.flex-col 
+          %div  
+            %label( for="duration" class="block mb-2 text-sm font-medium text-gray-900" ) Durasi ujian tiap sesi(*)
+
+            = form.text_field :exam_duration, class: "input text-center input-bordered w-[80px]", type: "text", placeholder: "Menit", "x-model": "formData.exam_duration", inputmode: 'numeric', pattern: '\d*', oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+            .label
+              .label-text-alt Dalam menit
+            %p.text-red-600.text-xs.mt-1(x-show="errors.exam_duration" x-text="errors.exam_duration")
+          
+          .mt-2
+            %label( for="batch" class="block mb-2 text-sm font-medium text-gray-900" ) Jeda antar sesi(*)
+
+            = form.text_field :break_time, class: "input text-center input-bordered w-[80px]", type: "text", placeholder: "Menit", "x-model": "formData.break_time", inputmode: 'numeric', pattern: '\d*', oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+            .label
+              .label-text-alt Dalam menit
+            %p.text-red-600.text-xs.mt-1(x-show="errors.break_time" x-text="errors.break_time")
+          
+          %a.mt-2.btn.btn-accent{ "@click": "scheduleSimulation" } Simulasi
+          
+        .flex.flex-col.space-y-4{class:"w-[250px]"}
+          %div
+            %p.text-sm.font-bold.mb-2 Simulasi Jadwal Ujian
+            %p.text-sm.italic Hanya menampilkan maksimal 25 sesi pertama tiap hari
+          %div
+            %p.text-sm
+              %span Tanggal:
+              %span.font-bold( x-text="formData.exam_date_start" )
+              %span sampai
+              %span.font-bold( x-text="formData.exam_date_end" )
+            %p.text-sm.mb-4
+              %span Jam mulai:
+              %span.font-bold( x-text="formData.exam_start" )
+              %span WIB
+            
+            %p.text-xs.text-red-500.font-bold( x-text="formData.error_calc" )
+
+            %template( x-for="(session, index) in simulation.slice(0, 25)" :key="index" )
+              %div
+                %p.text-sm
+                  %span Sesi
+                  %span( x-text="index + 1")
+                  %span( x-text="session.start" )
+                  %span WIB -
+                  %span( x-text="session.end" )
+                  %span WIB
+
+      %p.text-red-600.text-xs.mt-1(x-show="errors.exam_rest" x-text="errors.exam_rest")
+
+      .divider.divider-start.uppercase.italic.font-bold.text-gray-600.text-sm.mt-8 catatan operator          
+
+      .w-full.max-w-4xl
+        %span.label-text Catatan Internal
+        = form.text_area :notes, class: "textarea bg-white rounded-lg w-full max-w-4xl mt-2", placeholder: "Catatan Operator", "x-model": "formData.notes", rows: "4", "x-on:input": "formData.notes = formData.notes.substring(0, 2000)", maxlength: "2000"
+        .label
+          .label-text-alt
+          .label-text-alt.text-red-500
+            %span sisa
+            %span.font-bold( x-text="2000 - formData.notes.length" )
+            %span karakter
+
+      .mt-2
+        %a.btn.btn-primary{ class: "w-[200px]", "@click": "nextStep()" } Selanjutnya
+        %span.ml-8.text-sm.text-red-500.font-bold( x-text="error_notification")
+    
+    / Step 2
+    %div( x-show="step === 2")
+      .mb-6
+        %h2.text-lg.font-bold Langkah 2: Konfirmasi Ujian
+      
+      .w-full.max-w-4xl.bg-white.p-8.rounded-lg.shadow-lg{ class: "shadow-red-500/50 hover:shadow-indigo-500/40"}
+        %p.text-2xl.text-center
+          %span( x-text="formData.name" )
+        %p.text-sm.text-center.text-gray-500.font-bold.mb-6
+          %span.uppercase.italic nama ujian
+        
+        %table.table
+          %tbody 
+            %tr 
+              %td( class="w-[200px]") Nama Ujian Singkat 
+              %td( x-text="formData.short_name")
+            %tr 
+              %td Mulai Pendaftaran
+              %td( x-text="formData.start_register")
+            %tr 
+              %td Status ujian
+              %td( x-text="formatStatus()")
+            %tr
+              %td( colspan="2")  Deskripsi Ujian
+            %tr
+              %td.whitespace-pre-line( colspan="2" x-text="formData.descriptions")
+            %tr 
+              %td Jumlah peserta per sesi
+              %td
+                %span( x-text="formData.size")
+                %span Personel
+            %tr 
+              %td Jumlah sesi per hari
+              %td
+                %span( x-text="formData.batch")
+                %span Sesi
+            %tr 
+              %td Jumlah hari ujian
+              %td
+                %span( x-text="formData.day_count")
+                %span Sesi
+            %tr 
+              %td Estimasi total peserta
+              %td
+                %span( x-text="`${formData.size * formData.batch * formData.day_count}`" )
+                %span Personel
+            %tr 
+              %td Tanggal ujian
+              %td
+                %span( x-text="formData.exam_date_start")
+                %span sampai
+                %span( x-text="formData.exam_date_end")
+            %tr 
+              %td Waktu mulai ujian
+              %td
+                %span( x-text="formData.exam_start")
+                %span WIB
+            %tr 
+              %td Durasi ujian
+              %td
+                %span( x-text="formData.exam_duration")
+                %span Menit
+            %tr 
+              %td Jeda antar sesi
+              %td
+                %span( x-text="formData.break_time")
+                %span Menit
+            %tr 
+              %td Jam istirahat
+              %td
+                %span( x-text="formData.exam_rest_start")
+                %span sampai
+                %span( x-text="formData.exam_rest_end")
+                %span WIB
+            %tr
+              %td( colspan="2") Catatan
+            %tr
+              %td.whitespace-pre-line( colspan="2" x-text="formData.notes")      
+      
+      .mt-6.w-full.max-w-4xl.flex.space-x-4.justify-between
+        %a.btn.btn-primary{ class: "w-[200px]", "@click": "prevStep()" } Kembali
+        %button.btn.btn-secondary{ class: "w-[200px]" } Simpan
+
+:javascript
+  function multiStepForm(){
+    return {
+      step: 1,
+      simulation: [],
+      error_notification: '',
+      formData: {
+        start_register: '',
+        status: '',
+        name: '',
+        short_name: '',
+        descriptions: '',
+        size: 0,
+        batch: 0,
+        exam_date_start: '',
+        exam_date_end: '',
+        exam_start: '',
+        exam_rest_start: '',
+        exam_rest_end: '',
+        exam_duration: '',
+        break_time: '',
+        notes: '',
+        error_calc: '',
+        day_count: 0,
+      },
+      errors: {},
+      validate() {
+        let errors = {};
+        if(!this.formData.start_register) {
+          errors.start_register = "Tanggal mulai pendaftaran diperlukan"
+        }
+        if(!this.formData.name) {
+          errors.name = "Nama ujian diperlukan"
+        }
+        if(this.formData.size <= 0) {
+          errors.size = "Tidak boleh di bawah 1 peserta"
+        }
+        if(this.formData.batch <= 0) {
+          errors.batch = "Tidak boleh di bawah 1 sesi"
+        }
+        if(!this.formData.exam_date_start || this.formData.exam_date_start == 'belum dipilih' || this.formData.exam_date_start == '' || this.formData.exam_date_start.includes("undefined")) {
+          errors.exam_date_start = "Tanggal mulai ujian diperlukan"
+        }
+        if(!this.formData.exam_date_end || this.formData.exam_date_end == 'belum dipilih' || this.formData.exam_date_end == '' || this.formData.exam_date_end.includes("undefined")) {
+          errors.exam_date_end = "Tanggal akhir ujian diperlukan"
+        }
+        if(!this.formData.exam_start) {
+          errors.exam_start = "Waktu mulai diperlukan"
+        }
+        if(!this.formData.exam_rest_start) {
+          errors.exam_rest_start = "Waktu istirahat diperlukan"
+        }
+        if(!this.formData.exam_rest_end) {
+          errors.exam_rest_end = "Waktu istirahat diperlukan"
+        }
+        if(this.formData.exam_rest_start >= this.formData.exam_rest_end) {
+          errors.exam_rest = "Waktu akhir istirahat tidak boleh sama atau lebih kecil dari pada waktu mulai istirahat"
+        }
+        if(!this.formData.exam_duration) {
+          errors.exam_duration = "Durasi ujian diperlukan"
+        }
+        if(!this.formData.break_time) {
+          errors.break_time = "Jeda antar sesi diperlukan"
+        }
+        return errors;
+      },
+      init() {
+        this.formData.start_register = document.getElementById('exam_start_register').value
+
+        this.formData.status = document.getElementById('exam_status').value
+
+        this.formData.name = document.getElementById('exam_name').value
+
+        this.formData.short_name = document.getElementById('exam_short_name').value
+
+        this.formData.descriptions = document.getElementById('exam_descriptions').value
+
+        this.formData.size = document.getElementById('exam_size').value
+
+        this.formData.batch = document.getElementById('exam_batch').value
+
+        if(document.getElementById('exam_exam_start').value == ""){
+          this.formData.exam_start = ""
+        } else {
+          this.formData.exam_start = this.getterTime(document.getElementById('exam_exam_start').value)
+        }
+
+        if(document.getElementById('exam_exam_rest_start').value == ""){
+          this.formData.exam_rest_start = ""
+        } else {
+          this.formData.exam_rest_start = this.getterTime(document.getElementById('exam_exam_rest_start').value)
+        }
+
+        if(document.getElementById('exam_exam_rest_end').value == ""){
+          this.formData.exam_rest_end = ""
+        } else {
+          this.formData.exam_rest_end = this.getterTime(document.getElementById('exam_exam_rest_end').value)
+        }
+
+        this.formData.exam_duration = document.getElementById('exam_exam_duration').value
+
+        this.formData.break_time = document.getElementById('exam_break_time').value
+
+        this.formData.notes = document.getElementById('exam_notes').value
+       
+        document.getElementById('start-datepicker').value = this.formatDatex(this.formData.start_register)
+
+        
+        this.formData.exam_date_start = document.getElementById('exam_exam_date_start').value
+
+        if (this.formData.exam_date_start == '') {
+          document.getElementById('datepicker-range-start').value = ''
+          this.formData.exam_date_start = 'belum dipilih'
+        } else {
+          document.getElementById('datepicker-range-start').value = this.formatDatex(this.formData.exam_date_start)
+          this.formData.exam_date_start = this.formatDatex(document.getElementById('exam_exam_date_start').value)
+        }
+        
+        this.formData.exam_date_end = document.getElementById('exam_exam_date_end').value
+
+        if (this.formData.exam_date_end == '') {
+          document.getElementById('datepicker-range-end').value = ''
+          this.formData.exam_date_end = 'belum dipilih'
+        } else {
+          document.getElementById('datepicker-range-end').value = this.formatDatex(this.formData.exam_date_end)
+          this.formData.exam_date_end = this.formatDatex(document.getElementById('exam_exam_date_end').value)
+        }
+
+        const sr = document.getElementById('start-datepicker')
+        
+        const dps = document.getElementById('datepicker-range-start')
+        const dpe = document.getElementById('datepicker-range-end')
+
+        sr.addEventListener('blur', (event) => {
+          this.formData.start_register = sr.value;
+        })
+
+        dps.addEventListener('blur', (event) => {
+          this.formData.exam_date_start = dps.value;
+          this.formData.exam_date_end = dpe.value;
+          this.formData.day_count = this.counting_day(dps.value, dpe.value)
+        })
+
+        dpe.addEventListener('blur', (event) => {
+          this.formData.exam_date_start = dps.value;
+          this.formData.exam_date_end = dpe.value;
+          this.formData.day_count = this.counting_day(dps.value, dpe.value)
+        })
+
+
+        if (this.formData.start_register == '') {
+          this.formData.start_register = ''
+          sr.value = this.formData.start_register          
+        }
+
+        this.formData.day_count = this.counting_day(this.formData.exam_date_start, this.formData.exam_date_end)
+      },
+      counting_day(start, end) {
+        const startd = this.parseDate(start);
+        const endd = this.parseDate(end);
+
+        let current = startd;
+        let count = 0;
+
+        while (current <= endd) {
+            const dayOfWeek = current.getDay(); // 0 = Sunday, 6 = Saturday
+            // Only count weekdays (Monday to Friday)
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                count++;
+            }
+            // Move to the next day
+            current.setDate(current.getDate() + 1);
+        }
+        return count;
+      },
+      parseDate(dateStr) {
+        const [day, month, year] = dateStr.split('/').map(Number);
+        return new Date(year, month - 1, day);
+      },
+      formatDatex(ds) {
+        const [year, month, day] = ds.split('-');
+        return `${day}/${month}/${year}`;
+      },
+      scheduleSimulation() {
+        this.simulation = [];
+        let currentStart = this.parseTime(this.formData.exam_start);
+        const restStart = this.parseTime(this.formData.exam_rest_start);
+        const restEnd = this.parseTime(this.formData.exam_rest_end);
+
+        if (isNaN(currentStart) || isNaN(restStart) || isNaN(restEnd) || this.formData.batch == "" || this.formData.size == "" || this.formData.exam_duration == "" || this.formData.break_time == "") {
+          this.formData.error_calc = "Tidak bisa melakukan simulasi. Cek isian: Perserta per sesi, Jumlah sesi, Waktu mulai ujian, Jam mulai istirahat, Jam akhir istirahat, Durasi ujian tiap sesi, dan Jeda antar sesi."
+        } else {
+          this.formData.error_calc = ""
+        }
+        for (let i = 0; i < Math.min(this.formData.batch, 25); i++) {
+          let currentEnd = new Date(currentStart.getTime() + this.formData.exam_duration * 60000);
+          // Check if the current schedule overlaps with the rest period
+          if (currentStart >= restStart && currentStart < restEnd) {
+            // Adjust currentStart to be at the end of the rest period
+            currentStart = new Date(restEnd.getTime());
+            currentEnd = new Date(currentStart.getTime() + this.formData.exam_duration * 60000);
+          }
+          this.simulation.push({
+            start: this.formatTime(currentStart),
+            end: this.formatTime(currentEnd)
+          });
+          currentStart = new Date(currentEnd.getTime() + this.formData.break_time * 60000);
+        }
+      },
+      parseDate(dateString) {
+        const [day, month, year] = dateString.split('/').map(Number);
+        return new Date(year, month - 1, day);
+      },
+      parseTime(timeStr) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours);
+        date.setMinutes(minutes);
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+        return date;
+      },
+      formatTime(tiempo) {
+        return tiempo.toTimeString().slice(0, 5);
+      },
+      getterTime(tempos) {
+        if (tempos != '')
+        {
+          const [hour, minute] = tempos.split(':');
+          return `${hour}:${minute}`;
+        } else {
+          return `00:00`;
+        }
+      },
+      formatStatus(){
+        if (this.formData.status == '' || this.formData.status == 'draft') {
+          return "Draf"
+        } else if (this.formData.status == 'active') {
+          return "Aktif"
+        } else if (this.formData.status == 'archieve') {
+          return "Arsip"
+        }
+      },
+      nextStep() {
+        this.errors = this.validate();
+        if (Object.keys(this.errors).length === 0) {
+          this.step++;
+          window.scrollTo(0, 0);
+          this.error_notification = "";
+        } else {
+          this.error_notification = "Ada kesalahan input mohon cek ulang dari atas laman";
+        }
+      },
+      prevStep() {
+        this.step--;
+        window.scrollTo(0, 0);
+      },
+      formatDescription() {
+        let formatted = this.formData.description
+          .replace(/\n\n+/g, '<br><br>')
+          .replace(/\n/g, '<br>')
+          .replace(/(\+ul .+?)(?=\n\+ul|\n\+ol|\n\n|$)/g, match => {
+              return '<ul class="list-disc">' + match.replace(/\+ul /g, '<li>').replace(/\n/g, '</li><li>') + '</li></ul>';
+          })
+          .replace(/(\+ol .+?)(?=\n\+ul|\n\+ol|\n\n|$)/g, match => {
+              return '<ol class="list-decimal">' + match.replace(/\+ol /g, '<li>').replace(/\n/g, '</li><li>') + '</li></ol>';
+          });
+        return formatted;
+        }
+      }
+  }

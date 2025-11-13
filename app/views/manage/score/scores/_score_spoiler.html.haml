@@ -1,0 +1,30 @@
+%table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+  %tbody
+    %tr
+      %th( scope="col" class="h-12 px-6 text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="2" ) Hasil Ujian
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Rata-rata Nilai
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @score.score_number
+    
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" )
+        %span.italic Grade
+        Nilai
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= @score.score_grade
+    
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Terakhir diubah
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= I18n.l(@score.updated_at, format: :full_wib)
+    
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( scope="col" class="h-12 px-6 text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="2" ) Catatan
+    
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" colspan="2" )
+        - if @score.notes == ""
+          .divider.uppercase.font-bold.text-red-500.text-sm tidak ada catatan
+        - else
+          %p.my-2 #{@score.notes}
+
+
+    

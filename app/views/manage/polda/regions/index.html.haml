@@ -1,0 +1,73 @@
+- content_for :title do
+  Daftar Daerah Polisi - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold daftar polda
+	
+    .flex.justify-between.items-center.my-6.mb-2
+      %div 
+        .text-lg 
+          %span Total Daerah:
+          %span.font-bold.text-green-500 #{@total_regions} 
+      %div
+        %a.btn.btn-primary.font-black{ href: new_manage_polda_region_path }
+          %i.ri-add-fill
+          %span.uppercase.text-xs tambah daerah
+    .mt-8#data
+    
+
+= render "layouts/dashboard"
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    filterMode: "remote",
+    ajaxURL: "/kelola/polda/daerah/data",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center",
+      vertAlign: "middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "Nama Daerah Polisi", field: "name", minWidth: 250, maxWidth: 500, headerSort: false, vertAlign: "middle", headerFilter: true },
+      { 
+        title: "Aksi" ,
+        hozAlign: "center",
+        vertAlign:"middle",
+        frozen:true,
+        headerSort: false,
+        width: 200,
+        formatter: (cell, formatterParams, onRendered) => {
+          let showButton = document.createElement("a")
+          showButton.className =  "btn btn-sm rounded-lg btn-primary uppercase"
+          showButton.innerHTML = "<i class=ri-search-line></i> Lihat"
+          showButton.href = "/kelola/polda/daerah/" + cell.getRow().getData().slug
+
+          let editButton = document.createElement("a")
+          editButton.className =  "btn btn-sm rounded-lg btn-secondary uppercase"
+          editButton.innerHTML = "<i class=ri-edit-line></i> Ubah"
+          editButton.href = "/kelola/polda/daerah/" + cell.getRow().getData().slug + "/ubah"
+
+          let container = document.createElement("div")
+          container.className = "flex space-x-2"
+          container.appendChild(showButton)
+          container.appendChild(editButton)
+
+          return container          
+        }
+      }
+    ]
+  })

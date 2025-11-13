@@ -1,0 +1,2 @@
+module Module::HistoriesHelper
+end

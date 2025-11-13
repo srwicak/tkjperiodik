@@ -1,0 +1,67 @@
+- content_for :title do
+  Manajemen Surat - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold daftar surat
+	
+    .mt-8#data
+    
+
+= render "layouts/dashboard"
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    filterMode: "remote",
+    ajaxURL: "/kelola/surat/data",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center",
+      vertAlign: "middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "Nama Ujian", field: "name", minWidth: 250, maxWidth: 500, headerSort: false, vertAlign: "middle", headerFilter: true },
+      { 
+        title: "Status", 
+        field: "status", 
+        width: 100, 
+        headerSort: false, 
+        vertAlign: "middle", 
+      },
+      { title: "Tanggal Ujian", field: "exam_date", width: 300, headerSort: false, vertAlign: "middle" },
+      { 
+        title: "Aksi" ,
+        hozAlign: "center",
+        vertAlign:"middle",
+        headerHozAlign: "center",
+        frozen:true,
+        headerSort: false,
+        width: 100,
+        formatter: (cell, formatterParams, onRendered) => {
+          let editButton = document.createElement("a")
+          editButton.className =  "btn btn-sm rounded-lg btn-secondary uppercase"
+          editButton.innerHTML = "<i class=ri-edit-line></i> Ubah"
+          editButton.href = "/kelola/surat/" + cell.getRow().getData().slug
+
+          let container = document.createElement("div")
+          container.className = "flex space-x-2"
+          container.appendChild(editButton)
+
+          return container          
+        }
+      }
+    ]
+  })

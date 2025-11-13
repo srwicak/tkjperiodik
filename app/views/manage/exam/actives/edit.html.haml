@@ -1,0 +1,45 @@
+- content_for :title do
+  Ubah Ujian - Dasbor
+
+- content_for :content do
+  .mobile-message
+    %p.text-center.text-red-500.font-semibold.mt-10.text-xl Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .text-3xl.font-black.my-8
+      %a{ class:"p-1 bg-gray-400 rounded-full hover:bg-gray-600 hover:text-white text-3xl", href: index_manage_exam_active_path } 
+        %i.ri-arrow-left-line
+      %span.ml-2 Edit ujian: #{@exam.name}
+ 
+    = render "info"
+
+    .my-8.max-w-4xl.prose.bg-white.rounded-lg.p-4.outline-5.outline-offset-2.outline-double.outline-red-500
+      %p.text-lg.font-bold.text-gray-600.uppercase syarat mengubah ujian
+      %p.text-sm 
+        Pengubahan ujian secara keseluruhan bisa dilakukan jika
+        %span.font-bold.uppercase belum ada pendaftar.
+        Jika sudah ada pendaftar maka hanya bagian ini yang dapat diubah:
+        %ol.numeric.text-sm
+          %li Status Ujian
+          %li Nama Ujian
+          %li Nama Singkat Ujian
+          %li Deskripsi Ujian
+          %li Catatan Operator
+        -# .text-sm.prose
+        -#   Catatan saat review nanti dihapus:
+        -#   %br 
+        -#   Kenapa Mulai Daftar tidak bisa diganti tetapi batas daftar boleh diganti pas udah ada pendaftar?
+        -#   %br
+        -#   %br
+        -#   Bayangkan kita mau naik bisa, terus pas pembelian tiket kita sudah dapat tiket dan masuk ke bis, ternyata bisnya ga jadi jual tiket hari ini.
+        -#   %br 
+        -#   Terus ada penumpang lain yang pas hari pergantian beli tiketnya kaget, kok sudah 1/2 kuota terisi? tidak fair. Maka mulai daftar tidak bisa diganti ketika ada pendaftar.
+        -#   %br
+        -#   %br
+        -#   Kemudian kenapa batas daftar bisa diganti? 
+        -#   %br
+        -#   %br
+        -#   Selama tidak sama dengan waktu ujian maka batas daftar bisa diganti hingga h-1 hari ujian, jadi ibaratnya bisnya belum penuh tapi berangkatnya lusa, yaudah jual tiket terus sampe penuh sampai mau berangkat h-1 keberangkatan.
+
+    = render 'form_complex'
+
+= render "layouts/dashboard"

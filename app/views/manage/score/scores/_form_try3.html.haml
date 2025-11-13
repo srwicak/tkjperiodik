@@ -1,0 +1,30 @@
+= form_with(model: @score, url: @url, method: @method, local: true) do |form|
+  .bg-white.p-6.rounded-xl( x-data="scoreForm()" )
+    .mb-4.flex.justify-end 
+      %p.p-2.bg-red-500.text-white.font-bold.text-sm Kode: #{@score.code[0, 3]}-#{@score.code[-4, 4]}
+    %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+      %thead
+        %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+          %td( class="h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 uppercase text-center w-[20px]" ) No
+          %td( class="h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 uppercase text-center" ) Materi Peserta
+          %td( class="h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 uppercase text-center w-[60px]" ) jumlah teknik
+          %td( class="h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 uppercase text-center" ) nilai
+          %td( class="h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 uppercase text-center" ) 
+            keterangan 
+            %br
+            .text-xs (maks. 200 karakter)
+      
+      %tbody
+        %tr
+          %th( scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5" ) teknik dasar beladiri polri
+
+          %tr{ class: "transition-colors duration-300 hover:bg-slate-50" }
+            %td{ class: "h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center w-[20px]" } 1
+            %td{ class: "h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[250px]" } 
+              Jatuh ke kiri/kanan
+            %td{ class: "h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[60px] text-center" } 
+              2
+            %td{ class: "h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center w-[60px]" }
+              %input.input.input-bordered.text-center.p-2{ class:"w-[60px]", inputmode:"numeric", oninput: "this.value = this.value.replace(/[^0-9]/g, '');", maxlength: "3", "x-model": "score[basic_1]", "@change": "calculateScore()"  }
+            %td{ class: "h-12 p-2 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-150 stroke-slate-500 text-slate-500 text-center w-[150px]" }
+              %textarea.textarea.textarea-bordered.p-2{ class:"w-[150px]", rows: "2", maxlength: "200", "x-model": "remarks." + item[:code] }= item[:remarks] || ""

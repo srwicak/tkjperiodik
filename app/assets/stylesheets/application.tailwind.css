@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+
+@layer components {
+  .btn-primary {
+    @apply py-2 px-4 bg-blue-200;
+  }
+}
+
+*/
+
+/*Banner open/load animation*/
+.alert-banner {
+  -webkit-animation: slide-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+      animation: slide-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+/*Banner close animation*/
+.alert-banner input:checked ~ * {
+  -webkit-animation: slide-out-top 0.5s cubic-bezier(0.550, 0.085, 0.680, 0.530) both;
+      animation: slide-out-top 0.5s cubic-bezier(0.550, 0.085, 0.680, 0.530) both;		
+}
+
+/* -------------------------------------------------------------
+* Animations generated using Animista * w: http://animista.net, 
+* ---------------------------------------------------------- */
+
+@-webkit-keyframes slide-in-top{0%{-webkit-transform:translateY(-1000px);transform:translateY(-1000px);opacity:0}100%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@keyframes slide-in-top{0%{-webkit-transform:translateY(-1000px);transform:translateY(-1000px);opacity:0}100%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@-webkit-keyframes slide-out-top{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}100%{-webkit-transform:translateY(-1000px);transform:translateY(-1000px);opacity:0}}@keyframes slide-out-top{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}100%{-webkit-transform:translateY(-1000px);transform:translateY(-1000px);opacity:0}}@-webkit-keyframes slide-in-bottom{0%{-webkit-transform:translateY(1000px);transform:translateY(1000px);opacity:0}100%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@keyframes slide-in-bottom{0%{-webkit-transform:translateY(1000px);transform:translateY(1000px);opacity:0}100%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@-webkit-keyframes slide-out-bottom{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}100%{-webkit-transform:translateY(1000px);transform:translateY(1000px);opacity:0}}@keyframes slide-out-bottom{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}100%{-webkit-transform:translateY(1000px);transform:translateY(1000px);opacity:0}}@-webkit-keyframes slide-in-right{0%{-webkit-transform:translateX(1000px);transform:translateX(1000px);opacity:0}100%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@keyframes slide-in-right{0%{-webkit-transform:translateX(1000px);transform:translateX(1000px);opacity:0}100%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@-webkit-keyframes fade-out-right{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}100%{-webkit-transform:translateX(50px);transform:translateX(50px);opacity:0}}@keyframes fade-out-right{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}100%{-webkit-transform:translateX(50px);transform:translateX(50px);opacity:0}}
+
+/* dashboard css */
+@media (min-width: 768px){
+  .main.active{
+    margin-left: 0px;
+    width: 100%;
+  }
+}
+
+/* no mobile access */
+@media (max-width: 640px) {
+  .desktop-content {
+    display: none;
+  }
+  .mobile-message {
+    display: block;
+  }
+}
+
+@media (min-width: 641px) {
+  .desktop-content {
+    display: block;
+  }
+  .mobile-message {
+    display: none;
+  }
+}
+
+.collapse-arrow>.collapse-title:after {
+  top: 1.7rem !important;
+}
+
+.collapse-arrow>.collapse-title:after, .collapse-plus>.collapse-title:after {
+  inset-inline-end: 0.25rem !important;
+}
+
+.range {
+  border-radius: inherit !important;
+  height: inherit !important;
+}
+
+

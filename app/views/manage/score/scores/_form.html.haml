@@ -1,0 +1,156 @@
+= form_with(model: @score, url: @url, method: @method, local: true) do |form|
+  .bg-white.p-6.rounded-xl( x-data="scoreForm(#{@score_data.to_json.html_safe}, '#{@score.notes}')" )
+    .mb-4.flex.justify-end 
+      %p.p-2.bg-red-500.text-white.font-bold.text-sm Kode: #{@score.code[0, 3]}-#{@score.code[-4, 4]}
+
+    %table.w-full.text-left.border.border-separate.rounded.border-slate-200(cellspacing="0")
+      %thead
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.uppercase.text-center{ class: "w-[20px]" } No
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.uppercase.text-center Materi Peserta
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.uppercase.text-center nilai
+          
+      
+      - @categories.each do |category|
+        %tbody
+          %tr
+            %th(scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5")= category[:name]
+            - category[:content].each_with_index do |item, index|
+              %tr.transition-colors.duration-300.hover:bg-slate-50
+                %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{ class: "w-[20px]" }= index + 1
+                %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ class: "w-[250px]" }= item[:subject]
+                %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{ class: "w-[60px]" }
+                  %input.input.input-bordered.text-center.p-2{ class: "w-[60px]", inputmode: "numeric", oninput: "this.value = this.value.replace(/[^0-9]/g, '');", maxlength: "3", value: "", "x-model": "score['#{item[:code]}']", "@change": "calculateScore()" }
+      %tbody
+        %th(scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5") catatan opsional (Maksimal 1000 karakter)
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "5" }
+            = form.text_area :notes, class: "textarea textarea-bordered w-full", rows: "3", maxlength: "1000", "x-model": "notes"
+        
+      %tfoot
+        %th(scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5") Perhitungan Nilai
+        - (1..3).each do |i|
+          %tr.transition-colors.duration-300.hover:bg-slate-50
+            %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" }= "Total Nilai Penguji #{i}"
+            %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "examinerScores[#{i-1}]" }
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" } Total Nilai Semua Penguji
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "totalScore" }
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" } Rata-rata Nilai
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "averageScore" }
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" }
+            %span.italic Grade Nilai
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "gradeScore" }
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" }
+            %span Status
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "isPassed ? 'Lulus' : 'Tidak Lulus'"  }
+        %th(scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5")
+
+    = form.text_field :score_detail, "x-bind:value":"JSON.stringify(scores)"
+    = form.text_field :score_number, "x-bind:value":"averageScore"
+    = form.text_field :score_grade, "x-bind:value":"gradeScore"
+      
+    %button.btn.btn-success.w-full.btn-lg.font-bold.uppercase.text-white.mt-6 Simpan Nilai
+
+:javascript
+  function scoreForm(scores, notes) {
+    return {
+      scores: Array.isArray(scores) ? scores : Object.values(scores), // Pastikan scores adalah array
+      currentExaminer: 0,
+      examinerName: "",
+      examinerScores: {},
+      totalScore: 0,
+      averageScore: 0,
+      passingScore: 60,
+      gradeScore: "",
+      notes: notes || "",
+      isPassed: false,
+      score: {},
+      remarks: {},
+
+      init() {
+        this.loadAllExaminerData();
+        this.currentExaminer = 0;
+        this.loadExaminerData();
+      },
+
+      loadAllExaminerData() {
+        // Load data for all examiners
+        if (this.scores) {
+          this.scores.forEach((_, index) => {
+            this.currentExaminer = index;
+            this.loadExaminerData();
+          });
+        }
+      },
+
+      loadExaminerData() {
+        if (this.scores && this.scores[this.currentExaminer]) {
+          this.examinerName = this.scores[this.currentExaminer].examiner_name || "";
+          this.score = this.scores[this.currentExaminer].score || {};
+          this.remarks = this.scores[this.currentExaminer].remarks || {};
+          this.calculateScore();
+          //this.calculateAllExaminerScores();
+        } else {
+          console.error("Data for the current examiner is not defined.");
+          this.examinerName = "";
+          this.score = {};
+          this.remarks = {};
+        }
+        this.calculateAllExaminerScores();
+      },
+
+      saveExaminerName() {
+      if (this.scores && this.scores[this.currentExaminer]) {
+        this.scores[this.currentExaminer].examiner_name = this.examinerName;
+      }
+    },
+
+      
+      calculateScore() {
+        let total = 0;
+
+        Object.keys(this.score).forEach(key =>
+          total += parseInt(this.score[key]) || 0
+        );
+
+        this.examinerScores[this.currentExaminer] = total;
+        this.calculateAllExaminerScores();
+      },
+
+      calculateAllExaminerScores() {
+        let totalSum = 0;
+        let validExaminers = 0;
+
+        Object.keys(this.scores).forEach(index => {
+          if (this.examinerScores[index] !== undefined) {
+            totalSum += this.examinerScores[index];
+          }
+          if (this.examinerScores[index] !== 0) {
+            validExaminers++;
+          }
+        });
+
+        this.totalScore = totalSum;
+        this.averageScore = (validExaminers > 0) ? (totalSum / (validExaminers * 20)).toFixed(2) : 0;
+        this.isPassed = this.averageScore >= this.passingScore;
+
+        if (this.averageScore >= 81) {
+          this.gradeScore = "A";
+        } else if (this.averageScore >= 61) {
+          this.gradeScore = "B";
+        } else if (this.averageScore >= 41) {
+          this.gradeScore = "C";
+        } else if (this.averageScore >= 21) {
+          this.gradeScore = "D";
+        } else if (this.averageScore >= 0.01) {
+          this.gradeScore = "E";
+        } else {
+          this.gradeScore = "Masukkan Nilai";
+        }
+      }
+    }
+  }

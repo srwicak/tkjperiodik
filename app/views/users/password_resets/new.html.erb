@@ -1,0 +1,12 @@
+<% content_for :title do %>
+  Lupa Kata Sandi
+<% end %>
+<% content_for :page_title do %>
+  Pengajuan Kata Sandi Baru
+<% end %>
+<%= render "layouts/auth_form" do %>
+  <div id="error_messages">
+    <%= render "shared/error_messages", errors: @user.errors.full_messages, subject: "" if @user.errors.any? %>
+  </div>
+  <%= render "form", user: @user %>
+<% end %>

@@ -1,0 +1,111 @@
+= form_with(model: @score, url: @url, method: @method, local: true) do |form|
+  .bg-white.p-6.rounded-xl( x-data="scoreForm(#{@score_data.to_json.html_safe}, #{@score.notes.to_json.html_safe})" )
+    .mb-4.flex.flex-col
+      .flex.items-center.mb-4
+        %label.text-sm.font-medium.mr-2 Pilih Penguji:
+        %select{ "x-model": "selectedJudge", "@change": "updateExaminerName()" }
+          %option{ value: "1" } Penguji 1
+          %option{ value: "2" } Penguji 2
+          %option{ value: "3" } Penguji 3
+        %input.input.input-bordered.text-center.ml-4{ type: "text", "x-model": "examinerName", placeholder: "Nama Penguji" }
+
+    %table.w-full.text-left.border.border-separate.rounded.border-slate-200(cellspacing="0")
+      %thead
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.uppercase.text-center{ class: "w-[20px]" } No
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.uppercase.text-center Materi Peserta
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.uppercase.text-center{ class: "w-[26px]" } Jumlah Teknik
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.uppercase.text-center Nilai
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.uppercase.text-center Keterangan
+
+      %tbody
+        - @categories.each do |category|
+          %tr
+            %th(scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5")= category[:name]
+            - category[:content].each_with_index do |item, index|
+              %tr.transition-colors.duration-300.hover:bg-slate-50
+                %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{ class: "w-[20px]" }= index + 1
+                %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ class: "w-[250px]" }= item[:subject]
+                %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{ class: "w-[60px]" }= item[:amount]
+                %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{ class: "w-[60px]" }
+                  %input.input.input-bordered.text-center.p-2{ class: "w-[60px]", inputmode: "numeric", oninput: "this.value = this.value.replace(/[^0-9,]/g, '');", maxlength: "3", "x-model": "scores[selectedJudge]['#{item[:code]}']", "@change": "calculateScore()" }
+                %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{ class: "w-[150px]" }
+                  %textarea.textarea.textarea-bordered.p-2{ class: "w-[150px]", rows: "2", maxlength: "200", "x-model": "scores[selectedJudge]['keterangan']['#{item[:code]}']" }
+
+      %tfoot
+        %th(scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5") Perhitungan Nilai
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" } Jumlah Nilai
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "totalScores[selectedJudge - 1]" }
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" } Rata-rata Nilai
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "averageScore" }
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" }
+            %span.italic Grade Nilai
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "gradeScore" }
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "3" }
+            %span Status
+          %td.h-12.p-2.text-sm.transition-duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2", "x-text": "isPassed ? 'Lulus' : 'Tidak Lulus'"  }
+
+    = form.text_field :score_details, "x-bind:value":"JSON.stringify(scores)"
+    = form.text_field :score_number, "x-bind:value":"averageScore"
+    = form.text_field :score_grade, "x-bind:value":"gradeScore"
+
+    %button.btn.btn-success.w-full.btn-lg.font-bold.uppercase.text-white.mt-6 Simpan Nilai
+
+:javascript
+  function scoreForm(initialScores, initialNotes) {
+    return {
+      scores: initialScores || { 1: { name: "", score: {}, remarks: {} }, 2: { name: "", score: {}, remarks: {} }, 3: { name: "", score: {}, remarks: {} } },
+      notes: initialNotes || '',
+      selectedJudge: 1,
+      examinerName: '',
+      totalScores: [0, 0, 0],
+      totalScore: 0,
+      averageScore: 0,
+      gradeScore: "",
+      passingGrade: 60,
+      isPassed: false,
+
+      init() {
+        this.updateExaminerName();
+        this.calculateScore();
+      },
+
+      calculateScore() {
+        let totalScores = [0, 0, 0];
+        let totalItems = [0, 0, 0];
+
+        for (let judge = 1; judge <= 3; judge++) {
+          for (let key in this.scores[judge].score) {
+            if (this.scores[judge].score[key]) {
+              totalScores[judge - 1] += parseFloat(this.scores[judge].score[key].replace(',', '.')) || 0;
+              totalItems[judge - 1]++;
+            }
+          }
+        }
+
+        this.totalScores = totalScores;
+        let allScores = totalScores.reduce((acc, score) => acc + score, 0);
+        let allItems = totalItems.reduce((acc, items) => acc + items, 0);
+
+        this.averageScore = allItems ? (allScores / allItems).toFixed(2) : 0;
+        this.gradeScore = this.getGrade(this.averageScore);
+        this.isPassed = this.averageScore >= this.passingGrade;
+      },
+
+      getGrade(score) {
+        if (score >= 85) return 'A';
+        if (score >= 70) return 'B';
+        if (score >= 60) return 'C';
+        return 'D';
+      },
+
+      updateExaminerName() {
+        this.examinerName = this.scores[this.selectedJudge].name;
+      }
+    }
+  }
+  

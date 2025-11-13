@@ -1,0 +1,227 @@
+<% content_for :title do %>
+  Orientasi Akun
+<% end %>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<%= form_with model: @user_detail, url: create_onboarding_path, method: :post, html: { class: 'bg-white relative overflow-hidden' } do |form| %>
+  <section class="bg-white relative overflow-hidden">
+    <div class="w-full mx-auto max-w-[480px] flex flex-col justify-center py-20 relative p-8">
+      <div class="max-w-[480px] mx-auto">
+        <div class="prose text-gray-500 prose-sm prose-headings:font-normal prose-headings:text-xl mx-auto max-w-sm w-full">
+          <div>
+            <h1 class="text-center">Selamat datang di Aplikasi TKJ Periodik Polri</h1>
+            <p class="text-balance text-center">Mohon lengkapi informasi Anda pada laman ini.</p>
+            <p class="text-balance text-center">Coba muat ulang (refresh) laman ini jika ada kesalahan.</p>
+            <% unless current_user.is_police? %>
+              <p class="text-xs text-gray-400">Akun Anda terdeteksi menggunakan NIP PNS, oleh karena itu Anda hanya mengisi Langkah 1.</p>
+            <% end %>
+          </div>
+        </div>
+        <!-- Starts component -->
+        <div class="mt-6 border-t pt-12">
+          <div id="error_messages">
+            <%= render "shared/error_messages", errors: @user_detail.errors.full_messages, subject: "" if @user_detail.errors.any? %>
+          </div>
+          <div x-data="multiStepForm(<%= current_user.is_police? %>)" class="rounded-3xl bg-white shadow-2xl border p-8 lg:p-10 mt-6">
+            <!-- Step 1 -->
+            <div x-show="step === 1">
+              <h2 class="text-lg font-medium text-gray-500">
+                Langkah 1: Informasi Pribadi
+              </h2>
+              <div class="space-y-2 mt-12">
+                <%= form.label :name, "Nama", class: 'block text-sm text-gray-700' %>
+                <%= form.text_field :name, "x-model" => "formData.name", "@input": "formData.name = formattedName(formData.name)", class: "block w-full h-12 px-4 py-3 placeholder-gray-500 bg-gray-100 border-0 rounded-lg appearance-none text-blue-500 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-blue-500 focus:ring-inset focus:ring-2 text-xs", placeholder: "Nama lengkap dengan gelar" %>
+                <p x-show="errors.name" x-text="errors.name" class="text-red-600 text-xs mt-1"></p>
+              </div>
+              <div class="space-y-2 mt-4">
+                <%= form.label :email, "Email", class: 'block text-sm text-gray-700 italic' %>
+                <%= email_field_tag "user[email]", "", "x-model" => "formData.email", class: "block w-full h-12 px-4 py-3 placeholder-gray-500 bg-gray-100 border-0 rounded-lg appearance-none text-blue-500 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-blue-500 focus:ring-inset focus:ring-2 text-xs", placeholder: "Masukkan alamat email" %>
+                <p x-show="errors.email" x-text="errors.email" class="text-red-600 text-xs mt-1"></p>
+              </div>
+              <div class="space-y-2 mt-4">
+                <p class="block text-sm text-gray-700">Jenis Kelamin</p>
+                <div class="flex items-center space-x-4 mt-2">
+                  <%= form.radio_button :gender, 1, "x-model" => "formData.gender", class: 'form-radio h-4 w-4 text-blue-500' %>
+                  <%= form.label :gender, 'PRIA', class: 'ml-2 text-sm' %>
+                  <%= form.radio_button :gender, 0, "x-model" => "formData.gender", class: 'form-radio h-4 w-4 text-blue-500' %>
+                  <%= form.label :gender, 'WANITA', class: 'ml-2 text-sm' %>
+                </div>
+                <p x-show="errors.gender" x-text="errors.gender" class="text-red-600 text-xs mt-1"></p>
+              </div>
+              <div class="mt-4">
+                <button type="button" class="rounded-full bg-blue-600 px-8 py-2 h-12 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full" @click="nextStep()">Selanjutnya</button>
+              </div>
+            </div>
+            <!-- Step 2 -->
+            <template x-if="isPolice">
+              <div x-show="step === 2" style="display: none;">
+                <h2 class="text-lg font-medium text-gray-500 mb-4">
+                  Langkah 2: Informasi Anggota
+                </h2>
+                <div class="space-y-2 mt-12">
+                  <%= form.label :rank, "Pangkat", class: 'block text-sm text-gray-700' %>
+                  <%= form.select :rank, 
+                    UserDetail.ranks.keys.map { |rank| [rank, rank] }, { include_blank: 'Masukkan Pangkat' }, 
+                    "x-model" => "formData.rank", 
+                    class: 'uppercase block w-full h-12 px-4 py-3 placeholder-gray-500 bg-gray-100 border-0 rounded-lg appearance-none text-blue-500 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-blue-500 focus:ring-inset focus:ring-2 text-xs' 
+                  %>
+                  <p x-show="errors.rank" x-text="errors.rank" class="text-red-600 text-xs mt-1"></p>
+                </div>
+                <div class="space-y-2 mt-4">
+                  <%= form.label :unit, "Satuan Kerja", class: 'block text-sm text-gray-700' %>
+                  <%= form.select :unit, UserDetail.units.keys.map { |key| [key, key] },
+                  { include_blank: 'Pilih Satuan Kerja' },
+                  "x-model" => "formData.unit",
+                  class: "block w-full h-12 px-4 py-3 placeholder-gray-500 bg-gray-100 border-0 rounded-lg appearance-none text-blue-500 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-blue-500 focus:ring-inset focus:ring-2 text-xs" %>
+                  <p x-show="errors.unit" x-text="errors.unit" class="text-red-600 text-xs mt-1"></p>
+                </div>
+                <div class="space-y-2 mt-4">
+                  <%= form.label :position, "Jabatan", class: 'block text-sm text-gray-700' %>
+                  <%= form.text_field :position, "x-model" => "formData.position", "@input": "formData.position = formattedText(formData.position)", class: "block w-full h-12 px-4 py-3 placeholder-gray-500 bg-gray-100 border-0 rounded-lg appearance-none text-blue-500 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-blue-500 focus:ring-inset focus:ring-2 text-xs", placeholder: "Masukkan jabatan" %>
+                  <p x-show="errors.position" x-text="errors.position" class="text-red-600 text-xs mt-1"></p>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button type="button" class="rounded-full bg-blue-50 px-8 py-2 h-12 text-sm font-semibold text-blue-600 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full" @click="previousStep()">Sebelumnya</button>
+                  <button type="button" class="rounded-full bg-blue-600 px-8 py-2 h-12 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full" @click="nextStep()">Selanjutnya</button>
+                </div>
+              </div>
+            </template>
+            <!-- Step 3 -->
+            <div x-show="step === 3" style="display: none;">
+              <h2 class="text-lg font-semibold text-gray-500 text-center">
+                Konfirmasi Data Anda
+              </h2>
+              <hr>
+              <div class="mt-12 space-y-2 font-medium text-sm text-gray-500">
+                <template x-if="isPolice">
+                  <p>
+                    <span class="font-bold">NRP: </span><br>
+                    <%= current_user.identity %>
+                  </p>
+                </template>
+                <template x-if="!isPolice">
+                  <p>
+                    <span class="font-bold">NIP: </span><br>
+                    <%= current_user.identity %>
+                  </p>
+                </template>
+                <p>
+                  <span class="font-bold">Nama: </span><br>
+                  <span x-text="formData.name"></span>
+                </p>
+                <p>
+                  <span class="font-bold italic">Email: </span><br>
+                  <span x-text="formData.email"></span>
+                </p>
+                <p>
+                  <span class="font-bold">Jenis Kelamin: </span><br>
+                  <span x-text="formData.gender == 1 ? 'PRIA' : 'WANITA'"></span>
+                </p>
+                <template x-if="isPolice">
+                  <p>
+                    <span class="font-bold">Pangkat: </span><br>
+                    <span class="uppercase" x-text="formData.rank"></span>
+                  </p>
+                </template>
+                <template x-if="isPolice">
+                  <p>
+                    <span class="font-bold">Satuan kerja: </span><br>
+                    <span x-text="formData.unit"></span>
+                  </p>
+                </template>
+                <template x-if="isPolice">
+                  <p>
+                    <span class="font-bold">Jabatan: </span><br>
+                    <span x-text="formData.position"></span>
+                  </p>
+                </template>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button type="button" class="rounded-full bg-blue-50 px-8 py-2 h-12 text-sm font-semibold text-blue-600 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full" @click="previousStep()">Sebelumnya</button>
+                <button type="submit" class="rounded-full bg-blue-600 px-8 py-2 h-12 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 w-full">Simpan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Ends component -->
+      </div>
+    </div>
+  </section>
+<% end %>
+<script>
+  function multiStepForm(isPolice) {
+    return {
+      step: 1,
+      formData: {
+        name: '',
+        email: '',
+        gender: '',
+        position: '',
+        rank: '',
+        unit: ''
+      },
+      errors: {},
+      isPolice: isPolice,
+      nextStep() {
+        this.errors = this.validate();
+        if (Object.keys(this.errors).length === 0) {
+          if (this.step === 1 && !this.isPolice) {
+            this.step = 3; // Skip to step 3 if not police
+          } else {
+            this.step++;
+          }
+        }
+      },
+      previousStep() {
+        if (this.step === 3 && !this.isPolice) {
+          this.step = 1; // Go back to step 1 if not police
+        } else {
+          this.step--;
+        }
+      },
+      validate() {
+        let errors = {};
+        if (!this.formData.name) {
+          errors.name = 'Nama lengkap diperlukan';
+        }
+        if (!/^[a-zA-Z., ]+$/.test(this.formData.name)) {
+          errors.name = 'Masukan nama yang benar tanpa angka atau simbol';
+        }
+        if (!this.formData.email) {
+          errors.email = 'Alamat email diperlukan';
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.formData.email)) {
+          errors.email = 'Masukan alamat email yang benar';
+        }
+        if (!this.formData.gender) {
+          errors.gender = 'Jenis kelamin diperlukan';
+        }
+        if (this.step === 2 && this.isPolice) {
+          if (!this.formData.rank) {
+            errors.rank = 'Pangkat diperlukan';
+          }
+          if (!this.formData.unit) {
+            errors.unit = 'Kesatuan diperlukan';
+          }
+          if (!this.formData.position) {
+            errors.position = 'Jabatan diperlukan';
+          }
+        }
+        return errors;
+      },
+      formattedName(name) {
+        let parts = name.split(',');
+
+        if (parts.length > 1) {
+          parts[0] = parts[0].toUpperCase();
+        } else {
+          parts[0] = parts[0].toUpperCase();
+        }
+
+        return parts.join(',');
+      },
+      formattedText(text) {
+        return text.toUpperCase();
+      }
+    };
+  }
+</script>

@@ -1,0 +1,36 @@
+<% content_for :title do %>
+  Masuk
+<% end %>
+<% content_for :page_title do %>
+  Laman Masuk
+<% end %>
+<%=render "layouts/auth_form" do %>
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <div>
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text">NRP/NIP</span>
+        </div>
+        <%= f.text_field :identity, 
+          id: "identity", 
+          class: "input input-bordered w-full", 
+          placeholder: "Masukkan NRP/NIP", 
+          inputmode: 'numeric', 
+          pattern: '\d*', 
+          oninput: "this.value = this.value.replace(/[^0-9]/g, '');" 
+          %>
+      </label>
+    </div>
+    <div class="mb-4">
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text">Kata Sandi</span>
+        </div>
+        <%= f.password_field :password, autocomplete: "new-password", id: "password", class: "input input-bordered w-full", placeholder: "Masukkan kata sandi" %>
+      </label>
+    </div>
+    <div class="mb-4">
+      <%= f.submit "Masuk", class: "bg-red-500 hover:bg-red-700 text-white font-bold p-3 rounded-lg rounded focus:outline-none focus:shadow-outline w-full cursor-pointer text-lg" %>
+    </div>
+  <% end %>
+<% end %>

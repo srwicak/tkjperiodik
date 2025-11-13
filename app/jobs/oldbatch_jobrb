@@ -1,0 +1,124 @@
+class BatchJob < ApplicationJob
+  queue_as :default
+
+  def perform(batch_id)
+    batch = Batch.find(batch_id)
+    return unless batch
+
+    batch.processing!
+
+    # Ambil semua registrasi yang sesuai dengan unit dan jenis pendaftaran
+    registrations = Registration.joins(user: :user_detail, exam_session: :exam).joins(:score).where(
+      exams: { id: batch.exam_id },
+      registration_type: batch.registration_type,
+      user_details: { unit: batch.unit }
+    ).where.not(scores: { score_number: nil })
+
+    # Total peserta dalam batch
+    total_participants = registrations.count
+    batch.update!(total_count: total_participants)
+
+    # File yang akan menampung hasil batch
+    output_path = Rails.root.join("tmp", "batch_#{batch.slug}_#{SecureRandom.hex}.docx")
+
+    # Buka template dokumen
+    # template_path = Rails.root.join("private", "assets", "templates", "dokumen_hasil_unit.docx")
+    template_path = Rails.root.join("private", "assets", "templates", "dokumen_hasil_r9.docx").to_s
+
+    doc = Docx::Document.open(template_path)
+
+    # Fetch the result doc
+    result_doc = ResultDoc.find(batch.exam_id)
+    content = result_doc&.content ? JSON.parse(result_doc.content) : {}
+
+    # Extract data from the content JSON
+    exam_name = content.dig('general', 'exam_name') || result_doc.name
+    exam_name_short = content.dig('general', 'exam_name_short') || result_doc.name
+    exam_name_other = content.dig('general', 'exam_name_other') || result_doc.name
+
+    sk_number = content.dig('general', 'sk_number')
+    sk_date = content.dig('general', 'sk_date')
+    signer_name = content.dig('general', 'signer_name')
+    signer_nrp = content.dig('general', 'signer_nrp')
+
+    registrations.each_with_index do |registration, index|
+      # Generate report untuk setiap peserta
+      user_detail = registration.user.user_detail
+      score = registration.score
+      name = user_detail.name
+      rank_identity = "#{user_detail.rank}/#{registration.user.identity}"
+
+      unit = user_detail.unit
+      unit_name = user_detail.formatted_unit
+      unit_short = user_detail.unit.titlecase
+
+      if user_detail.gender
+        gender = "PRIA"
+      else
+        gender = "WANITA"
+      end
+
+      results = "#{exam_name_short} : #{score.score_number.to_s.gsub('.', ',')} (#{score.score_grade})"
+
+      notes = score.notes ? score.notes : "-"
+
+      # Get sk_unit based on user_detail.unit
+      sk_unit = content.dig('units', user_detail.unit)
+
+      # Mengisi data peserta dalam dokumen
+      # Proses paragraf dalam dokumen untuk mengganti placeholder
+      doc.paragraphs.each do |p|
+        p.each_text_run do |tr|
+          tr.substitute('{{EXAM_NAME}}', exam_name)
+          tr.substitute('{{EXAM_NAME_SHORT}}', exam_name_short)
+          tr.substitute('{{EXAM_NAME_OTHER}}', exam_name_other)
+          tr.substitute('{{SKPOLRI}}', sk_number) if sk_number.present?
+          tr.substitute('{{SKPOLRI_DATE}}', sk_date) if sk_date.present?
+          tr.substitute('{{SK_UNIT}}', sk_unit) if sk_unit.present?
+          tr.substitute('{{UNIT_NAME}}', unit_name)
+          tr.substitute('{{UNIT_SHORT}}', unit_short)
+          tr.substitute('{{RANK_UP}}', user_detail.group)
+        end
+      end
+
+      # Proses tabel dalam dokumen untuk mengganti placeholder
+      doc.tables.each do |table|
+        table.rows.each do |row|
+          row.cells.each do |cell|
+            cell.paragraphs.each do |p|
+              p.each_text_run do |tr|
+                tr.substitute('{{NAME}}', name)
+                tr.substitute('{{RANK_IDENTITY}}', rank_identity)
+                tr.substitute('{{UNIT}}', unit)
+                tr.substitute('{{GENDER}}', gender)
+                tr.substitute('{{RESULT}}', results)
+                tr.substitute('{{NOTES}}', notes)
+                tr.substitute('{{SIGNNAME}}', signer_name) if signer_name.present?
+                tr.substitute('{{NOMORREG}}', signer_nrp) if signer_nrp.present?
+              end
+            end
+          end
+        end
+      end
+
+      # Update progress batch
+      batch.update_progress!(1)
+    end
+
+    # Simpan dokumen hasil
+    doc.save(output_path)
+
+    # Simpan file di Shrine dan update batch
+    File.open(output_path) do |file|
+      batch.batch = file
+      batch.completed!
+    end
+
+    # Hapus file sementara
+    File.delete(output_path) if File.exist?(output_path)
+
+  rescue => e
+    Rails.logger.error "Failed to process batch: #{e.message}"
+    batch.error!
+  end
+end

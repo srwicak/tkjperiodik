@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html data-theme="fantasy">
+  <head>
+    <title><%= yield :title %> | TKJ PERIODIK</title>
+    <%= favicon_link_tag asset_path('icon.ico'), :rel => 'icon', :type => "image/x-icon" %>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- Load CSS files -->
+    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
+    <!-- Importmap for JavaScript -->
+    <%= javascript_importmap_tags %>
+    
+    <!-- Additional head content -->
+    <%= yield :additional_head %>
+  </head>
+
+  <body>
+    <% if notice.present? %>
+      <%= render 'layouts/message', data: notice %>
+    <% elsif alert.present? %>
+      <%= render 'layouts/message', data: alert %>
+    <% end %>
+
+    <main>
+      <%= yield %>
+    </main>
+  </body>
+</html>

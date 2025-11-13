@@ -1,0 +1,130 @@
+- content_for :title do
+  Verifikasi Pengguna - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold daftar pengguna lupa kata sandi
+    .text-sm 
+      %i.ri-information-line.text-xl
+      %span.text-gray-500.italic Informasi: Karena data terenkripsi di tingkat database, pencarian fuzzy atau parsial tidak bisa dilakukan. Mohon masukkan nomor NRP/NIP secara lengkap.
+    .mt-4 
+      %input#filter-value.input{ type: "text", placeholder: "Masukkan NRP/NIP" }
+      %button#filter-search.btn.btn-accent Cari
+      %button#filter-clear.btn.btn-error Muat ulang
+    .mt-8#data
+    %dialog#user_modal.modal
+      .modal-box
+        %h3.text-lg.font-bold.uppercase detil pengguna
+        %p.my-4 Apakah Anda menyetujui permohonan lupa kata sandi dari pengguna ini?
+        %p.mb-4#user_details
+        .modal-action 
+          %form{ method:"dialog" }
+            %button#save_button.btn.btn-success Setujui
+            %button#cancel_button.btn Batal
+
+= render "layouts/dashboard"
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    filterMode: "remote",
+    ajaxURL: "/kelola/pengguna/lupa/data",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center", 
+      vertAlign: "middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "NRP/NIP", field: "identity", width: 180, resizable: false, headerSort: false, vertAlign: "middle" },
+      { title: "Waktu Lupa", field: "forgotten_at", width: 150, formatter: "datetime", headerSort: false, vertAlign: "middle", formatterParams: {
+        inputFormat: "iso",
+        outputFormat: "HH:mm:ss dd/MM/yy",
+        invalidPlaceholder: "[invalid date]",
+        timezone: "Asia/Jakarta"
+      }},
+      { 
+        title: "Aksi" ,
+        width: 100,
+        hozAlign: "center",
+        headerHozAlign: "center",
+        vertAlign: "middle",
+        headerSort: false,
+        formatter: (cell, formatterParams, onRendered) => {
+          let button = document.createElement("button")
+          button.className =  "btn btn-sm rounded-lg btn-accent uppercase"
+          button.innerHTML = "detil"
+
+          // Showing user modal
+          button.addEventListener("click", () => {
+            let rowData = cell.getRow().getData();
+
+            let formattedDate_register = luxon.DateTime.fromISO(rowData.created_at).setZone("Asia/Jakarta").toFormat("dd/MM/yyyy HH:mm:ss")
+            let formattedDate_forgot = luxon.DateTime.fromISO(rowData.forgotten_at).setZone("Asia/Jakarta").toFormat("dd/MM/yyyy HH:mm:ss")
+
+            document.getElementById("user_details").innerHTML = "NRP/NIP: " 
+              + rowData.identity 
+              + "<br>Waktu daftar: " 
+              + formattedDate_register
+              + "<br>Waktu lupa: " 
+              + formattedDate_forgot
+
+            let saveButton = document.getElementById("save_button")
+            saveButton.dataset.id = rowData.id
+
+            document.getElementById("user_modal").showModal()
+          })
+          return button;
+        }
+      }
+    ]
+  })
+
+  document.getElementById("save_button").addEventListener("click", function() {
+    let userId = this.dataset.id;
+
+    fetch(`/kelola/pengguna/lupa/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({
+        user: { is_forgotten: false }
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        table.clearFilter(); 
+        table.setData();
+        document.getElementById("user_modal").close();
+      } else {
+        console.error("Error grant access user:", data.error);
+      }
+    })
+    .catch(error => console.error("Error:", error));
+  });
+
+  function updateFilter() {
+    let search_param = document.getElementById("filter-value").value
+
+    if(search_param) {
+      table.setFilter("identity", "=", search_param)
+    }
+  }
+
+  document.getElementById("filter-search").addEventListener("click", updateFilter)
+
+  document.getElementById("filter-clear").addEventListener("click", () => { window.location.reload() });

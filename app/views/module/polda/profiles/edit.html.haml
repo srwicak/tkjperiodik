@@ -1,0 +1,36 @@
+- content_for :title do
+  Ubah Profil Penanggung Jawab - Dasbor
+
+- content_for :content do
+  .max-w-4xl.mx-auto.w-full.mt-8
+    .p-6.bg-white.rounded-xl
+      %p.text-2xl.font-bold.mb-6 Ubah Profil Penanggung Jawab
+      .divider.divider-start.uppercase.font-bold.text-gray-500.text-sm identitas pengguna
+      .text-sm.font-semibold.uppercase.mb-4.text-white.bg-red-600.p-4.rounded 
+        %p.mb-2 Masukan nama, identitas (NRP/NIP), nomor HP Anda sebagai penanggung jawab Polda pada aplikasi SIBERDIRI
+      = form_with(model: @polda_staff, url: @url, method: :patch, local: true) do |form|
+        = render 'shared/error_messages', errors: @polda_staff.errors.full_messages, subject: "" if @polda_staff.errors.any?
+        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+          %tbody
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Region
+              %td( class="h-12 px-6 transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 " )
+                .my-4 
+                  = @polda_staff.polda_region.name
+
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.text_field :name, class: "input input-bordered my-2 w-full"
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Identitas (NRP/NIP)
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.text_field :identity, class: "input input-bordered my-2 w-full"
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) No HP
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.text_field :phone, class: "input input-bordered my-2 w-full"
+            
+        = form.submit "Simpan Profile", class: "btn btn-primary mt-4 w-full text-white font-bold uppercase"               
+
+       
+= render "layouts/dashboard"

@@ -1,0 +1,156 @@
+%div.max-w-xl.mx-auto.text-center.bg-white.px-4.sm:px-8.py-10.rounded-xl.shadow(x-data="search()")
+  %header.mb-4
+    %h1.text-2xl.font-bold.mb-2 Masukkan Identitas Pengguna
+    %p.text-slate-500 Masukkan NRP/NIP lengkap
+
+  %form#search-form{ "@submit.prevent": "performSearch" }
+    .flex.flex-row.justify-center.space-x-2
+      .flex
+        %input{ type: "text", placeholder: "Masukkan NRP/NIP", "x-model": "identity", class: "w-[250px] p-2 border border-gray-300 rounded input input-bordered text-center", oninput: "this.value = this.value.replace(/[^0-9]/g, '');"  }
+      .flex
+        %button{ type: "submit", class: "btn bg-blue-500 hover:bg-blue-600 text-white uppercase rounded" } 
+          %i.ri-search-line
+          Cari
+
+  %div#search-results.mt-4
+    %table( class="text-left border border-collapse rounded-xl sm:border-separate border-slate-200 bg-white w-full" cellspacing="0" x-show="dataFound" )
+      %template(x-if="!userData.is_user_detail")
+        .text-center Pengguna belum menyelesaikan pendaftaran
+      %template(x-if="userData.is_user_detail")
+        %tbody
+          %tr
+            %th( scope="col" class="h-12 px-4 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-t-xl font-bold" colspan="2" ) Informasi Pengguna
+          %tr
+            %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[170px]" ) Nama Pengguna
+            %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+              %p{ "x-text":"userData.name" } 
+          %tr
+            %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) NRP/NIP
+            %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+              %p{ "x-text":"userData.identity" } 
+          %tr
+            %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Hak Akses
+            %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+              %p{ "x-text":"userData.access_level" } 
+          %tr
+            %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Aksi
+            %td(class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500")
+              %template(x-if="userData.is_current_user")
+                %p.text-red-500 Anda tidak dapat melakukan aksi pada akun sendiri.
+              %template(x-if="!userData.is_current_user")
+                %div
+                  %template(x-if="userData.is_superadmin")
+                    .flex.flex-col.items-start.my-2
+                      %p.text-red-500.mb-2 Copot akses Superadmin?
+                      %button{ "x-on:click": "demoteFromSuperAdmin()", class: "btn bg-lime-500 hover:bg-lime-600 text-white uppercase" } Copot akses
+                  %template(x-if="userData.is_operator && !userData.is_superadmin")
+                    .flex.flex-col.items-start.my-2
+                      %p.text-red-500.mb-2 Angkat menjadi Superadmin?
+                      %button{ "x-on:click": "promoteToSuperAdmin()", class: "btn bg-lime-500 hover:bg-lime-600 text-white uppercase" } Promosi ke superadmin
+                  %template(x-if="!userData.is_operator && !userData.is_superadmin")
+                    .flex.flex-col.items-start.my-2
+                      %p.text-red-500.mb-2 Angkat menjadi Operator?
+                      %button{ "x-on:click": "promoteToOperator()", class: "btn bg-lime-500 hover:bg-lime-600 text-white uppercase" } Promosi ke opreator
+
+    %p.text-red-500{"x-show":"!dataFound && !isLoading && message"} Data tidak ditemukan!
+    %p.text-gray-500{"x-show":"isLoading"}  Sedang mencari...
+
+:javascript
+  function search() {
+    return {
+      identity: '',
+      isLoading: false,
+      dataFound : false,
+      message: '',
+      userData: {},
+
+      performSearch() {
+        this.isLoading = true;
+        this.dataFound = false;
+        this.message = '';
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch('/superadmin/kelola/operator/cari', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({ identity: this.identity })
+        })
+        .then(response => response.json())
+        .then(data => {
+          this.isLoading = false;
+          if (data.success) {
+            this.dataFound = true;
+            this.userData = data.user;
+          } else {
+            this.dataFound = false;
+            this.message = data.message;
+          }
+        }) 
+      },
+
+      promoteToOperator() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch('/superadmin/kelola/operator/tambah', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({ identity: this.identity })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.replace("/superadmin/kelola/operator")
+          } else {
+            window.location.reload()
+          }
+        });
+      },
+
+      promoteToSuperAdmin() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch('/superadmin/kelola/operator/tambah-superadmin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({ identity: this.identity })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.replace("/superadmin/kelola/operator")
+          } else {
+            window.location.reload()
+          }
+        });
+      },
+      
+      demoteFromSuperAdmin() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch('/superadmin/kelola/operator/hapus-superadmin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({ identity: this.identity })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.replace("/superadmin/kelola/operator")
+          } else {
+            window.location.reload()
+          }
+        });
+      },
+    }
+  }

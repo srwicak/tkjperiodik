@@ -1,0 +1,44 @@
+.w-full.max-w-4xl.bg-white.p-8.rounded-lg.shadow-lg{ class: "shadow-blue-500/50 hover:shadow-green-500/40"}
+  %p.mb-4
+    %span.font-bold.text-red-600.uppercase catatan:
+    %span.text-sm.font-semibold
+      File Excel yang di-upload harus memiliki kolom NRP & NILAI seperti template.
+  / === BARIS 1 : FORM UPLOAD ===
+  .mb-6
+    = form_with url: create_upload_manage_exam_unit_path(@exam.slug, params[:unit]),
+                local: false,
+                data: { turbo_frame: "upload_frame" },
+                html: { class: "flex items-center gap-4" } do |f|
+      = f.file_field :file,
+                     required: true,
+                     accept: '.xlsx',
+                     class: "block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+      = f.submit "Upload & Proses",
+                 data: { disable_with: "Mengunggah…" },
+                 class: "px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+
+  / === BARIS 2 : TABEL STATUS UPLOAD ===
+  %table( class="text-left border border-collapse rounded-xl sm:border-separate border-slate-200 bg-white w-full" cellspacing="0" )
+    %thead
+      %tr
+        %th{ scope: "col",
+             class: "h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-tl-xl font-bold uppercase text-center" } Waktu Upload
+        %th{ scope: "col",
+             class: "h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 font-bold uppercase text-center" } Status
+        %th{ scope: "col",
+             class: "h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 rounded-tr-xl font-bold uppercase text-center w-[120px]" } Download
+    %tbody#uploads
+      - if @upload
+        %tr{ id: dom_id(@upload) }
+          %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= l @upload.updated_at, format: :default
+          %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" )= @upload.status.humanize
+          %td( class="h-12 px-4 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" )
+            - if @upload.finished?
+              = link_to "Unduh",
+                        download_manage_exam_unit_excel_upload_path(@exam.slug, params[:unit], @upload),
+                        class: "text-blue-600 underline"
+            - else
+              –
+      - else
+        %tr
+          %td{ colspan: 3, class: "text-center py-4 text-slate-400" } Belum ada file Excel yang di-upload.

@@ -1,0 +1,4 @@
+:concurrency: 5
+:queues:
+  - [pangkat_production_default, 1]
+  - [pangkat_production_mailers, 1]

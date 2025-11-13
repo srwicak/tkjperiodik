@@ -1,0 +1,65 @@
+- content_for :title do
+  Tambah Pengguna - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold Tambah Pengguna
+
+    .max-w-4xl.w-full.bg-white.p-6.rounded-xl
+      .font-bold.text-sm.mb-6 
+        %p Laman ini hanya bisa untuk memambah pengguna peserta ujian atau Polisi dengan NRP.
+        %p Tidak bisa menambah dengan pengguna PNS atau dengan NIP
+        %p.text-red-500 Mohon pastikan isi semua data diisi dan benar
+      = form_with(model: @user, url: @url, method: :post, local: true) do |form|
+        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+          %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) NRP
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.text_field :identity, class: "input input-bordered my-2 w-full", oninput: "this.value = this.value.replace(/[^0-9]/g, '');", required: true
+          
+          %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kata sandi
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+              %div
+                = form.text_field :password, class: "input input-bordered my-2 w-full", required: true
+                .text-sm.mb-2 (minimal 8 karakter dengan campuran angka dan huruf)
+          
+          = form.fields_for :user_detail do |detail|
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama Lengkap
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                %div
+                  = detail.text_field :name, class: "input input-bordered my-2 w-full", required: true
+                  .text-sm.mb-2 (mohon dikapital nama secara manual, nama tidak boleh ada angka)
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jenis Kelamin
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                .flex.items-center.space-x-2
+                  = detail.radio_button :gender, 1, class: "radio", required: true
+                  = detail.label :gender, "PRIA"
+                  = detail.radio_button :gender, 0, class: "radio"
+                  = detail.label :gender, "WANITA"
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Pangkat
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = detail.select :rank, UserDetail.ranks.keys.map { |key| [key.humanize.upcase, key] }, { include_blank: 'Pilih Pangkat' }, class: "select select-bordered my-2 w-full", required: true
+
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jabatan
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= detail.text_field :position, class: "input input-bordered my-2 w-full", required: true
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kesatuan
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = detail.select :unit, UserDetail.units.keys.map { |key| [key.humanize.upcase, key] }, { include_blank: 'Pilih Kesatuan' }, class: "select select-bordered my-2 w-full", required: true
+        
+        = form.submit "Tambah Pengguna", class: "btn btn-primary mt-4 w-full text-white font-bold uppercase"               
+            
+
+
+  
+= render "layouts/dashboard"

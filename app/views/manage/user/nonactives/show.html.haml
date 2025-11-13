@@ -1,0 +1,286 @@
+- content_for :title do
+  Detil #{@name} | Pengguna Non Aktif - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .text-3xl.font-black.my-8
+      %a{ class:"p-1 bg-gray-400 rounded-full hover:bg-gray-600 hover:text-white text-3xl", href: index_manage_user_nonactive_path } 
+        %i.ri-arrow-left-line
+      %span.ml-2 #{@name}
+
+    .divider.divider-start.uppercase.text-gray-400.font-bold detil personal pengguna
+
+    .relative.overflow-x-auto.shadow-md.rounded-lg.my-8{ class: "xl:w-2/3 w-full" }
+      %table.w-full.bg-white
+        %tbody
+          - @personal.each do |item|
+            %tr{ class: "border-b border-gray-600 hover:bg-green-200" }
+              %th{ scope: "row", class: "px-6 py-4 font-medium bg-gray-500 text-blue-50 whitespace-nowrap w-1/4" }
+                = item[:key]
+              %td.px-6.py-4= item[:value]
+    
+    - if @police
+      .divider.divider-start.uppercase.text-gray-400.font-bold detil keanggotaan personil
+
+      .relative.overflow-x-auto.shadow-md.rounded-lg.my-8{ class: "xl:w-2/3 w-full" }
+        %table.w-full.bg-white
+          %tbody
+            - @police.each do |item|
+              %tr{ class: "border-b border-gray-600 hover:bg-green-200" }
+                %th{ scope: "row", class: "px-6 py-4 font-medium bg-gray-500 text-blue-50 whitespace-nowrap w-1/4" }
+                  = item[:key]
+                %td.px-6.py-4= item[:value]
+
+    .divider.divider-start.uppercase.text-gray-400.font-bold detil akun pengguna
+
+    %button.btn.btn-accent{ onclick: "status_modal.showModal()" } Ubah Status Pengguna
+
+    .relative.overflow-x-auto.shadow-md.rounded-lg.my-8{ class: "xl:w-2/3 w-full" }
+      %table.w-full.bg-white
+        %tbody
+          - @account.each do |item|
+            %tr{ class: "border-b border-gray-600 hover:bg-green-200" }
+              %th{ scope: "row", class: "px-6 py-4 font-medium bg-gray-500 text-blue-50 whitespace-nowrap w-1/4" }
+                = item[:key]
+              %td.px-6.py-4= item[:value]
+
+    .divider.divider-start.uppercase.text-gray-400.font-bold catatan status
+
+    .relative.overflow-x-auto.shadow-md.rounded-lg.my-8{ class: "xl:w-2/3 w-full" }
+      %table.w-full.bg-white
+        %tbody
+          %thead
+            %td{ scope: "row", class: "px-6 py-4 font-medium bg-gray-500 text-blue-50 whitespace-nowrap " } Alasan
+          %tr{ class: "hover:bg-green-200" }
+            %td{ scope: "row", class: "px-6 py-4 font-medium whitespace-nowrap" } #{ @comment ? @comment : "" }
+    
+    - if @police
+      .divider.divider-start.uppercase.text-gray-400.font-bold#riwayat riwayat ujian
+      %p.text-right.text-gray-600.font-bold.uppercase.text-sm.mt-4
+        %span Catatan: [
+        %i.ri-search-line.text-red-500
+        %span melihat pendaftaran ] | [
+        %i.ri-input-method-line.text-red-500
+        %span melihat nilai ]
+      .mt-8#data-ujian
+      .text-sm.text-gray-500
+        %p Catatan: Semua waktu yang ditampilkan adalah dalam WIB
+        %p *) Waktu perkiraan
+        %p (?) Nilai belum diinput
+    
+    .divider.divider-start.uppercase.text-gray-400.font-bold hapus akun pengguna
+
+    .text-gray-600.mb-4
+      %i.ri-error-warning-fill
+      %span.italic.text.sm Pengguna hanya bisa dihapus jika pengguna belum pernah mendaftar ujian atau pengguna bukan memiliki akses Operator.
+
+    - if @is_operator || @is_registered_exists
+      %button.btn.btn-error{ onclick: "delete_modal.showModal()", disabled: "disabled"} Hapus Pengguna
+    
+    - else
+      %button.btn.btn-error{ onclick: "delete_modal.showModal()"} Hapus Pengguna
+  
+    %dialog#status_modal.modal
+      .modal-box
+        %h3.text-lg.font-bold.uppercase.mb-4 status pengguna
+
+        .mb-4 
+          %p Ubah status pengguna 
+          %p 
+            #{@id_cat}: 
+            %span.font-semibold #{@identity}
+          %p 
+            Status saat ini:
+            %span.font-semibold.uppercase #{@status}
+          
+
+        %ul.w-full.text-sm.font-medium
+          %li.w-full.border-b.border-gray-600
+            .flex.items-center.ps-3{ class: "hover:bg-green-200" }
+              %input#status-actived.w-4.h-4.text-green-600.bg-gray-100.border-gray-300.focus:ring-green-500{ name: "status", type: "radio", value: "0", checked:(@status == "Aktif"), focus: false }
+              %label.w-full.py-3.ms-2.text-sm.font-medium.text-gray-600{ class: "hover:text-blue-900", for: "status-actived" } Aktif
+        
+          %li.w-full.border-b.border-gray-600
+            .flex.items-center.ps-3{ class: "hover:bg-green-200" }
+              %input#status-rejected.w-4.h-4.text-green-600.bg-gray-100.border-gray-300.focus:ring-green-500{ name: "status", type: "radio", value: "2", checked:(@status == "Ditolak") }
+              %label.w-full.py-3.ms-2.text-sm.font-medium.text-gray-600{ class: "hover:text-blue-900", for: "status-rejected" } Ditolak
+
+          %li.w-full.border-b.border-gray-600
+            .flex.items-center.ps-3{ class: "hover:bg-green-200" }
+              %input#status-suspended.w-4.h-4.text-green-600.bg-gray-100.border-gray-300.focus:ring-green-500{ name: "status", type: "radio", value: "3", checked:(@status == "Ditangguhkan") }
+              %label.w-full.py-3.ms-2.text-sm.font-medium.text-gray-600{ class: "hover:text-blue-900", for: "status-suspended" } Ditangguhkan
+
+          %li.w-full.border-b.border-gray-600
+            .flex.items-center.ps-3{ class: "hover:bg-green-200" }
+              %input#status-blocked.w-4.h-4.text-green-600.bg-gray-100.border-gray-300.focus:ring-green-500{ name: "status", type: "radio", value: "4" }
+              %label.w-full.py-3.ms-2.text-sm.font-medium.text-gray-600{ class: "hover:text-blue-900", for: "status-blocked", checked:(@status == "Diblokir") } Diblokir
+        
+        .hidden#comment_section.mt-4
+          %label{ for: "comment" } Alasan (maksimum 120 karakter):
+          %textarea#comment{name: "comment", class: "textarea textarea-bordered w-full mt-2", rows: "3", maxlength: "120"}        
+
+        .modal-action 
+          %form{ method:"dialog" }
+            %button#save_button.btn.btn-success Simpan
+            %button#cancel_button.btn Batal
+
+       
+    %dialog#delete_modal.modal
+      .modal-box
+        %h3.text-lg.font-bold.uppercase.mb-4 hapus pengguna
+
+        .mb-4 
+          %p Apakah Anda yakin menghapus akun pengguna
+          %p 
+            #{@id_cat}: 
+            %span.font-semibold #{@identity}
+          %p 
+            Status saat ini:
+            %span.font-semibold.uppercase #{@status}
+        
+        
+        %form.flex.gap-x-2{ method:"dialog" }
+          %button#delete_button.btn.btn-error Konfirmasi
+          %button.btn.grow Batal
+
+= render "layouts/dashboard"
+
+:javascript
+  // toggle textarea comment
+  document.getElementsByName("status").forEach(function(radio){
+    radio.addEventListener("change", function() {
+      let commentSection = document.getElementById("comment_section");
+      if (this.value != 0) {
+        commentSection.classList.remove("hidden");
+      } else {
+        commentSection.classList.add("hidden");
+      }
+    });
+  });
+
+  document.getElementById("status_modal").addEventListener("close", function() {
+    document.getElementById("comment").value = "";
+    document.getElementById("comment_section").classList.add("hidden");
+  });
+
+  document.getElementById("save_button").addEventListener("click", () => {
+    const path = window.location.pathname
+    let status = document.querySelector('input[name="status"]:checked').value;
+    let comment = document.getElementById("comment").value;
+
+    const data = {
+      user: {
+        account_status: parseInt(status),
+        account_status_reason: comment
+      }
+    }
+    fetch(path, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(data)
+    }).then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("status_modal").close()
+        if (parseInt(status) == 0) {
+          window.location.replace("/kelola/pengguna")
+        } else {
+          window.location.reload()
+        }
+
+      } else {
+        console.error("Error updating user:", data.error)
+      }
+    })
+    .catch(error => console.error("Error:", error))
+  })
+
+  document.getElementById("delete_button").addEventListener("click", () => {
+    const path = window.location.pathname
+
+    fetch(path, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json'
+      }
+    }).then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById("delete_modal").close()
+          window.location.replace("/kelola/pengguna/nonaktif")
+        } else {
+          console.error("Error delete user:", data.error)
+        }
+      }).catch(error => console.error("Error:", error))
+  })
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data-ujian",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    filterMode: "remote",
+    ajaxURL: "/kelola/pengguna/data-partisipasi/#{params[:slug]}",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center",
+      vertAlign: "middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "Nama Ujian", field: "exam_name", minWidth: 250, maxWidth: 500, headerSort: false, vertAlign: "middle", headerFilter: true },
+      { title: "Waktu Daftar", field: "registration_date", width: 200, headerSort: false, vertAlign: "middle" },
+      { title: "Tanggal Ujian", field: "exam_date", width: 150, headerSort: false, vertAlign: "middle" },
+      { 
+        title: "Sesi Ujian*",
+        field: "session", 
+        mutator: (value, data) => data.start_time + " - " + data.end_time,
+        width: 120, 
+        headerSort: false, 
+        vertAlign: "middle", 
+        hozAlign: "center", 
+        headerHozAlign: "center" 
+      },
+      { title: "Nilai", field: "score_number", width: 60, headerSort: false, vertAlign: "middle", headerHozAlign: "center", hozAlign: "center" },
+      { 
+        title: "Aksi" ,
+        hozAlign: "center",
+        vertAlign:"middle",
+        headerHozAlign: "center",
+        frozen:true,
+        headerSort: false,
+        width: 100,
+        formatter: (cell, formatterParams, onRendered) => {
+          let showButton = document.createElement("a")
+          showButton.className =  "btn btn-sm rounded-lg btn-primary uppercase"
+          showButton.innerHTML = "<i class=ri-search-line></i>"
+          showButton.href = "/kelola/pengguna/nonaktif/#{params[:slug]}/ujian/" + cell.getRow().getData().slug
+
+          let editButton = document.createElement("a")
+          editButton.className =  "btn btn-sm rounded-lg btn-secondary uppercase"
+          editButton.innerHTML = "<i class=ri-input-method-line></i>"
+          editButton.href = "/kelola/pengguna/nonaktif/#{params[:slug]}/hasil/" + cell.getRow().getData().score_slug
+
+          let container = document.createElement("div")
+          container.className = "flex space-x-2"
+          container.appendChild(showButton)
+          container.appendChild(editButton)
+
+          return container          
+        }
+      }
+    ]
+  })

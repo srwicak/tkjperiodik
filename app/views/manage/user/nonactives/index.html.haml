@@ -1,0 +1,85 @@
+- content_for :title do
+  Pengguna Non Aktif - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold daftar pengguna tidak aktif
+    .text-sm 
+      %i.ri-information-line.text-xl
+      %span.text-gray-500.italic Dikarenakan data terenkripsi pada tingkat database maka tidak bisa pencarian secara fuzzy/parsial, mohon masukkan keseluruhan nomor NRP/NIP.
+    .mt-4 
+      %input#filter-value.input{ type: "text", placeholder: "Masukkan NRP/NIP" }
+      %button#filter-search.btn.btn-accent Cari
+      %button#filter-clear.btn.btn-error Muat ulang
+    .mt-8#data
+
+= render "layouts/dashboard"
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    filterMode: "remote",
+    ajaxURL: "/kelola/pengguna/nonaktif/data",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center", 
+      headerHozAlign: "center", 
+      vertAlign: "middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "NRP/NIP", field: "identity", width: 180, resizable: false, headerSort: false, vertAlign: "middle" },
+      { title: "Nama", field: "name", width: 250, headerSort: false, vertAlign: "middle" },
+      { title: "Status", field: "account_status", width: 100, headerSort: false, vertAlign: "middle" },
+      { title: "Waktu Ubah", field: "updated_at", width: 150, formatter: "datetime", headerSort: false, vertAlign: "middle", formatterParams: {
+        inputFormat: "iso",
+        outputFormat: "HH:mm:ss dd/MM/yy",
+        invalidPlaceholder: "[invalid date]",
+        timezone: "Asia/Jakarta"
+      }},
+      { 
+        title: "Aksi" ,
+        width: 100,
+        hozAlign: "center",
+        headerHozAlign: "center", 
+        vertAlign: "middle",
+        headerSort: false,
+        formatter: (cell, formatterParams, onRendered) => {
+          let button = document.createElement("a")
+          button.className =  "btn btn-sm rounded-lg btn-accent uppercase"
+          button.innerHTML = "detil"
+          button.href = "/kelola/pengguna/nonaktif/" + cell.getRow().getData().slug
+
+          return button;
+        }
+      }
+    ]
+  })
+
+  function updateFilter() {
+    let search_param = document.getElementById("filter-value").value.trim()
+
+    if(search_param) {
+      table.setFilter("identity", "=", search_param)
+    }
+  }
+
+
+
+  document.getElementById("filter-search").addEventListener("click", updateFilter)
+
+  document.getElementById("filter-clear").addEventListener("click", () => { window.location.reload() });
+
+
+

@@ -1,0 +1,116 @@
+- content_for :title do
+  Lihat Ujian - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .text-3xl.font-black.my-8
+      %a{ class:"p-1 bg-gray-400 rounded-full hover:bg-gray-600 hover:text-white text-3xl", href: index_manage_exam_active_path } 
+        %i.ri-arrow-left-line
+      %span.ml-2 #{@exam.name}
+    
+    = render 'info'
+
+    = render 'exam_detail'
+
+
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 statistik ujian
+    = render 'statistic'
+
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 daftar sesi
+    #data-session
+    
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 hapus ujian
+
+    .text-gray-600.mb-4
+      %i.ri-error-warning-fill
+      %span.italic.text.sm Ujian hanya bisa dihapus jika belum ada pendaftar atau bukan dalam status Aktif.
+
+    %button.btn.btn-error{ onclick: "delete_modal.showModal()"} Hapus Ujian
+
+    %dialog#delete_modal.modal
+      .modal-box
+        %h3.text-lg.font-bold.uppercase.mb-4 hapus ujian
+        .mb-4 
+          %p Apakah Anda yakin menghapus ujian
+          %p 
+            Nama ujian: 
+            %span.font-semibold #{@exam.name}
+          %p 
+            Tanggal ujian:
+            %span.font-semibold #{I18n.l(@exam.exam_date_start, format: :default)} - #{I18n.l(@exam.exam_date_end, format: :default)}
+        %form.flex.gap-x-2{ method:"dialog" }
+          %button#delete_button.btn.btn-error Konfirmasi
+          %button.btn.grow Batal
+        
+
+
+= render "layouts/dashboard"
+
+:javascript
+  document.getElementById("delete_button").addEventListener("click", () => {
+    const path = window.location.pathname
+
+    fetch(path, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json'
+      }
+    }).then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.replace(data.redirect_path);
+        } else {
+          window.location.replace(data.redirect_path);
+          console.error("Error delete exam:", data.error);
+        }
+      }).catch(error => console.error("Error:", error))
+  })
+
+:javascript
+  // Tanulator table
+  var table = new Tabulator("#data-session",{
+    minHeight: 300,
+    pagination: true,
+    paginationMode: "remote",
+    ajaxURL: "/kelola/ujian/#{params[:slug]}/data-session",
+    paginationSize: 10,
+    paginationSizeSelector: [10, 25, 50],
+    layout: "fitDataFill",
+    rowHeader: {
+      formatter: "rownum",
+      headerSort: false,
+      hozAlign: "center",
+      vertAlign: "middle",
+      resizable: false,
+      frozen: true
+    },
+    columns:[
+      { title: "Sesi Ujian", field: "date", width: 300, headerSort: false, vertAlign: "middle"},
+      { title: "Pendaftar", field: "registration", headerSort: false, vertAlign: "middle", hozAlign: "center"},
+      { 
+        title: "Aksi" ,
+        hozAlign: "center",
+        vertAlign:"middle",
+        headerHozAlign: "center",
+        frozen: true,
+        headerSort: false,
+        width: 100,
+        formatter: (cell, formatterParams, onRendered) => {
+          let showButton = document.createElement("a")
+          showButton.className =  "btn btn-sm rounded-lg btn-primary uppercase"
+          showButton.innerHTML = "Detil <i class=ri-search-line></i>"
+          showButton.href = "/kelola/ujian/#{params[:slug]}/sesi/" + cell.getRow().getData().slug
+
+          let container = document.createElement("div")
+          container.className = "flex space-x-2"
+          container.appendChild(showButton)
+
+          return container          
+        }
+      }
+    ]
+  })

@@ -1,0 +1,126 @@
+id:
+  activerecord:
+    attributes:
+      user_detail:
+        name: "Nama"
+        rank: "Pangkat"
+        unit: "Kesatuan"
+        position: "Jabatan"
+        gender: "Jenis Kelamin"
+    models:
+      user: "Pengguna"
+    errors:
+      models:
+        user:
+          attributes:
+            password:
+              blank: "tidak boleh kosong."
+              too_short: "terlalu pendek (minimal %{count} karakter)."
+              too_weak: "minimum 8 karakter dan kata sandi harus gabungan dari huruf dan angka"
+            identity:
+              blank: "tidak boleh kosong."
+              invalid_length: "salah, harus 8 atau 18 karakter."
+              taken: "sudah digunakan."
+            password_confirmation:
+              confirmation: "tidak cocok."
+        user_detail:
+          attributes:
+            name:
+              blank: "tidak boleh kosong."
+              format: "boleh berisi alfabet, titik, dan koma."
+            rank:
+              blank: "tidak boleh kosong."
+            unit:
+              blank: "tidak boleh kosong."
+            position:
+              blank: "tidak boleh kosong."
+            gender:
+              blank: "tidak boleh kosong."
+
+  devise:
+    confirmations:
+      confirmed: "Alamat email Anda telah berhasil dikonfirmasi."
+      send_instructions: "Anda akan menerima email dengan instruksi untuk mengonfirmasi alamat email Anda dalam beberapa menit."
+      send_paranoid_instructions: "Jika alamat email Anda ada di database kami, Anda akan menerima email dengan instruksi untuk mengonfirmasi alamat email Anda dalam beberapa menit."
+    failure:
+      already_authenticated: "Anda sudah masuk."
+      inactive: "Akun Anda belum diaktifkan."
+      invalid: "NRP/NIP atau kata sandi salah."
+      locked: "Akun Anda terkunci. Silahkan ajukan kata sandi baru melalui \"Lupa Kata Sandi?\"."
+      last_attempt: "Anda memiliki satu percobaan lagi sebelum akun Anda terkunci."
+      not_found_in_database: "NRP/NIP atau kata sandi salah."
+      timeout: "Sesi Anda telah berakhir. Silakan masuk kembali untuk melanjutkan."
+      unauthenticated: "Anda perlu masuk atau mendaftar sebelum melanjutkan."
+      unconfirmed: "Anda harus mengonfirmasi alamat email Anda sebelum melanjutkan."
+    mailer:
+      confirmation_instructions:
+        subject: "Instruksi Konfirmasi"
+      reset_password_instructions:
+        subject: "Instruksi Atur Ulang Kata Sandi"
+      unlock_instructions:
+        subject: "Instruksi Membuka Kunci"
+      email_changed:
+        subject: "Email Berubah"
+      password_change:
+        subject: "Kata Sandi Berubah"
+    omniauth_callbacks:
+      failure: "Tidak dapat mengautentikasi Anda dari %{kind} karena \"%{reason}\"."
+      success: "Berhasil diautentikasi dari akun %{kind}."
+    passwords:
+      no_token: "Anda tidak bisa mengakses halaman ini tanpa berasal dari email pengaturan ulang kata sandi. Jika Anda datang dari email pengaturan ulang kata sandi, pastikan Anda menggunakan URL lengkap yang disediakan."
+      send_instructions: "Anda akan menerima email dengan instruksi tentang cara mengatur ulang kata sandi Anda dalam beberapa menit."
+      send_paranoid_instructions: "Jika alamat email Anda ada di database kami, Anda akan menerima tautan pemulihan kata sandi di alamat email Anda dalam beberapa menit."
+      updated: "Kata sandi Anda telah berhasil diubah. Anda sekarang masuk."
+      updated_not_active: "Kata sandi Anda telah berhasil diubah."
+    registrations:
+      destroyed: "Selamat tinggal! Akun Anda telah berhasil dibatalkan. Kami berharap dapat bertemu Anda lagi segera."
+      signed_up: "Selamat datang! Anda telah berhasil mendaftar."
+      signed_up_but_inactive: "Anda telah berhasil mendaftar. Namun, kami tidak bisa memasukkan Anda karena akun Anda belum diaktifkan."
+      signed_up_but_locked: "Anda telah berhasil mendaftar. Namun, kami tidak bisa memasukkan Anda karena akun Anda terkunci."
+      signed_up_but_unconfirmed: "Pesan dengan tautan konfirmasi telah dikirim ke alamat email Anda. Silakan ikuti tautan untuk mengaktifkan akun Anda."
+      update_needs_confirmation: "Anda telah berhasil memperbarui akun Anda, tetapi kami perlu memverifikasi alamat email baru Anda. Silakan periksa email Anda dan ikuti tautan konfirmasi untuk mengonfirmasi alamat email baru Anda."
+      updated: "Akun Anda telah berhasil diperbarui."
+      updated_but_not_signed_in: "Akun Anda telah berhasil diperbarui, tetapi karena kata sandi Anda diubah, Anda perlu masuk kembali."
+    sessions:
+      signed_in: "Berhasil masuk."
+      signed_out: "Berhasil keluar."
+      already_signed_out: "Berhasil keluar."
+    unlocks:
+      send_instructions: "Anda akan menerima email dengan instruksi untuk membuka kunci akun Anda dalam beberapa menit."
+      send_paranoid_instructions: "Jika akun Anda ada, Anda akan menerima email dengan instruksi untuk membuka kunci akun Anda dalam beberapa menit."
+      unlocked: "Akun Anda telah berhasil dibuka. Silakan masuk untuk melanjutkan."
+  errors:
+    messages:
+      already_confirmed: "sudah dikonfirmasi, silakan coba masuk"
+      confirmation_period_expired: "perlu dikonfirmasi dalam %{period}, silakan minta yang baru"
+      expired: "telah kedaluwarsa, silakan minta yang baru"
+      not_found: "tidak ditemukan"
+      not_locked: "tidak terkunci"
+      not_saved:
+        one: "1 kesalahan menghalangi %{resource} ini untuk disimpan:"
+        other: "%{count} kesalahan menghalangi %{resource} ini untuk disimpan:"
+  twofactorauth:
+    success_otp_setup: "Otentikasi dua faktor berhasil diatur."
+    wrong_otp_setup: "Kode OTP salah, silakan coba lagi."
+    invalid_otp_code: "Token sesi OTP tidak valid atau kedaluwarsa."
+    success_otp_login: "Berhasil masuk."
+  time:
+    formats:
+      default: "%A, %d %B %Y %H:%M:%S"
+      def_wib: "%A, %d %B %Y %H:%M WIB"
+      full_wib: "%A, %d %B %Y %H:%M:%S WIB"
+      simple: "%d %B %Y %H:%M:%S"
+      simple_no_sec: "%d %B %Y %H:%M"
+      time_only: "%H:%M"
+      date_only: "%A, %d %B %Y"
+      date_without: "%d %B %Y"
+      time_wib: "%H:%M WIB"
+  date:
+    formats:
+      default: "%d %B %Y"
+      date_only: "%A, %d %B %Y"
+  exam:
+    statuses:
+      draft: "Draf"
+      active: "Aktif"
+      archieve: "Arsip"

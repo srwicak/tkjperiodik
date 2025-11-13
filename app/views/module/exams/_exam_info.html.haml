@@ -1,0 +1,34 @@
+.mb-8 
+  %p.mb-6.font-semibold.text-xl Informasi Ujian 
+  %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+    %tbody
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Tanggal Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          .my-2 
+            %span.text-red-500.font-semibold= I18n.l(@exam.exam_date_start, format: :date_only)
+            sampai
+            %span.text-red-500.font-semibold= I18n.l(@exam.exam_date_end, format: :date_only)
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Waktu Mulai
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= I18n.l(@exam.exam_start, format: :time_wib)
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Kuota Peserta
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) 
+          #{@exam.batch * @exam.size * @exam_days} Personel [
+          %span.text-red-500.font-bold #{@exam.registered_count}
+          terdaftar ]
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" colspan="2" ) Informasi Lanjut Ujian
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" colspan="2" )
+          - if !@exam.descriptions.empty?
+            .whitespace-pre-line.mb-4
+              #{@exam.descriptions}
+          - else
+            .divider.italic.uppercase.text-sm.text-gray-500.font-bold tidak ada informasi lanjutan
+            
+      

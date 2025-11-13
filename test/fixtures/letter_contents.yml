@@ -1,0 +1,31 @@
+# == Schema Information
+#
+# Table name: letter_contents
+#
+#  id          :bigint           not null, primary key
+#  name        :string
+#  placeholder :json
+#  slug        :string
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  letter_id   :bigint           not null
+#
+# Indexes
+#
+#  index_letter_contents_on_letter_id  (letter_id)
+#  index_letter_contents_on_slug       (slug) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (letter_id => letters.id)
+#
+
+# This model initially had no columns defined. If you add columns to the
+# model remove the "{}" from the fixture names and add the columns immediately
+# below each fixture, per the syntax in the comments below
+#
+one: {}
+# column: value
+#
+two: {}
+# column: value

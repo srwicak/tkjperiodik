@@ -1,0 +1,9 @@
+= form_with(model: @region, url: @url, method: @method, local: true) do |form|
+  = render 'shared/error_messages', errors: @region.errors.full_messages, subject: "" if @region.errors.any?
+  %table(class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0")
+    %tbody
+      %tr(class="transition-colors duration-300 hover:bg-slate-50")
+        %td(class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]") Nama Daerah
+        %td(class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500")= form.text_field :name, class: "input input-bordered my-2 w-full"  
+    
+  = form.submit "Simpan Daerah", class: "btn btn-primary mt-4 w-full text-white font-bold uppercase"

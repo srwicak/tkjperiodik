@@ -1,0 +1,6 @@
+production:
+  adapter: redis
+  url: "redis:///home/siberdir/redis.sock"
+  channel_prefix: pangkat_production
+  allowed_request_origins:
+    - https://siberdiri.com

@@ -1,0 +1,195 @@
+- content_for :title do
+  Verifikasi Pengguna - Dasbor
+
+- content_for :content do
+  .mobile-message
+    %p.text-center.text-red-500.font-semibold.mt-10.text-xl Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold daftar pengguna belum terverifikasi
+    .mt-8#data
+    %dialog#user_modal.modal
+      .modal-box
+        %h3.text-lg.font-bold.uppercase detil pengguna
+        %p.py-4#user_details
+        .mt-4
+          %label{ for: "status" } Status:
+          .flex.items-center.mt-2
+            %input#approved{name: "status", type: "radio", value: "approved", class: "radio radio-success"}
+            %label{ for: "approved", class: "ml-2" } Setujui
+            %input#rejected{name: "status", type: "radio", value: "rejected", class: "radio radio-error ml-4"}
+            %label{ for: "rejected", class: "ml-2" } Tidak Disetujui
+          .hidden#comment_section.mt-4
+            %label{ for: "comment" } Alasan (maksimum 120 karakter):
+            %textarea#comment{name: "comment", class: "textarea textarea-bordered w-full mt-2", rows: "3", maxlength: "120"}         
+        .modal-action 
+          %form{ method:"dialog" }
+            %button#save_button.btn.btn-success Simpan
+            %button#cancel_button.btn Batal
+
+= render "layouts/dashboard"
+
+:javascript
+  document.addEventListener("turbo:load", function() {
+    fetch("/pengguna/verifikasi/peninjau")
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(function(item) {
+          var row = table.getRow(item.id);
+          if (row) {
+            row.update({ peninjau: item.reviewer });
+          }
+        });
+      })
+      .catch(error => console.error("Error fetching reviewers:", error));
+  });
+  var table = new Tabulator("#data", {
+    minHeight:300,
+    pagination:true,
+    paginationMode:"remote",
+    ajaxURL:"/pengguna/verifikasi/data",
+    paginationSize:10,
+    paginationSizeSelector:[10, 25, 50],
+    layout:"fitData", 
+    rowHeader:{formatter:"rownum", headerSort:false, hozAlign:"center", resizable:false, frozen:true},
+    columns:[ 
+      {title:"NRP/NIP", field:"identity", width:170, resizable:false},
+      {title:"Waktu Daftar", field:"created_at", hozAlign:"left", formatter:"datetime", formatterParams:{
+        inputFormat:"iso",
+        outputFormat:"HH:mm:ss dd/MM/yy",
+        invalidPlaceholder:"(invalid date)",
+        timezone:"Asia/Jakarta",
+      }},
+      {
+        title: "Aksi", 
+        formatter:function(cell, formatterParams, onRendered) {
+        var button = document.createElement("button");
+          button.className = "btn btn-xs rounded-xl btn-accent uppercase";
+          button.innerHTML = "detil";
+          button.addEventListener("click", function() {
+            var rowData = cell.getRow().getData();
+            if (rowData.reviewer) {
+              alert("Data ini sedang ditinjau oleh " + rowData.reviewer);
+            }
+
+            var formattedDate = luxon.DateTime.fromISO(rowData.created_at).setZone('Asia/Jakarta').toFormat('dd/MM/yyyy HH:mm:ss');
+            
+            document.getElementById("user_details").innerHTML = "NRP/NIP: " + rowData.identity 
+              + "<br>Waktu Daftar: " + formattedDate;
+            
+            var saveButton = document.getElementById("save_button");
+            saveButton.dataset.identity = rowData.identity;
+            
+            document.getElementById("user_modal").showModal();
+
+            fetch('/pengguna/verifikasi/tinjau', {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              },
+              body: JSON.stringify({ id: rowData.id })
+            });
+            // Disable the buton to prevent other user reviewing the same data
+            button.disabled = true;
+        });
+        return button;
+      }, cellClick: function(e, cell) {
+        let row = cell.getRow();
+        let rowData = row.getData();
+        if (rowData.reviewer) {
+          e.preventDefault();
+        }
+        //fetch((`review/${rowData.id}`), {
+        //  method: 'PATCH',
+        //  headers: {
+        //    'Content-Type': 'application/json',
+        //    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        //  }
+        //});
+      }},
+      {title: "Peninjau", field: "peninjau"}
+    ],
+  });
+  
+  document.getElementsByName("status").forEach(function(radio){
+    radio.addEventListener("change", function() {
+      let commentSection = document.getElementById("comment_section");
+      if (this.value === "rejected") {
+        commentSection.classList.remove("hidden");
+      } else {
+        commentSection.classList.add("hidden");
+      }
+    });
+  });
+
+  document.getElementById("save_button").addEventListener("click", function() {
+    let userIdentity = this.dataset.identity;
+    let status = document.querySelector('input[name="status"]:checked').value;
+    let comment = document.getElementById("comment").value;
+
+    const data = { 
+      user: {
+        is_verified: true, 
+        account_status: (status === "approved"? 0 : 2),
+        account_status_reason: comment
+      } 
+    }
+
+    fetch(`/pengguna/verifikasi/${userIdentity}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        table.setData(); 
+        document.getElementById("user_modal").close();
+      } else {
+        console.error("Error verifying user:", data.error);
+      }
+    })
+    .catch(error => console.error("Error:", error));
+  });
+
+  document.getElementById("user_modal").addEventListener("close", function() {
+    var selectedRadio = document.querySelector('input[name="status"]:checked');
+    if (selectedRadio) {
+      selectedRadio.checked = false;
+    }
+    document.getElementById("comment").value = "";
+    document.getElementById("comment_section").classList.add("hidden");
+
+    // Re-enable the button when the modal is closed
+    let userIdentity = document.getElementById("save_button").dataset.identity;
+    let button = document.querySelector(`button[data-identity="${userIdentity}"]`);
+    if (button) {
+      button.disabled = false;
+    } 
+  });
+
+  document.getElementById("cancel_button").addEventListener("click", function() {
+  let userIdentity = document.getElementById("save_button").dataset.identity;
+
+  fetch(`/pengguna/verifikasi/batal`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({ id: userIdentity })
+  }).then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        table.setData(); // Refresh data in the table
+      } else {
+        console.error("Error cancelling review:", data.error);
+      }
+    })
+    .catch(error => console.error("Error:", error));
+
+    document.getElementById("user_modal").close();
+  });

@@ -1,0 +1,12 @@
+- content_for :title do
+  Cari Nilai Dengan Kode Formulir - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .mt-16
+      = render "find"
+  
+= render "layouts/dashboard"

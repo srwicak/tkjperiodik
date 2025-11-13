@@ -1,0 +1,64 @@
+.mb-8
+  %table.w-full.text-left.border.border-separate.rounded.border-slate-200{ cellspacing: 0 }
+    %thead
+      %tr
+        %th(class="h-12 px-6 text-sm border border-slate-200 text-center") Kesatuan
+        %th(class="h-12 px-6 text-sm border border-slate-200 text-center") Jenis
+        %th(class="h-12 px-6 text-sm border border-slate-200 text-center") Peserta
+        %th(class="h-12 px-6 text-sm border border-slate-200 text-center") Dinilai
+        %th(class="h-12 px-6 text-sm border border-slate-200 text-center") Aksi
+        %th(class="h-12 px-6 text-sm border border-slate-200 text-center") Status Dokumen
+    %tbody
+      - UserDetail.units.each do |unit_key, unit_value|
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.px-6.text-sm.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{class:"w-[180px]", rowspan: 2}
+            #{unit_key.to_s.titlecase}
+            %br
+            %a{ class:"underline decoration-dashed", href: show_manage_exam_unit_path(slug: @exam.slug, unit: unit_key.parameterize) } Ubah Nilai
+          %td.h-12.px-6.text-sm.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{class:"w-[100px]"}
+            Berkala
+          %td.h-12.px-6.text-sm.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{class:"w-[125px]"}
+            = @registration_counts[:reguler][unit_key] || 0
+          %td.h-12.px-6.text-sm.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{class:"w-[125px]"}
+            = @score_counts[:reguler][unit_key] || 0
+          %td.h-12.px-6.text-sm.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+            - if @score_counts[:reguler][unit_key].to_i > 0
+              = button_to "Buat Dokumen", create_bulk_manage_result_generate_by_exam_path(unit: unit_key, registration_type: "reguler", exam_id: @exam.id), method: :post, class: "btn btn-primary w-full"
+            - else
+              %span{ class: "text-gray-500" } Tidak ada nilai
+          %td.h-12.px-6.text-sm.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+            - batch = @batches.find { |b| b.unit == unit_key && b.exam_id == @exam.id && b.registration_type == 0 }
+            - if batch
+              - if batch.status == "completed" && batch.batch_data.present?
+                = link_to "Download", download_manage_result_generate_by_unit_by_type_path(batch.exam_id, batch.unit, batch.registration_type), class: "btn btn-success w-full text-white", target: "_blank"
+              - elsif batch.status == "processing"
+                Sedang Diproses (#{batch.processed_count}/#{batch.total_count})
+              - else
+                Galat
+            - else
+              Belum Dibuat
+        %tr.transition-colors.duration-300.hover:bg-slate-50
+          %td.h-12.px-6.text-sm.border-t.border-l.border-slate-200.stroke-slate-500.text-slate-500
+            Pangkat
+          %td.h-12.px-6.text-sm.border-t.border-l.border-slate-200.stroke-slate-500.text-slate-500.text-center
+            = @registration_counts[:rankup][unit_key] || 0
+          %td.h-12.px-6.text-sm.border-t.border-l.border-slate-200.stroke-slate-500.text-slate-500.text-center
+            = @score_counts[:rankup][unit_key] || 0
+          %td.h-12.px-6.text-sm.border-t.border-l.border-slate-200.stroke-slate-500.text-slate-500
+            - if @score_counts[:rankup][unit_key].to_i > 0
+              = button_to "Buat Dokumen", create_bulk_manage_result_generate_by_exam_path(unit: unit_key, registration_type: "rankup", exam_id: @exam.id), method: :post, class: "btn btn-secondary w-full"
+            - else
+              %span{ class: "text-gray-500" } Tidak ada nilai
+          %td.h-12.px-6.text-sm.border-t.border-l.border-slate-200.stroke-slate-500.text-slate-500
+            - batch = @batches.find { |b| b.unit == UserDetail.units[unit_key] && b.exam_id == @exam.id && b.registration_type == 1 }
+            - if batch
+              - if batch.status == "completed" && batch.batch_data.present?
+                = link_to "Download", download_manage_result_generate_by_unit_by_type_path(batch.exam_id, batch.unit, batch.registration_type), class: "btn btn-success w-full text-white", target: "_blank"
+              - elsif batch.status == "processing"
+                Sedang Diproses (#{batch.processed_count}/#{batch.total_count})
+              - else
+                Galat
+            - else
+              Belum Dibuat
+
+  

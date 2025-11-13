@@ -1,0 +1,29 @@
+stages:
+  - deploy
+
+before_script:
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+deploy_production:
+  stage: deploy
+  script:
+    - echo "Deploying to production..."
+    - ssh -p 64000 siberdir@siberdiri.com '
+        if [ -d "~/siberdiri/.git" ]; then
+          cd ~/siberdiri && git pull origin main;
+        else
+          rm -rf ~/siberdiri && git clone git@gitlab.com:sanrawcyber/pangkat-plus.git ~/siberdiri && cd ~/siberdiri;
+        fi &&
+        ~/.asdf/shims/bundle install &&
+        RAILS_ENV=production ~/.asdf/shims/rails db:create &&
+        RAILS_ENV=production ~/.asdf/shims/rails db:migrate &&
+        RAILS_ENV=production ~/.asdf/shims/rails assets:precompile &&
+        passenger-config restart-app ~/siberdiri
+      '
+  only:
+    - main

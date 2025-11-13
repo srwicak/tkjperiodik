@@ -1,0 +1,46 @@
+- content_for :title do
+  Pendaftaran Ujian - Dasbor
+
+- content_for :content do
+  .max-w-4xl.mx-auto.w-full.my-8
+    .divider.divider-start.text-3xl.text-red-500.font-black.mb-8.uppercase Pendaftaran Ujian
+    .rounded-lg.p-8.bg-white.mb-8
+      = render "exam_info"
+      .divider
+      = render "user_info"
+      .divider.divider-start Jenis pendaftaran
+
+      .mb-8 
+        %p.mb-6.font-semibold.text-xl Jenis Keikutsertaan Ujian
+        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+          %tbody
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Ujian Untuk
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                .my-2
+                  = form_with url: new_module_exam_path(@exam.slug), method: :post, local: true, id: "registration-form" do |f|
+                    .flex.flex-col.space-y-2.justify-center
+                      .flex.items-center.space-x-1
+                        = f.radio_button :reg_type, 'berkala', required: true
+                        %label{ for: "reg_type_berkala" } Berkala
+                      .flex.items-center.space-x-1
+                        = f.radio_button :reg_type, 'kenaikan_pangkat', required: true
+                        %label{ for: "reg_type_kenaikan_pangkat" } Kenaikan Pangkat
+    
+    %button.btn.btn-lg.btn-success.w-full.text-white.font-bold{ onclick: "confirm_modal.showModal()" } DAFTAR UJIAN
+
+  %dialog#confirm_modal.modal
+    .modal-box
+      %h3.text-lg.font-bold.uppercase.mb-4 konfirmasi pendaftar ujian
+
+      .mb-4 
+        %p Dengan menekan tombol konfirmasi di bawah ini, maka Anda telah membaca keseluruhan informasi ujian di laman ini serta data diri Anda telah diperbarui dan sesuai
+      .flex.gap-x-2
+        %button.btn.px-16{ type: "button", onclick: "document.getElementById('confirm_modal').close()" } Batal
+        %button.btn.btn-success.grow.text-white.uppercase{ type: "button", onclick: "document.getElementById('registration-form').submit()" } Konfirmasi
+
+
+
+
+
+= render "layouts/dashboard"

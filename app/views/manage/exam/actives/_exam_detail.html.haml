@@ -1,0 +1,79 @@
+.w-full.max-w-4xl.bg-white.p-8.rounded-lg.shadow-lg{ class: "shadow-blue-500/50 hover:shadow-green-500/40"}
+  .relative
+    .absolute.top-0.right-0.-mt-6.-mr-6
+      %a( href="#{edit_manage_exam_active_path(@exam.slug)}" class="font-black text-green-400 hover:text-red-500 hover:underline hover:decoration-wavy text-lg" )
+        %span.uppercase ubah
+        %i.ri-edit-line
+
+  %p.text-2xl.text-center
+    %span #{@exam.name}
+  %p.text-sm.text-center.text-gray-500.font-bold.mb-6
+    %span.uppercase.italic nama ujian
+  
+  %table.table.mb-8
+    %tbody 
+      %tr 
+        %td( class="w-[200px]") Nama Ujian Singkat 
+        %td #{@exam.short_name}
+      %tr 
+        %td Mulai daftar ujian
+        %td #{I18n.l(@exam.start_register, format: :default)}
+      %tr 
+        %td Status ujian
+        %td #{@exam.status_label}
+      %tr
+        %td( colspan="2")  Deskripsi Ujian
+      %tr
+        %td( colspan="2" ) 
+          - if !@exam.descriptions.empty?
+            .whitespace-pre-line
+              #{@exam.descriptions}
+          - else
+            .divider.italic.uppercase.text-sm.text-gray-500.font-bold kosong
+      %tr 
+        %td Jumlah peserta per sesi
+        %td
+          %span #{@exam.size}
+          %span Personel
+      %tr 
+        %td Jumlah sesi per hari
+        %td
+          %span #{@exam.batch}
+          %span Sesi
+      %tr 
+        %td Jumlah hari ujian
+        %td
+          %span #{@exam_days}
+          %span Hari
+      %tr 
+        %td Kapasitas peserta
+        %td
+          %span #{@exam.size * @exam.batch * @exam_days}
+          %span Personel
+      %tr 
+        %td Tanggal ujian
+        %td #{I18n.l(@exam.exam_date_start, format: :default)} - #{I18n.l(@exam.exam_date_end, format: :default)}
+      %tr 
+        %td Waktu mulai ujian
+        %td
+          %span #{I18n.l(@exam.exam_start, format: :time_only)}
+          %span WIB
+      %tr 
+        %td Durasi ujian
+        %td
+          %span #{@exam.exam_duration}
+          %span Menit
+      %tr 
+        %td Jeda antar sesi
+        %td
+          %span #{@exam.break_time}
+          %span Menit
+      %tr
+        %td( colspan="2") Catatan
+      %tr
+        %td( colspan="2" ) 
+          - if !@exam.notes.empty?
+            .whitespace-pre-line
+              #{@exam.notes}
+          - else
+            .divider.italic.uppercase.text-sm.text-gray-500.font-bold kosong
