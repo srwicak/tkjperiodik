@@ -15,6 +15,11 @@
 
     = render 'exam_detail'
 
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 pengaturan jadwal ujian
+    .mb-6
+      %a.btn.btn-primary{ href: manage_exam_schedules_path(@exam.slug) }
+        %i.ri-calendar-line
+        %span Atur Jadwal Ujian per Satuan
 
     .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 statistik ujian
     = render 'statistic'

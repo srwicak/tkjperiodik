@@ -8,26 +8,64 @@
       = render "exam_info"
       .divider
       = render "user_info"
-      .divider.divider-start Jenis pendaftaran
+      
+      - if @available_schedules.empty?
+        .alert.alert-warning
+          %i.ri-information-line
+          %span Belum ada jadwal ujian yang tersedia untuk satuan Anda.
+      - else
+        = form_with url: new_module_exam_path(@exam.slug), method: :post, local: true, id: "registration-form" do |f|
+          .divider.divider-start Pilih Jadwal Ujian
 
-      .mb-8 
-        %p.mb-6.font-semibold.text-xl Jenis Keikutsertaan Ujian
-        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
-          %tbody
-            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Ujian Untuk
-              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
-                .my-2
-                  = form_with url: new_module_exam_path(@exam.slug), method: :post, local: true, id: "registration-form" do |f|
-                    .flex.flex-col.space-y-2.justify-center
-                      .flex.items-center.space-x-1
-                        = f.radio_button :reg_type, 'berkala', required: true
-                        %label{ for: "reg_type_berkala" } Berkala
-                      .flex.items-center.space-x-1
-                        = f.radio_button :reg_type, 'kenaikan_pangkat', required: true
-                        %label{ for: "reg_type_kenaikan_pangkat" } Kenaikan Pangkat
+          .mb-8 
+            %p.mb-6.font-semibold.text-xl Pilih Tanggal Ujian
+            .space-y-4.mb-6
+              - @available_schedules.each do |schedule|
+                .border.rounded-lg.p-4.cursor-pointer.transition-colors.hover:bg-base-200{ onclick: "selectSchedule(this, #{schedule.id})" }
+                  .flex.items-start.gap-3
+                    = f.radio_button :exam_schedule_id, schedule.id, required: true, class: "radio radio-primary mt-1"
+                    .flex-1
+                      %label.cursor-pointer{ for: "exam_schedule_id_#{schedule.id}" }
+                        .font-bold.text-lg
+                          %i.ri-calendar-line.text-primary
+                          = schedule.exam_date.strftime("%A, %d %B %Y")
+                        .text-sm.text-gray-600.mt-1
+                          %strong Nama: 
+                          = schedule.display_name
+                        .text-sm.text-gray-600
+                          %strong Satuan: 
+                          = schedule.unit_names.join(", ")
+                        .text-sm.text-gray-600
+                          %strong Peserta Terdaftar: 
+                          %span.font-bold.text-primary= schedule.registered_count
+                          - if schedule.max_participants
+                            = " / #{schedule.max_participants}"
+                          orang
+                        - if schedule.notes.present?
+                          .text-sm.text-gray-600.mt-2
+                            %i.ri-information-line
+                            = schedule.notes
+
+          .divider.divider-start Jenis pendaftaran
+
+          .mb-8 
+            %p.mb-6.font-semibold.text-xl Jenis Keikutsertaan Ujian
+            %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+              %tbody
+                %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+                  %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Ujian Untuk
+                  %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                    .my-2
+                      .flex.flex-col.space-y-2.justify-center
+                        .flex.items-center.space-x-1
+                          = f.radio_button :reg_type, 'berkala', required: true
+                          %label{ for: "reg_type_berkala" } Berkala
+                        .flex.items-center.space-x-1
+                          = f.radio_button :reg_type, 'kenaikan_pangkat', required: true
+                          %label{ for: "reg_type_kenaikan_pangkat" } Kenaikan Pangkat
     
-    %button.btn.btn-lg.btn-success.w-full.text-white.font-bold{ onclick: "confirm_modal.showModal()" } DAFTAR UJIAN
+    - if @available_schedules.present?
+      %button.btn.btn-lg.btn-success.w-full.text-white.font-bold{ onclick: "confirm_modal.showModal()" } DAFTAR UJIAN
 
   %dialog#confirm_modal.modal
     .modal-box
@@ -39,8 +77,13 @@
         %button.btn.px-16{ type: "button", onclick: "document.getElementById('confirm_modal').close()" } Batal
         %button.btn.btn-success.grow.text-white.uppercase{ type: "button", onclick: "document.getElementById('registration-form').submit()" } Konfirmasi
 
-
-
-
+:javascript
+  function selectSchedule(element, scheduleId) {
+    document.querySelectorAll('.border.rounded-lg').forEach(el => {
+      el.classList.remove('bg-base-200', 'border-primary');
+    });
+    element.classList.add('bg-base-200', 'border-primary');
+    document.getElementById('exam_schedule_id_' + scheduleId).checked = true;
+  }
 
 = render "layouts/dashboard"

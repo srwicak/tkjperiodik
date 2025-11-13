@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_13_205151) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_13_222933) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -67,6 +67,22 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_13_205151) do
     t.index ["slug"], name: "index_batches_on_slug", unique: true
   end
 
+  create_table "exam_schedules", force: :cascade do |t|
+    t.bigint "exam_id", null: false
+    t.date "exam_date", null: false
+    t.string "schedule_name"
+    t.integer "units", default: [], array: true
+    t.integer "max_participants"
+    t.text "notes"
+    t.string "slug"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["exam_id", "exam_date"], name: "index_exam_schedules_on_exam_id_and_exam_date"
+    t.index ["exam_id"], name: "index_exam_schedules_on_exam_id"
+    t.index ["slug"], name: "index_exam_schedules_on_slug", unique: true
+    t.index ["units"], name: "index_exam_schedules_on_units", using: :gin
+  end
+
   create_table "exam_sessions", force: :cascade do |t|
     t.bigint "exam_id", null: false
     t.datetime "start_time", null: false
@@ -76,7 +92,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_13_205151) do
     t.string "slug"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "exam_schedule_id"
     t.index ["exam_id"], name: "index_exam_sessions_on_exam_id"
+    t.index ["exam_schedule_id", "start_time"], name: "index_exam_sessions_on_exam_schedule_id_and_start_time"
+    t.index ["exam_schedule_id"], name: "index_exam_sessions_on_exam_schedule_id"
     t.index ["slug"], name: "index_exam_sessions_on_slug", unique: true
   end
 
@@ -277,6 +296,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_13_205151) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "batches", "exams"
+  add_foreign_key "exam_schedules", "exams"
+  add_foreign_key "exam_sessions", "exam_schedules"
   add_foreign_key "exam_sessions", "exams"
   add_foreign_key "exams", "users", column: "created_by_id"
   add_foreign_key "exams", "users", column: "updated_by_id"

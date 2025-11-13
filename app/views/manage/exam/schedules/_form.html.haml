@@ -1,0 +1,68 @@
+- content_for :title do
+  = @schedule.new_record? ? "Tambah Jadwal Ujian" : "Edit Jadwal Ujian"
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold 
+      = @schedule.new_record? ? "tambah jadwal ujian" : "edit jadwal ujian"
+	
+    .flex.justify-between.items-center.my-6.mb-4
+      %div 
+        .text-lg.font-bold 
+          %p= @exam.name
+          %p.text-sm.text-gray-600.font-normal 
+            = @schedule.new_record? ? "Tambahkan jadwal ujian baru" : "Ubah jadwal ujian"
+
+    .card.bg-base-100.shadow-xl.border.mt-6
+      .card-body
+        = form_with model: @schedule, url: @schedule.new_record? ? manage_exam_schedules_path(@exam.slug) : manage_exam_schedule_path(@exam.slug, @schedule.slug), method: @schedule.new_record? ? :post : :patch, class: "space-y-4" do |f|
+          
+          - if @schedule.errors.any?
+            .alert.alert-error
+              %ul
+                - @schedule.errors.full_messages.each do |message|
+                  %li= message
+
+          .form-control
+            = f.label :exam_date, "Tanggal Ujian *", class: "label"
+            = f.date_field :exam_date, class: "input input-bordered w-full", required: true, min: Date.tomorrow
+            .label
+              %span.label-text-alt.text-gray-500 Pilih tanggal ujian
+
+          .form-control
+            = f.label :schedule_name, "Nama Jadwal (Opsional)", class: "label"
+            = f.text_field :schedule_name, class: "input input-bordered w-full", placeholder: "Contoh: DENSUS 88, GABUNGAN A, SSDM & POLDA METRO"
+            .label
+              %span.label-text-alt.text-gray-500 Kosongkan jika ingin menggunakan nama satuan otomatis
+
+          .form-control
+            %label.label
+              %span.label-text Pilih Satuan *
+            .grid.grid-cols-2.md:grid-cols-3.gap-3.p-4.border.rounded-lg.max-h-96.overflow-y-auto
+              - UserDetail.units.each do |unit_name, unit_value|
+                .form-control
+                  %label.label.cursor-pointer.justify-start.gap-2
+                    = f.check_box :units, { multiple: true, class: "checkbox checkbox-primary" }, unit_value, nil
+                    %span.label-text= unit_name
+            .label
+              %span.label-text-alt.text-gray-500 Pilih minimal satu satuan
+
+          .form-control
+            = f.label :max_participants, "Batas Maksimal Peserta (Opsional)", class: "label"
+            = f.number_field :max_participants, class: "input input-bordered w-full", placeholder: "Kosongkan jika tidak ada batasan", min: 1
+            .label
+              %span.label-text-alt.text-gray-500 Kosongkan jika tidak ada batasan jumlah peserta
+
+          .form-control
+            = f.label :notes, "Catatan (Opsional)", class: "label"
+            = f.text_area :notes, class: "textarea textarea-bordered w-full", rows: 3, placeholder: "Catatan tambahan tentang jadwal ujian ini"
+
+          .flex.gap-3.mt-6
+            = f.submit @schedule.new_record? ? "Simpan Jadwal" : "Update Jadwal", class: "btn btn-primary"
+            %a.btn.btn-outline{ href: manage_exam_schedules_path(@exam.slug) } 
+              Batal
+
+= render "layouts/dashboard"

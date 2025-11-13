@@ -1,0 +1,64 @@
+- content_for :title do
+  Jadwal Ujian - #{@exam.name}
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold pengaturan jadwal ujian
+	
+    .flex.justify-between.items-center.my-6.mb-4
+      %div 
+        .text-lg.font-bold 
+          %p= @exam.name
+          %p.text-sm.text-gray-600.font-normal Atur jadwal ujian per satuan
+      %div
+        %a.btn.btn-primary.font-black{ href: new_manage_exam_schedule_path(@exam.slug) }
+          %i.ri-add-fill
+          %span.uppercase.text-xs tambah jadwal
+
+    - if @schedules.empty?
+      .alert.alert-warning.mt-8
+        %i.ri-information-line
+        %span Belum ada jadwal ujian. Silakan tambahkan jadwal untuk memulai pendaftaran.
+    - else
+      .grid.grid-cols-1.gap-4.mt-6
+        - @schedules.each do |schedule|
+          .card.bg-base-100.shadow-xl.border
+            .card-body
+              .flex.justify-between.items-start
+                %div
+                  %h2.card-title
+                    %i.ri-calendar-line.text-primary
+                    = schedule.exam_date.strftime("%A, %d %B %Y")
+                  %p.text-sm.text-gray-600.mt-2
+                    %strong Nama Jadwal: 
+                    = schedule.display_name
+                  %p.text-sm.text-gray-600
+                    %strong Satuan: 
+                    = schedule.unit_names.join(", ")
+                  %p.text-sm.text-gray-600
+                    %strong Peserta Terdaftar: 
+                    %span.font-bold.text-primary= schedule.registered_count
+                    - if schedule.max_participants
+                      = " / #{schedule.max_participants}"
+                    orang
+                  - if schedule.notes.present?
+                    %p.text-sm.text-gray-600.mt-2
+                      %strong Catatan: 
+                      = schedule.notes
+                %div.flex.gap-2
+                  %a.btn.btn-sm.btn-secondary{ href: edit_manage_exam_schedule_path(@exam.slug, schedule.slug) }
+                    %i.ri-edit-line
+                    Edit
+                  = button_to manage_exam_schedule_path(@exam.slug, schedule.slug), method: :delete, class: "btn btn-sm btn-error", data: { turbo_confirm: "Yakin ingin menghapus jadwal ini?" } do
+                    %i.ri-delete-bin-line
+                    Hapus
+
+    .mt-8
+      %a.btn.btn-outline{ href: manage_exam_active_path(@exam.slug) }
+        %i.ri-arrow-left-line
+        Kembali ke Detail Ujian
+
+= render "layouts/dashboard"

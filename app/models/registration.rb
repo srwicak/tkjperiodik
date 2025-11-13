@@ -48,6 +48,16 @@ class Registration < ApplicationRecord
 
   enum registration_type: { berkala: 0, kenaikan_pangkat: 1 }
 
+  # Helper untuk mendapatkan exam schedule
+  def exam_schedule
+    exam_session&.exam_schedule
+  end
+
+  # Helper untuk mendapatkan exam
+  def exam
+    exam_session&.exam
+  end
+
   private
 
   def assign_to_session

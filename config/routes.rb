@@ -146,6 +146,15 @@ Rails.application.routes.draw do
 
         get "/:slug/data-session", to: "manage/exam/participants#data_session", as: :data_session_manage_exam_participants
 
+        # 2025 Update - Exam Schedules
+        get "/:exam_slug/jadwal", to: "manage/exam/schedules#index", as: :manage_exam_schedules
+        get "/:exam_slug/jadwal/baru", to: "manage/exam/schedules#new", as: :new_manage_exam_schedule
+        post "/:exam_slug/jadwal", to: "manage/exam/schedules#create"
+        get "/:exam_slug/jadwal/:id/ubah", to: "manage/exam/schedules#edit", as: :edit_manage_exam_schedule
+        patch "/:exam_slug/jadwal/:id", to: "manage/exam/schedules#update", as: :manage_exam_schedule
+        put "/:exam_slug/jadwal/:id", to: "manage/exam/schedules#update"
+        delete "/:exam_slug/jadwal/:id", to: "manage/exam/schedules#destroy"
+
         get "/:slug/ubah", to: "manage/exam/actives#edit", as: :edit_manage_exam_active
         patch "/:slug/ubah", to: "manage/exam/actives#update"
         put "/:slug/ubah", to: "manage/exam/actives#update"
