@@ -27,7 +27,8 @@ class Manage::Exam::ActivesController < ApplicationController
     @exam = Exam.new(exam_params)
     @exam.created_by = current_user
     if @exam.save
-      redirect_to index_manage_exam_active_path, notice: "Ujian suskes dibuat"
+      # 2025 Update: Redirect to schedules page after creating exam
+      redirect_to manage_exam_schedules_path(@exam.slug), notice: "Ujian berhasil dibuat. Silakan atur jadwal ujian per satuan."
     else
       @url = new_manage_exam_active_path
       @method = :post

@@ -67,6 +67,14 @@
             %span karakter
     
       .divider.divider-start.uppercase.italic.font-bold.text-gray-600.text-sm pengaturan jumlah peserta ujian
+      
+      .alert.alert-info.mb-4
+        %i.ri-information-line
+        %div
+          %p.font-bold 2025 Update: Sistem Jadwal Baru
+          %p.text-sm Field "Peserta per sesi" dan "Sesi per hari" di bawah ini hanya untuk estimasi awal.
+          %p.text-sm Pengaturan detail jadwal per satuan akan dilakukan setelah ujian dibuat.
+      
       %h2.mb-4.font-bold.text-gray-800.text-xs.text-red-500 Catatan: Ketika jumlah hari di baca NaN maka tanggal ujian belum dipilih
 
       %p.text-red-600.text-xs.mt-1(x-show="errors.size" x-text="errors.size")

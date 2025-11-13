@@ -7,12 +7,19 @@
     .rounded-lg.p-8.bg-white.mb-8
       = render "exam_info"
 
+    - if @available_schedules.empty?
+      .alert.alert-warning.mb-6
+        %i.ri-information-line
+        %span Belum ada jadwal ujian yang tersedia untuk saat ini.
+
     .flex.justify-center
       - if @is_registered 
         %a.btn.btn-success.text-white.font-bold.uppercase{ disabled: "disabled" } anda sudah terdaftar
+      - elsif @available_schedules.empty?
+        %a.btn.btn-success.text-white.font-bold.uppercase{ disabled: "disabled" } belum ada jadwal tersedia
       - elsif @full_capacity
         %a.btn.btn-success.text-white.font-bold.uppercase{ disabled: "disabled" } kuota sudah penuh atau hari ujian telah berakhir
-      -else
+      - else
         %a.btn.btn-success.text-white.font-bold.uppercase{ href: new_module_exam_path(@exam.slug) } pendaftaran ujian
 
 

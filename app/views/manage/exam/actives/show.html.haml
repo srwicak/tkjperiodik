@@ -16,6 +16,12 @@
     = render 'exam_detail'
 
     .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 pengaturan jadwal ujian
+    
+    - if @exam.exam_schedules.empty?
+      .alert.alert-warning.mb-4
+        %i.ri-error-warning-line
+        %span Belum ada jadwal ujian yang diatur. Silakan atur jadwal terlebih dahulu agar peserta dapat mendaftar.
+    
     .mb-6
       %a.btn.btn-primary{ href: manage_exam_schedules_path(@exam.slug) }
         %i.ri-calendar-line

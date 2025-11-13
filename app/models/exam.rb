@@ -61,18 +61,11 @@ class Exam < ApplicationRecord
 
   validate :check_and_handle_registrations, on: :update
 
-
   before_save :set_slug
-  # before_save :adjust_end_register
-
-  after_create :generate_sessions
+  
+  # 2025 Update: Disable auto-generate sessions, use ExamSchedule instead
+  # after_create :generate_sessions
   after_create :create_result_doc
-
-  # before_update :ensure_no_registrations_on_update, if: :should_regenerate_sessions?
-
-  # before_destroy :ensure_no_registrations_on_delete
-
-  # after_save :regenerate_sessions, if: :should_regenerate_sessions?
 
   def active?
     status == "active" && Date.current >= start_register
@@ -104,82 +97,14 @@ class Exam < ApplicationRecord
     I18n.t("exam.statuses.#{status}", default: status)
   end
 
-  # def ensure_no_registrations_on_update
-  #   puts "YOOOOOOOO========================================HOY"
-  #   if exam_sessions.joins(:registrations).exists?
-  #     puts "============================================HOY"
-  #     errors.add(:base, "Tidak bisa mengubah jadwal dan total peserta ketika ujian yang telah ada pendaftarnya")
-  #     throw(:abort)
-  #   end
-  # end
-
-  # def ensure_no_registrations_on_delete
-  #   puts "=======================================DELETE"
-  #   registration_exists = exam_sessions.joins(:registrations).exists?
-  #   puts "Registration exists? #{registration_exists}"
-  #   if registration_exists
-  #     puts "GABISAAPUS"
-  #     errors.add(:base, "Tidak bisa menghapus ujian yang telah ada pendaftarnya")
-  #     throw(:abort)
-  #   else
-  #     puts "BISA DIHAPUS"
-  #   end
-  # end
-
-  def regenerate_sessions
-    exam_sessions.destroy_all
-    generate_sessions
+  # 2025 Update: Check if exam has schedules
+  def has_schedules?
+    exam_schedules.exists?
   end
 
-  # # single day generate
-  # def generate_sessions
-  #   current_start = exam_start
-  #   batch.times do |i|
-  #     start_time = Time.zone.parse("#{exam_date} #{current_start}")
-  #     end_time = start_time + exam_duration.minutes
-  #     exam_sessions.create!(
-  #       start_time: start_time,
-  #       end_time: end_time,
-  #       max_size: size,
-  #     )
-  #     current_start = (start_time + exam_duration.minutes + break_time.minutes).strftime("%H:%M")
-  #   end
-  # end
-
-  # multi day generate
-  def generate_sessions
-    current_date = exam_date_start
-
-    while current_date <= exam_date_end
-      # Skip weekends
-      unless current_date.saturday? || current_date.sunday?
-        current_start = exam_start
-
-        batch.times do |i|
-          start_time = Time.zone.parse("#{current_date} #{current_start}")
-          end_time = start_time + exam_duration.minutes
-
-          # Handle rest period
-          if start_time >= Time.zone.parse("#{current_date} #{exam_rest_start}") && start_time < Time.zone.parse("#{current_date} #{exam_rest_end}")
-            start_time = Time.zone.parse("#{current_date} #{exam_rest_end}")
-            end_time = start_time + exam_duration.minutes
-          elsif end_time > Time.zone.parse("#{current_date} #{exam_rest_start}") && end_time <= Time.zone.parse("#{current_date} #{exam_rest_end}")
-            end_time = Time.zone.parse("#{current_date} #{exam_rest_end}") + exam_duration.minutes
-          end
-
-          exam_sessions.create!(
-            start_time: start_time,
-            end_time: end_time,
-            max_size: size,
-          )
-
-          current_start = (end_time + break_time.minutes).strftime("%H:%M")
-        end
-      end
-
-      # Move to the next day
-      current_date += 1.day
-    end
+  # Get all available schedule dates
+  def available_schedule_dates
+    exam_schedules.where("exam_date >= ?", Date.tomorrow).order(:exam_date).pluck(:exam_date)
   end
 
   def registered_count
@@ -206,11 +131,9 @@ class Exam < ApplicationRecord
 
   def check_and_handle_registrations
     if registrations.exists?
-      if start_register_changed? || exam_date_start_changed? || exam_date_end_changed? || exam_duration_changed? || batch_changed? || size_changed? || break_time_changed?
-        errors.add(:base, "Tidak dapat mengubah tanggal mulai dan berakhir ujian, durasi, batch, ukuran, atau waktu istirahat jika ada pendaftar.")
+      if start_register_changed? || exam_date_start_changed? || exam_date_end_changed? || exam_duration_changed?
+        errors.add(:base, "Tidak dapat mengubah tanggal ujian dan durasi jika ada pendaftar.")
       end
-    else
-      regenerate_sessions
     end
   end
 end
