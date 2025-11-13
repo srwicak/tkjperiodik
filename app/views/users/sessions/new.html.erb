@@ -4,33 +4,53 @@
 <% content_for :page_title do %>
   Laman Masuk
 <% end %>
-<%=render "layouts/auth_form" do %>
+<%= render "layouts/auth_form" do %>
   <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
     <div>
       <label class="form-control w-full">
         <div class="label">
-          <span class="label-text">NRP/NIP</span>
+          <span class="label-text text-slate-100">NRP/NIP</span>
         </div>
-        <%= f.text_field :identity, 
-          id: "identity", 
-          class: "input input-bordered w-full", 
-          placeholder: "Masukkan NRP/NIP", 
-          inputmode: 'numeric', 
-          pattern: '\d*', 
-          oninput: "this.value = this.value.replace(/[^0-9]/g, '');" 
-          %>
+        <div class="relative">
+          <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+            <!-- User icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+              <path fill-rule="evenodd" d="M12 2.25a5.25 5.25 0 00-2.675 9.777c-3.27.776-5.79 3.517-6.27 6.97a.75.75 0 00.744.878h16.402a.75.75 0 00.744-.879c-.48-3.452-3-6.193-6.27-6.969A5.25 5.25 0 0012 2.25z" clip-rule="evenodd" />
+            </svg>
+          </span>
+          <%= f.text_field :identity,
+            id: "identity",
+            class: "input input-bordered w-full pl-10 bg-white/10 border-white/20 text-white placeholder-slate-300 focus:border-red-400 focus:outline-none",
+            placeholder: "Masukkan NRP/NIP",
+            inputmode: 'numeric',
+            pattern: '\\d*',
+            oninput: "this.value = this.value.replace(/[^0-9]/g, '');" %>
+        </div>
       </label>
     </div>
-    <div class="mb-4">
+    <div>
       <label class="form-control w-full">
         <div class="label">
-          <span class="label-text">Kata Sandi</span>
+          <span class="label-text text-slate-100">Kata Sandi</span>
+          <%= link_to "Lupa?", new_user_password_reset_path, class: "ml-auto text-xs text-red-300 hover:text-white" %>
         </div>
-        <%= f.password_field :password, autocomplete: "new-password", id: "password", class: "input input-bordered w-full", placeholder: "Masukkan kata sandi" %>
+        <div class="relative">
+          <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+            <!-- Lock icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+              <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25V9H6a3 3 0 00-3 3v6a3 3 0 003 3h12a3 3 0 003-3v-6a3 3 0 00-3-3h-.75V6.75A5.25 5.25 0 0012 1.5zm-1.5 10.5a1.5 1.5 0 113 0v2.25a1.5 1.5 0 11-3 0V12z" clip-rule="evenodd" />
+            </svg>
+          </span>
+          <%= f.password_field :password,
+            autocomplete: "current-password",
+            id: "password",
+            class: "input input-bordered w-full pl-10 bg-white/10 border-white/20 text-white placeholder-slate-300 focus:border-red-400 focus:outline-none",
+            placeholder: "Masukkan kata sandi" %>
+        </div>
       </label>
     </div>
-    <div class="mb-4">
-      <%= f.submit "Masuk", class: "bg-red-500 hover:bg-red-700 text-white font-bold p-3 rounded-lg rounded focus:outline-none focus:shadow-outline w-full cursor-pointer text-lg" %>
+    <div class="mt-2">
+      <%= f.submit "Masuk", class: "w-full cursor-pointer text-lg font-semibold text-white py-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 shadow-lg shadow-red-900/30" %>
     </div>
   <% end %>
 <% end %>
