@@ -3,33 +3,58 @@
 
 - content_for :content do
   - if @admin || @police
-    .my-8.bg-white.rounded-lg.shadow-lg.text-slate-500.shadow-red-300.p-8.w-full.max-w-xl.mx-auto{ class:"hover:shadow-green-200" }
+    .my-4.md:my-8.bg-gradient-to-br.from-white.to-red-50.rounded-2xl.shadow-xl.text-slate-700.border.border-red-100.p-4.md:p-8.w-full.max-w-2xl.mx-auto{ class:"hover:shadow-2xl transition-all duration-300" }
       - if @nearest_exam
         .text-center.mb-6
-          %p.text-xl.text-red-500.font-bold.uppercase Pendaftaran Ujian terdekat
-          %p.text-xl.font-bold.my-4 #{@nearest_exam.name}
-          %p
-            %i.ri-calendar-event-line
-            %span.font-semibold.text-red-500= I18n.l(@nearest_exam.exam_date_start, format: :date_only)
-            sampai
-            %span.font-semibold.text-red-500= I18n.l(@nearest_exam.exam_date_end, format: :date_only)
-          %p
-            %i.ri-time-line
-            Mulai dari
-            %span.font-semibold.text-red-500= I18n.l(@nearest_exam.exam_start, format: :time_wib)
-        %p 
-          Kuota: 
-          %span.font-black.text-red-500 #{@nearest_exam.batch * @nearest_exam.size * @exam_days} 
-          Personel
-        %p
-          Mulai pendaftaran:
-          %span.font-bold.text-green-600= I18n.l(@start_time, format: :def_wib)
+          .inline-block.bg-red-500.text-white.px-4.py-2.rounded-full.text-xs.md:text-sm.font-bold.uppercase.mb-4
+            %i.ri-alarm-warning-line.mr-1
+            Pendaftaran Ujian Terdekat
+          %h2.text-xl.md:text-2xl.font-bold.my-4.text-gray-800= @nearest_exam.name
+          .bg-white.rounded-xl.p-4.md:p-6.mb-4.shadow-sm
+            .flex.flex-col.md:flex-row.items-center.justify-center.gap-2.md:gap-4.mb-4
+              .flex.items-center.gap-2
+                .bg-red-100.p-2.rounded-lg
+                  %i.ri-calendar-event-fill.text-red-500.text-xl
+                .flex.flex-col.items-start
+                  %span.text-xs.text-gray-500 Tanggal Ujian
+                  %span.font-bold.text-red-600.text-sm.md:text-base= I18n.l(@nearest_exam.exam_date_start, format: :date_only)
+              .hidden.md:block.text-gray-300 -
+              .flex.items-center.gap-2
+                .flex.flex-col.items-start
+                  %span.text-xs.text-gray-500 Sampai
+                  %span.font-bold.text-red-600.text-sm.md:text-base= I18n.l(@nearest_exam.exam_date_end, format: :date_only)
+            .flex.items-center.justify-center.gap-2.text-gray-700
+              .bg-blue-100.p-2.rounded-lg
+                %i.ri-time-line.text-blue-500.text-xl
+              .flex.flex-col.items-start
+                %span.text-xs.text-gray-500 Waktu Mulai
+                %span.font-semibold.text-sm.md:text-base= I18n.l(@nearest_exam.exam_start, format: :time_wib)
+        .grid.grid-cols-1.md:grid-cols-2.gap-3.md:gap-4.mb-6
+          .bg-gradient-to-br.from-red-50.to-white.p-4.rounded-xl.border.border-red-100
+            .flex.items-center.gap-3
+              .bg-red-500.p-3.rounded-full
+                %i.ri-group-line.text-white.text-xl
+              .flex.flex-col
+                %span.text-xs.text-gray-500 Total Kuota
+                %span.text-xl.md:text-2xl.font-black.text-red-600= "#{@nearest_exam.batch * @nearest_exam.size * @exam_days}"
+                %span.text-xs.text-gray-600 Personel
+          .bg-gradient-to-br.from-green-50.to-white.p-4.rounded-xl.border.border-green-100
+            .flex.items-center.gap-3
+              .bg-green-500.p-3.rounded-full
+                %i.ri-calendar-check-line.text-white.text-xl
+              .flex.flex-col
+                %span.text-xs.text-gray-500 Buka Pendaftaran
+                %span.text-sm.md:text-base.font-bold.text-green-600.leading-tight= I18n.l(@start_time, format: :def_wib)
         .mt-6
-          %a.btn.bg-red-500.text-white.w-full.uppercase.text-lg{ href: show_module_exam_path(@nearest_exam.slug), class: "hover:bg-red-600 !important", disabled: !@registerable } lihat detil
+          %a.btn.bg-gradient-to-r.from-red-500.to-red-600.text-white.w-full.uppercase.text-base.md:text-lg.rounded-xl.shadow-lg.border-0{ href: show_module_exam_path(@nearest_exam.slug), class: "hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-300", disabled: !@registerable }
+            %i.ri-file-list-3-line.mr-2
+            Lihat Detail
       - else
-        .text-center
-          %p.text-xl.text-red-500.font-bold.mb-6.uppercase Pendaftaran Ujian terdekat
-          %p.text-gray-400.text-sm.font-bold.italic.text-center Belum ada informasi terkini terkait pendaftaran ujian
+        .text-center.py-8
+          .bg-gray-100.w-20.h-20.md:w-24.md:h-24.rounded-full.mx-auto.mb-4.flex.items-center.justify-center
+            %i.ri-calendar-close-line.text-4xl.md:text-5xl.text-gray-400
+          %p.text-lg.md:text-xl.text-gray-600.font-bold.mb-2.uppercase Pendaftaran Ujian Terdekat
+          %p.text-gray-400.text-xs.md:text-sm.italic Belum ada informasi terkini terkait pendaftaran ujian
 
   - if @admin
     - admin_top_panel = [ { number: @active_user, 
@@ -38,21 +63,27 @@
       { number: @forgot_user, subject: "Pengguna Lupa Kata Sandi", link: index_manage_user_forgot_path },
       { number: @nonactive_user, subject: "Pengguna Non Aktif", link: index_manage_user_nonactive_path } ]
 
-    .divider.divider-start.uppercase.text-sm.text-gray-600.font-bold.italic.mt-8 statistik pengguna
-    .grid.grid-cols-1.md:grid-cols-2.xl:grid-cols-4.gap-6.mb-6
+    .divider.divider-start.uppercase.text-xs.md:text-sm.text-gray-700.font-bold.mt-6.md:mt-8.flex.items-center.gap-2
+      .bg-red-500.w-1.h-6.rounded-full
+      %span Statistik Pengguna
+    .grid.grid-cols-1.sm:grid-cols-2.lg:grid-cols-4.gap-3.md:gap-6.mb-6
       - admin_top_panel.each do |item|
         = render partial: "shared/component/dashboard/card_panel", locals: { number: item[:number], subject: item[:subject],link: item[:link] }
     
   // 2025 update
   - if @polda_staff
     - if current_user.polda_staff.name == nil
-      .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4.rounded.shadow
-        %p.font-bold.text-lg.mb-2 Profil Penanggung Jawab Polda Belum Lengkap
-        %p.text-sm.mb-2 Silakan lengkapi profil PJ anda terlebih dahulu agar dapat menggunakan fitur aplikasi secara penuh.
-        %a.btn.btn-warning.mt-2{ href: edit_module_polda_staff_profile_path }
-          %i.ri-user-settings-line.mr-1
-          Lengkapi Profil Sekarang
+      .mt-4.md:mt-8.bg-gradient-to-r.from-yellow-50.to-amber-50.border-l-4.border-yellow-500.text-yellow-800.p-4.md:p-6.rounded-xl.shadow-lg
+        .flex.flex-col.md:flex-row.md:items-center.gap-4
+          .bg-yellow-500.w-12.h-12.md:w-16.md:h-16.rounded-full.flex.items-center.justify-center.flex-shrink-0
+            %i.ri-error-warning-line.text-2xl.md:text-3xl.text-white
+          .flex-1
+            %p.font-bold.text-base.md:text-lg.mb-2 Profil Penanggung Jawab Polda Belum Lengkap
+            %p.text-xs.md:text-sm.mb-3.md:mb-4.text-yellow-700 Silakan lengkapi profil PJ anda terlebih dahulu agar dapat menggunakan fitur aplikasi secara penuh.
+            %a.btn.btn-warning.text-xs.md:text-sm.w-full.md:w-auto.rounded-lg{ href: edit_module_polda_staff_profile_path }
+              %i.ri-user-settings-line.mr-1
+              Lengkapi Profil Sekarang
   - else
-    .mt-8.bg-white.rounded-lg.shadow-lg.text-slate-500.shadow-red
+    .mt-4.md:mt-8.bg-white.rounded-lg.shadow-lg.text-slate-500.shadow-red
 
 = render "layouts/dashboard"
