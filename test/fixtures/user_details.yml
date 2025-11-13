@@ -3,6 +3,7 @@
 # Table name: user_details
 #
 #  id                    :bigint           not null, primary key
+#  date_of_birth         :date
 #  gender                :boolean          not null
 #  is_operator_granted   :boolean          default(FALSE), not null
 #  is_superadmin_granted :boolean          default(FALSE), not null

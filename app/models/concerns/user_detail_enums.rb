@@ -7,29 +7,41 @@ module UserDetailEnums
     enum person_status: { police: 0, staff: 1, polda_staff: 2 }
 
     enum rank: {
+      # Tamtama
       BHARADA: 0,
       BHARATU: 1,
       BHARAKA: 2,
       ABRIPDA: 3,
       ABRIPTU: 4,
-      ABRIP:5,
+      ABRIP: 5,
+      # Bintara
       BRIPDA: 6,
       BRIPTU: 7,
       BRIGPOL: 8,
       BRIPKA: 9,
       AIPDA: 10,
       AIPTU: 11,
+      # Perwira Pertama (Pama)
       IPDA: 12,
       IPTU: 13,
-      # modified and added after project finished
-      AKP: 15, # Updated Jan 2025
-      LAINNYA: 14,
+      AKP: 14,
+      # Perwira Menengah (Pama)
+      KOMPOL: 15,
+      AKBP: 16,
+      KOMBES: 17,
+      # Perwira Tinggi (Pati)
+      BRIGJEN: 18,
+      IRJEN: 19,
+      KOMJEN: 20,
+      JENDERAL: 21,
     }
 
     # Scope atau method tambahan untuk memudahkan pengelompokan
     scope :tamtama, -> { where(rank: [ranks[:BHARADA], ranks[:BHARATU], ranks[:BHARAKA], ranks[:ABRIPDA], ranks[:ABRIPTU], ranks[:ABRIP]]) }
     scope :bintara, -> { where(rank: [ranks[:BRIPDA], ranks[:BRIPTU], ranks[:BRIGPOL], ranks[:BRIPKA], ranks[:AIPDA], ranks[:AIPTU]]) }
     scope :pama, -> { where(rank: [ranks[:IPDA], ranks[:IPTU], ranks[:AKP]]) }
+    scope :pamen, -> { where(rank: [ranks[:KOMPOL], ranks[:AKBP], ranks[:KOMBES]]) }
+    scope :pati, -> { where(rank: [ranks[:BRIGJEN], ranks[:IRJEN], ranks[:KOMJEN], ranks[:JENDERAL]]) }
 
     def group
       case rank
@@ -39,8 +51,12 @@ module UserDetailEnums
         "Bintara"
       when "IPDA", "IPTU", "AKP"
         "Perwira Pertama (Pama)"
+      when "KOMPOL", "AKBP", "KOMBES"
+        "Perwira Menengah (Pamen)"
+      when "BRIGJEN", "IRJEN", "KOMJEN", "JENDERAL"
+        "Perwira Tinggi (Pati)"
       else
-        "Lainnya"
+        "Unknown"
       end
     end
 
@@ -78,6 +94,9 @@ module UserDetailEnums
 
       # 2025 Update
       "KORTASTIPIDKOR POLRI": 25,
+
+      #TKJ UPDATE
+      "LAINNYA": 26
     }
   end
 end

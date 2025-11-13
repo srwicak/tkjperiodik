@@ -6,6 +6,18 @@ class Module::ProfilesController < ApplicationController
   end
 
   def update
+    # Convert date_of_birth dari DD-MM-YYYY ke YYYY-MM-DD jika ada
+    if params[:user_detail][:date_of_birth].present?
+      date_str = params[:user_detail][:date_of_birth]
+      if date_str.match(/^\d{2}-\d{2}-\d{4}$/)
+        day, month, year = date_str.split('-')
+        params[:user_detail][:date_of_birth] = "#{year}-#{month}-#{day}"
+      end
+    else
+      # Jika tanggal lahir kosong, hapus dari params agar tidak di-update
+      params[:user_detail].delete(:date_of_birth)
+    end
+    
     if @user_detail.update(user_detail_params)
       if user_params[:password].present?
         if current_user.update_with_password(user_params)
@@ -24,7 +36,7 @@ class Module::ProfilesController < ApplicationController
   private
 
   def user_detail_params
-    params.require(:user_detail).permit(:name, :rank, :unit, :position)
+    params.require(:user_detail).permit(:name, :rank, :unit, :position, :gender, :date_of_birth)
   end
 
   def user_params

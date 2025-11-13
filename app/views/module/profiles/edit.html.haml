@@ -41,6 +41,12 @@
                     = form.radio_button :gender, 0, class: "radio", checked: @user_detail.gender == false
                     = form.label :gender, "WANITA"
 
+              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tanggal Lahir
+                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                  = form.text_field :date_of_birth, value: @user_detail.date_of_birth&.strftime('%d-%m-%Y'), placeholder: "DD-MM-YYYY (contoh: 17-08-1945)", class: "input input-bordered my-2 w-full", maxlength: 10, id: "date_of_birth_field"
+                  %p.text-xs.text-gray-500.mt-1.italic Format: DD-MM-YYYY (contoh: 17-08-1945)
+
             - if current_user.is_police?
               %tr( class="transition-colors duration-300 hover:bg-slate-50" )
                 %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Pangkat
@@ -71,5 +77,25 @@
 
         = form.submit "Simpan Profile", class: "btn btn-primary mt-4 w-full text-white font-bold uppercase"               
 
+:javascript
+  document.addEventListener('DOMContentLoaded', function() {
+    const dateField = document.getElementById('date_of_birth_field');
+    
+    if (dateField) {
+      dateField.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, ''); // Hapus semua non-digit
+        
+        // Auto-format dengan dash
+        if (value.length >= 2) {
+          value = value.slice(0, 2) + '-' + value.slice(2);
+        }
+        if (value.length >= 5) {
+          value = value.slice(0, 5) + '-' + value.slice(5, 9);
+        }
+        
+        e.target.value = value;
+      });
+    }
+  });
        
 = render "layouts/dashboard"

@@ -7,6 +7,15 @@ class OnboardingController < ApplicationController
   end
 
   def create
+    # Convert date_of_birth dari DD-MM-YYYY ke YYYY-MM-DD
+    if params[:user_detail][:date_of_birth].present?
+      date_str = params[:user_detail][:date_of_birth]
+      if date_str.match(/^\d{2}-\d{2}-\d{4}$/)
+        day, month, year = date_str.split('-')
+        params[:user_detail][:date_of_birth] = "#{year}-#{month}-#{day}"
+      end
+    end
+    
     @user_detail = current_user.build_user_detail(user_detail_params)
 
     unless current_user.is_police?
@@ -46,7 +55,7 @@ class OnboardingController < ApplicationController
   end
 
   def user_detail_params
-    params.require(:user_detail).permit(:name, :gender, :position, :rank, :unit)
+    params.require(:user_detail).permit(:name, :gender, :position, :rank, :unit, :date_of_birth)
   end
 
   def user_params
