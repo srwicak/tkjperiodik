@@ -33,6 +33,14 @@
                     %i.ri-calendar-line.text-primary
                     = schedule.exam_date.strftime("%A, %d %B %Y")
                   %p.text-sm.text-gray-600.mt-2
+                    %strong Jam Mulai: 
+                    = schedule.start_time.strftime("%H:%M")
+                    WIB
+                  %p.text-sm.text-gray-600
+                    %strong Durasi: 
+                    = schedule.exam_duration
+                    menit
+                  %p.text-sm.text-gray-600
                     %strong Nama Jadwal: 
                     = schedule.display_name
                   %p.text-sm.text-gray-600
@@ -57,7 +65,7 @@
                     Hapus
 
     .mt-8
-      %a.btn.btn-outline{ href: manage_exam_active_path(@exam.slug) }
+      %a.btn.btn-outline{ href: show_manage_exam_active_path(@exam.slug) }
         %i.ri-arrow-left-line
         Kembali ke Detail Ujian
 

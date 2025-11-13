@@ -30,6 +30,14 @@
                           %i.ri-calendar-line.text-primary
                           = schedule.exam_date.strftime("%A, %d %B %Y")
                         .text-sm.text-gray-600.mt-1
+                          %strong Jam: 
+                          = schedule.start_time.strftime("%H:%M")
+                          WIB
+                        .text-sm.text-gray-600
+                          %strong Durasi: 
+                          = schedule.exam_duration
+                          menit
+                        .text-sm.text-gray-600
                           %strong Nama: 
                           = schedule.display_name
                         .text-sm.text-gray-600

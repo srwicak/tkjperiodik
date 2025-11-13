@@ -1,0 +1,91 @@
+= form_with(model: @exam, url: @url, method: @method, local: true, class: "max-w-4xl") do |form|
+  - if @exam.errors.any?
+    .alert.alert-error.mb-6
+      %h3.font-bold= pluralize(@exam.errors.count, "error") + " prohibited this exam from being saved:"
+      %ul.mt-2
+        - @exam.errors.full_messages.each do |message|
+          %li= message
+
+  .bg-white.rounded-lg.shadow-lg.p-8
+
+    .mb-6
+      %h2.text-2xl.font-bold.text-gray-800 Informasi Ujian Baru
+      %p.text-sm.text-gray-600.mt-2 Isi informasi dasar ujian. Pengaturan jadwal per satuan akan dilakukan setelah ujian dibuat.
+
+    .divider.my-6
+
+    / Informasi Wajib
+    .space-y-6
+
+      .form-control
+        = form.label :name, "Nama Ujian *", class: "label font-bold"
+        = form.text_field :name, class: "input input-bordered w-full", placeholder: "Contoh: TKJ Periodik 2025 Semester 1", required: true
+        .label
+          %span.label-text-alt.text-gray-500 Nama lengkap ujian
+
+      .form-control
+        = form.label :short_name, "Nama Singkat Ujian", class: "label font-bold"
+        = form.text_field :short_name, class: "input input-bordered w-full", placeholder: "Contoh: TKJ 2025 Sem 1"
+        .label
+          %span.label-text-alt.text-gray-500 Akan digunakan pada surat. Kosongkan jika sama dengan nama ujian.
+
+      .form-control
+        = form.label :descriptions, "Deskripsi Ujian", class: "label font-bold"
+        = form.text_area :descriptions, class: "textarea textarea-bordered w-full", rows: 6, placeholder: "Masukkan deskripsi ujian yang akan ditampilkan kepada peserta...", maxlength: 5000
+        .label
+          %span.label-text-alt.text-gray-500 Informasi yang akan ditampilkan kepada peserta saat mendaftar (maks 5000 karakter)
+
+      .grid.grid-cols-1.md:grid-cols-2.gap-4
+
+        .form-control
+          = form.label :start_register, "Mulai Pendaftaran *", class: "label font-bold"
+          = form.date_field :start_register, class: "input input-bordered w-full", required: true, min: Date.today
+          .label
+            %span.label-text-alt.text-gray-500 Pendaftaran mulai pukul 00:00 WIB
+
+        .form-control
+          = form.label :status, "Status Ujian *", class: "label font-bold"
+          = form.select :status, Exam.statuses.keys.map { |key| [I18n.t("exam.statuses.#{key}"), key] }, {}, { class: "select select-bordered w-full", required: true }
+          .label
+            %span.label-text-alt.text-gray-500 Set "Aktif" jika ingin peserta bisa mendaftar
+
+    .divider.my-6
+
+    / Catatan Internal
+    .form-control
+      = form.label :notes, "Catatan Internal (Opsional)", class: "label font-bold"
+      = form.text_area :notes, class: "textarea textarea-bordered w-full", rows: 4, placeholder: "Catatan untuk operator/panitia (tidak ditampilkan ke peserta)", maxlength: 2000
+      .label
+        %span.label-text-alt.text-gray-500 Catatan internal untuk panitia (maks 2000 karakter)
+
+    / Hidden fields untuk backward compatibility dengan nilai default
+    = form.hidden_field :size, value: 50
+    = form.hidden_field :batch, value: 1
+    = form.hidden_field :break_time, value: 15
+    = form.hidden_field :exam_date_start, value: Date.today
+    = form.hidden_field :exam_date_end, value: Date.today + 30
+    = form.hidden_field :exam_start, value: "08:00"
+    = form.hidden_field :exam_duration, value: 90
+    = form.hidden_field :exam_rest_start, value: "12:00"
+    = form.hidden_field :exam_rest_end, value: "13:00"
+
+    .divider.my-6
+
+    .flex.gap-4.justify-end
+      %a.btn.btn-outline{ href: index_manage_exam_active_path } 
+        %i.ri-close-line
+        Batal
+      = form.submit "Buat Ujian & Atur Jadwal", class: "btn btn-primary"
+        
+
+  .alert.alert-info.mt-6
+    %i.ri-information-line
+    %div
+      %p.font-bold Catatan:
+      %p.text-sm Setelah ujian dibuat, Anda akan diarahkan ke halaman pengaturan jadwal untuk mengatur:
+      %ul.list-disc.list-inside.text-sm.mt-2
+        %li Tanggal ujian per satuan
+        %li Jam mulai ujian
+        %li Durasi ujian
+        %li Satuan yang bisa ikut ujian
+        %li Batas maksimal peserta

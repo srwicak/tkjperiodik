@@ -52,6 +52,6 @@ class Manage::Exam::SchedulesController < ApplicationController
   end
 
   def schedule_params
-    params.require(:exam_schedule).permit(:exam_date, :schedule_name, :max_participants, :notes, units: [])
+    params.require(:exam_schedule).permit(:exam_date, :schedule_name, :max_participants, :notes, :start_time, :exam_duration, units: [])
   end
 end

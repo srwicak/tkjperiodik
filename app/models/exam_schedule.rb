@@ -4,10 +4,12 @@
 #
 #  id               :bigint           not null, primary key
 #  exam_date        :date             not null
+#  exam_duration    :integer
 #  max_participants :integer
 #  notes            :text
 #  schedule_name    :string
 #  slug             :string
+#  start_time       :time
 #  units            :integer          default([]), is an Array
 #  created_at       :datetime         not null
 #  updated_at       :datetime         not null
@@ -15,10 +17,10 @@
 #
 # Indexes
 #
-#  index_exam_schedules_on_exam_id             (exam_id)
+#  index_exam_schedules_on_exam_id                (exam_id)
 #  index_exam_schedules_on_exam_id_and_exam_date  (exam_id,exam_date)
-#  index_exam_schedules_on_slug                (slug) UNIQUE
-#  index_exam_schedules_on_units               (units) USING gin
+#  index_exam_schedules_on_slug                   (slug) UNIQUE
+#  index_exam_schedules_on_units                  (units) USING gin
 #
 # Foreign Keys
 #
@@ -34,6 +36,9 @@ class ExamSchedule < ApplicationRecord
 
   validates :exam_date, presence: true
   validates :units, presence: true
+  validates :start_time, presence: true
+  validates :exam_duration, presence: true, numericality: { greater_than: 0 }
+  
   validate :exam_date_must_be_future, on: :create
   validate :units_must_be_valid
 
@@ -87,13 +92,13 @@ class ExamSchedule < ApplicationRecord
 
   # Generate satu exam session untuk jadwal ini
   def generate_exam_session
-    start_time = Time.zone.parse("#{exam_date} #{exam.exam_start}")
-    end_time = start_time + exam.exam_duration.minutes
+    start_datetime = Time.zone.parse("#{exam_date} #{start_time}")
+    end_datetime = start_datetime + exam_duration.minutes
 
     exam_sessions.create!(
       exam_id: exam.id,
-      start_time: start_time,
-      end_time: end_time,
+      start_time: start_datetime,
+      end_time: end_datetime,
       max_size: max_participants || 999999
     )
   end

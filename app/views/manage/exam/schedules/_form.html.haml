@@ -33,6 +33,18 @@
               %span.label-text-alt.text-gray-500 Pilih tanggal ujian
 
           .form-control
+            = f.label :start_time, "Jam Mulai Ujian *", class: "label"
+            = f.time_field :start_time, class: "input input-bordered w-full", required: true
+            .label
+              %span.label-text-alt.text-gray-500 Contoh: 08:00 WIB
+
+          .form-control
+            = f.label :exam_duration, "Durasi Ujian (Menit) *", class: "label"
+            = f.number_field :exam_duration, class: "input input-bordered w-full", placeholder: "90", required: true, min: 1
+            .label
+              %span.label-text-alt.text-gray-500 Durasi ujian dalam menit
+
+          .form-control
             = f.label :schedule_name, "Nama Jadwal (Opsional)", class: "label"
             = f.text_field :schedule_name, class: "input input-bordered w-full", placeholder: "Contoh: DENSUS 88, GABUNGAN A, SSDM & POLDA METRO"
             .label
