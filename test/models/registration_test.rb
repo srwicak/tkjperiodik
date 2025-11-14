@@ -3,6 +3,7 @@
 # Table name: registrations
 #
 #  id                :bigint           not null, primary key
+#  golongan          :integer
 #  is_attending      :boolean
 #  pdf_data          :text
 #  pdf_status        :integer

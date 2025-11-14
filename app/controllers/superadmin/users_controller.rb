@@ -20,7 +20,7 @@ class Superadmin::UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:identity, :password, user_detail_attributes: [:name, :rank, :unit, :position, :gender])
+    params.require(:user).permit(:identity, :password, user_detail_attributes: [:name, :date_of_birth, :rank, :unit, :position, :gender])
   end
 
   def superadminonly

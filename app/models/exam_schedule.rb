@@ -64,12 +64,18 @@ class ExamSchedule < ApplicationRecord
   # Check apakah jadwal sudah penuh
   def full?
     return false if max_participants.nil?
-    registrations.count >= max_participants
+    registrations.count >= total_max_participants
   end
 
   # Hitung jumlah peserta terdaftar
   def registered_count
     registrations.count
+  end
+
+  # Hitung total kuota maksimal (kuota per hari × jumlah hari)
+  def total_max_participants
+    return nil if max_participants.nil?
+    max_participants * total_days
   end
 
   # Check apakah unit tertentu bisa ujian di jadwal ini

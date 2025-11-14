@@ -24,7 +24,7 @@
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= I18n.l(exam_session.start_time, format: :date_only)
             
             %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Waktu Ujian (perkiraan)
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Waktu Ujian
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) #{I18n.l(exam_session.start_time, format: :time_only)} - #{I18n.l(exam_session.end_time, format: :time_only)} WIB
             
             %tr( class="transition-colors duration-300 hover:bg-slate-50" )
@@ -48,39 +48,37 @@
                       %span.font-semibold= score_grade
                       %span.text-sm.text-gray-500.mr-2= "(#{score_number})"
 
-                    - if @registration.score.result_report_status == "completed"
-                      .flex.flex-wrap.gap-2
-                        = link_to result_report_slug_path(@registration.score.result_report_slug),
-                          class: "inline-flex items-center px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 shadow-sm transition", target: "_blank" do
-                          %i.ri-file-line.mr-2
-                          Lihat Hasil
-
-                        = button_to generate_result_report_path(@registration.score.slug),
-                          method: :post,
-                          class: "inline-flex items-center px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition" do
-                          %i.ri-printer-line.mr-2
-                          Cetak Ulang
-                    - else
-                      = button_to generate_result_report_path(@registration.score.slug),
-                        method: :post,
-                        class: "inline-flex items-center px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition" do
-                        %i.ri-printer-line.mr-2
-                        Cetak Hasil
+                    -# Temporarily hidden - print result buttons
+                    -# - if @registration.score.result_report_status == "completed"
+                    -#   .flex.flex-wrap.gap-2
+                    -#     = link_to result_report_slug_path(@registration.score.result_report_slug),
+                    -#       class: "inline-flex items-center px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 shadow-sm transition", target: "_blank" do
+                    -#       %i.ri-file-line.mr-2
+                    -#       Lihat Hasil
+                    -#
+                    -#     = button_to generate_result_report_path(@registration.score.slug),
+                    -#       method: :post,
+                    -#       class: "inline-flex items-center px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition" do
+                    -#       %i.ri-printer-line.mr-2
+                    -#       Cetak Ulang
+                    -# - else
+                    -#   = button_to generate_result_report_path(@registration.score.slug),
+                    -#     method: :post,
+                    -#     class: "inline-flex items-center px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition" do
+                    -#     %i.ri-printer-line.mr-2
+                    -#     Cetak Hasil
                 - else
                   %span.text-yellow-700.font-medium Nilai belum diinput
         
         .divider.divider-start.uppercase.text-xl.font-black.text-red-600 detil pendaftaran
         .bg-red-500.p-2.mb-4.text-sm.text-white.font-semibold 
           %p Catatan: Berkas pendaftaran mohon untuk dicetak dan dibawa saat ujian berlangsung.
-          %p Cetak keseluruhan berkas yang berisi 3 halaman. Gunakan kertas ukuran Legal, perhatikan dalam mencetak berkas, pastikan tidak ada kata yang terpotong.
+          %p Cetak keseluruhan berkas. Gunakan kertas ukuran Legal, perhatikan dalam mencetak berkas, pastikan tidak ada kata yang terpotong.
         %table( class="w-full text-left border border-separate rounded border-red-600" cellspacing="0" )
           %tbody
             %tr( class="transition-colors duration-300 hover:bg-slate-50" )
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-red-500 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Waktu Daftar
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-red-500 stroke-slate-500 text-slate-500" )= I18n.l(@registration.created_at, format: :full_wib)
-            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-red-500 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Ujian untuk
-              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-red-500 stroke-slate-500 text-slate-500 " )= @registration.registration_type.humanize.titlecase
             %tr( class="transition-colors duration-300 bg-indigo-300 hover:bg-indigo-400" )
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-red-500 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Berkas Pendaftaran
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-red-500 stroke-slate-500 text-slate-500" )

@@ -13,10 +13,6 @@
         %p.text-gray-500 Tidak bisa menambah dengan identitas PNS atau dengan NIP
         %p.text-gray-500 Mohon pastikan NRP yang benar
         %p.text-red-500 Hanya bisa menambahkan peserta pada ujian dengan status DRAF atau AKTIF
-        %p.text-red-500
-          Secara
-          %span.italic default
-          semua pendaftaran adalah berkala kecuali pangkat diceklis
 
       %form{ action: "", method: "post" }
         .container(x-data="participants()")
@@ -28,8 +24,6 @@
           %template(x-for="(identity, index) in identities" :key="index")
             .identity-row.my-4
               %input{ type: "text", name: "identities[]", "x-model": "identities[index]", placeholder: "Masukkan NRP", class: "input input-bordered text-center w-[150px]", "x-bind:class": "{ 'border-red-500': status[index] && status[index] !== 'Sedang proses...' }", oninput: "this.value = this.value.replace(/[^0-9]/g, '');" }
-              %input{ type: "checkbox", class: "checkbox ml-2", "x-model": "registrationTypes[index]", value: true} 
-                %span.ml-1 Pangkat
               %button{ type: "button", "x-show": "identities.length > 1", "@click": "removeIdentity(index)", class: "ml-4 btn btn-error text-white uppercase" }
                 %i.ri-delete-bin-line
               %span.ml-2(x-text="status[index]" class="text-red-500")

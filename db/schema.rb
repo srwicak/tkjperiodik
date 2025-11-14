@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_14_005611) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_14_034656) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -117,6 +117,16 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_005611) do
     t.datetime "updated_at", null: false
     t.date "exam_date_start"
     t.date "exam_date_end"
+    t.string "form_a_police_position"
+    t.string "form_a_name"
+    t.string "form_a_rank"
+    t.string "form_a_nrp"
+    t.string "form_b_police_position"
+    t.string "form_b_name"
+    t.string "form_b_rank"
+    t.string "form_b_nrp"
+    t.string "form_a_event_position"
+    t.string "form_b_event_position"
     t.index ["created_by_id"], name: "index_exams_on_created_by_id"
     t.index ["slug"], name: "index_exams_on_slug", unique: true
     t.index ["updated_by_id"], name: "index_exams_on_updated_by_id"
@@ -163,6 +173,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_005611) do
     t.integer "pdf_status"
     t.integer "registration_type"
     t.boolean "is_attending"
+    t.integer "golongan"
     t.index ["exam_session_id"], name: "index_registrations_on_exam_session_id"
     t.index ["slug"], name: "index_registrations_on_slug", unique: true
     t.index ["user_id", "exam_session_id"], name: "index_registrations_on_user_id_and_exam_session_id", unique: true

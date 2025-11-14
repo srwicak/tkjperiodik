@@ -76,6 +76,7 @@
                               = schedule.notes
 
           = f.hidden_field :reg_type, value: 'berkala'
+          = f.hidden_field :golongan, value: '', id: 'golongan_field'
     
     - if @available_schedules.present?
       - if @user.user_detail.date_of_birth.blank?
@@ -160,6 +161,17 @@
     });
     element.classList.add('bg-base-200', 'border-primary');
     document.getElementById('selected_date_' + scheduleKey).checked = true;
+    
+    // Update golongan field based on selected exam date
+    const form = document.getElementById('registration-form');
+    const dobStr = form?.dataset.dob;
+    const examDateStr = element.dataset.examDate;
+    
+    if (dobStr && examDateStr) {
+      const ageData = calculateAge(dobStr, examDateStr);
+      const category = getAgeCategory(ageData.years);
+      document.getElementById('golongan_field').value = category;
+    }
   }
   
   // Initialize age calculations

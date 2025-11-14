@@ -31,6 +31,13 @@
       %tr( class="transition-colors duration-300 hover:bg-slate-50" )
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jabatan
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )#{@user.user_detail.position}
+      
+      - if @golongan.present?
+        %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Golongan Saat Ujian
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+            %span.badge.badge-lg{ class: @golongan == 4 ? 'badge-error' : (@golongan == 3 ? 'badge-warning' : (@golongan == 2 ? 'badge-info' : 'badge-success')) }
+              Golongan #{@golongan}
 
       %tr
         %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 font-bold" colspan="2" ) 

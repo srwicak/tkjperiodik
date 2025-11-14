@@ -148,7 +148,7 @@ class Manage::Exam::ActivesController < ApplicationController
   end
 
   def exam_params
-    params.require(:exam).permit(:name, :short_name, :slug, :size, :exam_date_start, :exam_date_end, :status, :notes, :descriptions, :start_register)
+    params.require(:exam).permit(:name, :short_name, :slug, :size, :exam_date_start, :exam_date_end, :status, :notes, :descriptions, :start_register, :form_a_police_position, :form_a_event_position, :form_a_name, :form_a_rank, :form_a_nrp, :form_b_police_position, :form_b_event_position, :form_b_name, :form_b_rank, :form_b_nrp)
   end
 
   def set_info

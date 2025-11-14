@@ -35,6 +35,11 @@
                   .text-sm.mb-2 (mohon dikapital nama secara manual, nama tidak boleh ada angka)
             
             %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tanggal Lahir
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = detail.date_field :date_of_birth, class: "input input-bordered my-2 w-full", required: true
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jenis Kelamin
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
                 .flex.items-center.space-x-2

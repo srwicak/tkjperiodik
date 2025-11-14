@@ -133,6 +133,10 @@ class Module::ExamsController < ApplicationController
 
       # Set default registration type to berkala
       registration.registration_type = params[:reg_type] || 'berkala'
+      
+      # Set golongan based on age category
+      registration.golongan = params[:golongan] if params[:golongan].present?
+      
       registration.save!
 
       redirect_to show_module_history_path(registration.slug), notice: "Pendaftaran Berhasil! Segera cetak berkas pendaftaran!"

@@ -219,38 +219,53 @@ class Manage::Score::ScoresController < ApplicationController
     @exam = @exam_session.exam
     @user = @registration.user
 
-    @score_sheet = {
-      "exam_type": "beladiri_polri",
-      "categories": [
-        {
-          "code": "first_examiner",
-          "name": "Penguji Ke-1",
-          "content": [
-            { "code": "s_1_1", "subject": "TEKNIK DASAR BELADIRI POLRI" },
-            { "code": "s_1_2", "subject": "TEKNIK BELADIRI TANPA ALAT" },
-            { "code": "s_1_3", "subject": "TEKNIK BELADIRI DENGAN ALAT MEMBAWA ALAT" },
-          ]
-        },
-        {
-          "code": "second_examiner",
-          "name": "Penguji Ke-2",
-          "content": [
-            { "code": "s_2_1", "subject": "TEKNIK DASAR BELADIRI POLRI" },
-            { "code": "s_2_2", "subject": "TEKNIK BELADIRI TANPA ALAT" },
-            { "code": "s_2_3", "subject": "TEKNIK BELADIRI DENGAN ALAT MEMBAWA ALAT" },
-          ]
-        },
-        {
-          "code": "third_examiner",
-          "name": "Penguji Ke-3",
-          "content": [
-            { "code": "s_3_1", "subject": "TEKNIK DASAR BELADIRI POLRI" },
-            { "code": "s_3_2", "subject": "TEKNIK BELADIRI TANPA ALAT" },
-            { "code": "s_3_3", "subject": "TEKNIK BELADIRI DENGAN ALAT MEMBAWA ALAT" },
-          ]
-        },
-      ]
-    }
+    # Calculate age and check golongan
+    @age_at_exam = @registration.age_at_exam
+    @golongan = @registration.golongan
+    
+    # Determine if should use simplified form (golongan 4 or age >= 51)
+    @use_simplified_form = (@golongan == 4) || (@age_at_exam && @age_at_exam >= 51)
+
+    # New score sheet for Ujian Kesamaptaan Jasmani
+    if @use_simplified_form
+      # Simplified form: Only Ujian Kesamaptaan A
+      @score_sheet = {
+        "exam_type": "kesamaptaan_simplified",
+        "categories": [
+          {
+            "code": "kesamaptaan_a",
+            "name": "Ujian Kesamaptaan A",
+            "content": [
+              { "code": "lari_12_menit", "subject": "LARI 12 MENIT" }
+            ]
+          }
+        ]
+      }
+    else
+      # Full form: Ujian Kesamaptaan A + B
+      @score_sheet = {
+        "exam_type": "kesamaptaan_full",
+        "categories": [
+          {
+            "code": "kesamaptaan_a",
+            "name": "Ujian Kesamaptaan A",
+            "content": [
+              { "code": "lari_12_menit", "subject": "LARI 12 MENIT" }
+            ]
+          },
+          {
+            "code": "kesamaptaan_b",
+            "name": "Ujian Kesamaptaan B",
+            "content": [
+              { "code": "pull_ups", "subject": "PULL-UPS" },
+              { "code": "sit_ups", "subject": "SIT-UPS" },
+              { "code": "push_ups", "subject": "PUSH-UPS" },
+              { "code": "shuttle_run", "subject": "SHUTTLE RUN" }
+            ]
+          }
+        ]
+      }
+    end
 
     # @score_sheet = {
     #   "exam_type": "beladiri_polri",

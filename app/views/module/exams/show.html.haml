@@ -53,10 +53,13 @@
                   %td
                     .text-sm= schedule.unit_names.join(", ")
                   %td.text-center
-                    - if schedule.max_participants
+                    - if schedule.total_max_participants
                       %span.font-bold{ class: schedule.full? ? 'text-error' : 'text-primary' }
                         = schedule.registered_count
-                      = " / #{schedule.max_participants}"
+                      = " / #{schedule.total_max_participants}"
+                      - if schedule.total_days > 1
+                        .text-xs.text-gray-500.mt-1
+                          = "(#{schedule.max_participants} per hari × #{schedule.total_days} hari)"
                     - else
                       %span.font-bold.text-primary= schedule.registered_count
 

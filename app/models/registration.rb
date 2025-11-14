@@ -3,6 +3,7 @@
 # Table name: registrations
 #
 #  id                :bigint           not null, primary key
+#  golongan          :integer
 #  is_attending      :boolean
 #  pdf_data          :text
 #  pdf_status        :integer
@@ -34,7 +35,8 @@ class Registration < ApplicationRecord
 
   has_one :score, dependent: :destroy
 
-  validate :assign_to_session, on: :create
+  # Commented out: Controller now handles session assignment based on user's selected date
+  # validate :assign_to_session, on: :create
 
   # 2025 Update
   # This version is more robust and handles various edge cases better.
@@ -43,6 +45,7 @@ class Registration < ApplicationRecord
   before_save :set_slug, if: :new_record?
   after_create :increment_session_size
   after_create :create_associated_score
+  after_destroy :decrement_session_size
 
   enum pdf_status: { processing: 0, completed: 1, error: 2 }
 
@@ -197,6 +200,10 @@ class Registration < ApplicationRecord
 
   def increment_session_size
     exam_session.increment!(:size)
+  end
+
+  def decrement_session_size
+    exam_session.decrement!(:size)
   end
 
   def create_associated_score

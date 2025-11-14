@@ -12,7 +12,7 @@
       %div 
         .text-lg.font-bold 
           %p= @exam.name
-          %p.text-sm.text-gray-600.font-normal Atur jadwal ujian per satuan
+          %p.text-sm.text-gray-600.font-normal Atur jadwal ujian per Satuan Kerja
       %div
         %a.btn.btn-primary.font-black{ href: new_manage_exam_schedule_path(@exam.slug) }
           %i.ri-add-fill
@@ -56,9 +56,9 @@
                   %p.text-sm.text-gray-600
                     %strong Peserta Terdaftar: 
                     %span.font-bold.text-primary= schedule.registered_count
-                    - if schedule.max_participants
-                      = " / #{schedule.max_participants}"
-                    orang
+                    - if schedule.total_max_participants
+                      = " / #{schedule.total_max_participants}"
+                    peserta
                   - if schedule.notes.present?
                     %p.text-sm.text-gray-600.mt-2
                       %strong Catatan: 

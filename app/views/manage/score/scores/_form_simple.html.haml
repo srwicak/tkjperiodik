@@ -29,10 +29,7 @@
       %tfoot
         %th(scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5") Perhitungan Nilai
         %tr.transition-colors.duration-300.hover:bg-slate-50
-          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2" } Jumlah Nilai
-          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ "x-text": "totalScore" }
-        %tr.transition-colors.duration-300.hover:bg-slate-50
-          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2" } Rata-rata Nilai
+          %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2" } Nilai Akhir
           %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ "x-text": "averageScore" }
         %tr.transition-colors.duration-300.hover:bg-slate-50
           %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ colspan: "2" }
@@ -57,31 +54,48 @@
       notes: notes || "",
       isPassed: false,
       score: {},
+      useSimplifiedForm: #{@use_simplified_form},
       init(){
         this.score = this.scores.score;
         this.remarks = this.scores.remarks;
         this.calculateScore();
       },
       calculateScore() {
-        let total = 0;
-
-        Object.keys(this.score).forEach(key =>
-          total += parseInt(this.score[key]) || 0
-        )
-
-        this.totalScore = total;
-        this.averageScore = (total/9).toFixed(2);
+        if (this.useSimplifiedForm) {
+          // Simplified form: Only Lari 12 Menit
+          const lariScore = parseInt(this.score['lari_12_menit']) || 0;
+          this.totalScore = lariScore;
+          this.averageScore = lariScore.toFixed(2);
+        } else {
+          // Full form: Average of B tests + A test, then average again
+          const lariScore = parseInt(this.score['lari_12_menit']) || 0;
+          const pullUpsScore = parseInt(this.score['pull_ups']) || 0;
+          const sitUpsScore = parseInt(this.score['sit_ups']) || 0;
+          const pushUpsScore = parseInt(this.score['push_ups']) || 0;
+          const shuttleRunScore = parseInt(this.score['shuttle_run']) || 0;
+          
+          // Average of 4 B tests
+          const bTestsAverage = (pullUpsScore + sitUpsScore + pushUpsScore + shuttleRunScore) / 4;
+          
+          // Add A test and average again
+          this.totalScore = (bTestsAverage + lariScore) / 2;
+          this.averageScore = this.totalScore.toFixed(2);
+        }
+        
         this.isPassed = this.averageScore >= this.passingScore;
-        if (this.averageScore >= 81 ) {
-          this.gradeScore = "A"
-        } else if (this.averageScore >= 61 ) {
+        
+        // Classification based on Excel formula
+        // =IF(R8>=81;"BS";IF(R8>=61;"B";IF(R8>=41;"C";IF(R8>=31;"K";IF(R8<30;"KS")))))
+        if (this.averageScore >= 81) {
+          this.gradeScore = "BS"
+        } else if (this.averageScore >= 61) {
           this.gradeScore = "B"
-        } else if (this.averageScore >= 41 ) {
+        } else if (this.averageScore >= 41) {
           this.gradeScore = "C"
-        } else if (this.averageScore >= 21 ) {
-          this.gradeScore = "D"
-        } else if (this.averageScore >= 0.01 ) {
-          this.gradeScore = "E"
+        } else if (this.averageScore >= 31) {
+          this.gradeScore = "K"
+        } else if (this.averageScore > 0) {
+          this.gradeScore = "KS"
         } else {
           this.gradeScore = "Masukkan Nilai"
         }
