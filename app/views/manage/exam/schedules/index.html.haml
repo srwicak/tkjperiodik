@@ -32,14 +32,21 @@
                   %h2.card-title
                     %i.ri-calendar-line.text-primary
                     = schedule.exam_date.strftime("%A, %d %B %Y")
+                    - if schedule.exam_date_end.present? && schedule.exam_date_end != schedule.exam_date
+                      = " - #{schedule.exam_date_end.strftime('%d %B %Y')}"
+                  - if schedule.total_days > 1
+                    %p.text-sm.text-gray-600.mt-1
+                      %strong Total: 
+                      = schedule.total_days
+                      hari kerja
                   %p.text-sm.text-gray-600.mt-2
-                    %strong Jam Mulai: 
+                    %strong Jam: 
                     = schedule.start_time.strftime("%H:%M")
+                    -
+                    = schedule.end_time.strftime("%H:%M")
                     WIB
-                  %p.text-sm.text-gray-600
-                    %strong Durasi: 
-                    = schedule.exam_duration
-                    menit
+                    %span.text-xs.text-gray-500
+                      (#{schedule.duration_hours} jam)
                   %p.text-sm.text-gray-600
                     %strong Nama Jadwal: 
                     = schedule.display_name

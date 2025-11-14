@@ -27,22 +27,29 @@
                   %li= message
 
           .form-control
-            = f.label :exam_date, "Tanggal Ujian *", class: "label"
+            = f.label :exam_date, "Tanggal Mulai Ujian *", class: "label"
             = f.date_field :exam_date, class: "input input-bordered w-full", required: true, min: Date.tomorrow
             .label
-              %span.label-text-alt.text-gray-500 Pilih tanggal ujian
+              %span.label-text-alt.text-gray-500 Tanggal mulai ujian
 
           .form-control
-            = f.label :start_time, "Jam Mulai Ujian *", class: "label"
-            = f.time_field :start_time, class: "input input-bordered w-full", required: true
+            = f.label :exam_date_end, "Tanggal Akhir Ujian (Opsional)", class: "label"
+            = f.date_field :exam_date_end, class: "input input-bordered w-full", min: Date.tomorrow
             .label
-              %span.label-text-alt.text-gray-500 Contoh: 08:00 WIB
+              %span.label-text-alt.text-gray-500 Kosongkan jika ujian hanya 1 hari. Hari Sabtu & Minggu otomatis dilewati.
 
-          .form-control
-            = f.label :exam_duration, "Durasi Ujian (Menit) *", class: "label"
-            = f.number_field :exam_duration, class: "input input-bordered w-full", placeholder: "90", required: true, min: 1
-            .label
-              %span.label-text-alt.text-gray-500 Durasi ujian dalam menit
+          .grid.grid-cols-2.gap-4
+            .form-control
+              = f.label :start_time, "Jam Mulai *", class: "label"
+              = f.time_field :start_time, class: "input input-bordered w-full", required: true
+              .label
+                %span.label-text-alt.text-gray-500 Contoh: 08:00 WIB
+
+            .form-control
+              = f.label :end_time, "Jam Selesai *", class: "label"
+              = f.time_field :end_time, class: "input input-bordered w-full", required: true
+              .label
+                %span.label-text-alt.text-gray-500 Contoh: 17:00 WIB
 
           .form-control
             = f.label :schedule_name, "Nama Jadwal (Opsional)", class: "label"
@@ -53,11 +60,19 @@
           .form-control
             %label.label
               %span.label-text Pilih Satuan *
+            .mb-2
+              %label.label.cursor-pointer.justify-start.gap-2
+                %button#select-all-units.btn.btn-xs.btn-outline.btn-primary{ type: "button" }
+                  Pilih semua satuan
+            .mb-2
+              %label.label.cursor-pointer.justify-start.gap-2
+                %button#clear-all-units.btn.btn-xs.btn-outline.btn-error{ type: "button" }
+                  Hapus semua pilihan
             .grid.grid-cols-2.md:grid-cols-3.gap-3.p-4.border.rounded-lg.max-h-96.overflow-y-auto
               - UserDetail.units.each do |unit_name, unit_value|
                 .form-control
                   %label.label.cursor-pointer.justify-start.gap-2
-                    = f.check_box :units, { multiple: true, class: "checkbox checkbox-primary" }, unit_value, nil
+                    = f.check_box :units, { multiple: true, class: "checkbox checkbox-primary exam-unit-checkbox" }, unit_value, nil
                     %span.label-text= unit_name
             .label
               %span.label-text-alt.text-gray-500 Pilih minimal satu satuan
@@ -76,5 +91,24 @@
             = f.submit @schedule.new_record? ? "Simpan Jadwal" : "Update Jadwal", class: "btn btn-primary"
             %a.btn.btn-outline{ href: manage_exam_schedules_path(@exam.slug) } 
               Batal
+
+:javascript
+  document.addEventListener("turbo:load", function() {
+    var selectAll = document.getElementById("select-all-units");
+    var clearAll = document.getElementById("clear-all-units");
+    if (!selectAll) { return; }
+
+    selectAll.addEventListener("click", function() {
+      var checkboxes = document.querySelectorAll(".exam-unit-checkbox");
+      checkboxes.forEach(function(cb) { cb.checked = true; });
+    });
+
+    if (clearAll) {
+      clearAll.addEventListener("click", function() {
+        var checkboxes = document.querySelectorAll(".exam-unit-checkbox");
+        checkboxes.forEach(function(cb) { cb.checked = false; });
+      });
+    }
+  });
 
 = render "layouts/dashboard"

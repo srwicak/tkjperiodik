@@ -2,9 +2,7 @@ module UserDetailEnums
   extend ActiveSupport::Concern
 
   included do
-    # 2025 Update 
-    # adding polda
-    enum person_status: { police: 0, staff: 1, polda_staff: 2 }
+    enum person_status: { police: 0, staff: 1 }
 
     enum rank: {
       # Tamtama

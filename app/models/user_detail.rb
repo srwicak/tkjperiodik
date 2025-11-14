@@ -48,11 +48,8 @@ class UserDetail < ApplicationRecord
       self.person_status = :police
     when 18
       self.person_status = :staff
-    # 2025 update
-    when 10
-      self.person_status = :polda_staff
     else
-      errors.add(:identity, :invalid_length, message: "must be 8, 10, or 18 characters long")
+      errors.add(:identity, :invalid_length, message: "must be 8 or 18 characters long")
       throw(:abort)
     end
   end

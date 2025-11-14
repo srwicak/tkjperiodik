@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_13_225706) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_14_005611) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -78,7 +78,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_13_225706) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.time "start_time"
-    t.integer "exam_duration"
+    t.time "end_time"
+    t.date "exam_date_end"
     t.index ["exam_id", "exam_date"], name: "index_exam_schedules_on_exam_id_and_exam_date"
     t.index ["exam_id"], name: "index_exam_schedules_on_exam_id"
     t.index ["slug"], name: "index_exam_schedules_on_slug", unique: true
@@ -105,11 +106,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_13_225706) do
     t.string "slug", null: false
     t.string "name", null: false
     t.string "short_name"
-    t.time "exam_start", null: false
-    t.integer "exam_duration", null: false
-    t.integer "break_time", null: false
     t.integer "size", null: false
-    t.integer "batch", null: false
     t.integer "status", default: 0, null: false
     t.text "descriptions"
     t.text "notes"
@@ -120,8 +117,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_13_225706) do
     t.datetime "updated_at", null: false
     t.date "exam_date_start"
     t.date "exam_date_end"
-    t.time "exam_rest_start"
-    t.time "exam_rest_end"
     t.index ["created_by_id"], name: "index_exams_on_created_by_id"
     t.index ["slug"], name: "index_exams_on_slug", unique: true
     t.index ["updated_by_id"], name: "index_exams_on_updated_by_id"
@@ -156,45 +151,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_13_225706) do
     t.datetime "updated_at", null: false
     t.index ["exam_id"], name: "index_letters_on_exam_id"
     t.index ["slug"], name: "index_letters_on_slug", unique: true
-  end
-
-  create_table "polda_regions", force: :cascade do |t|
-    t.string "name"
-    t.string "slug"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_polda_regions_on_name", unique: true
-    t.index ["slug"], name: "index_polda_regions_on_slug", unique: true
-  end
-
-  create_table "polda_reports", force: :cascade do |t|
-    t.bigint "polda_region_id", null: false
-    t.bigint "exam_id", null: false
-    t.bigint "user_id", null: false
-    t.string "title", null: false
-    t.text "description"
-    t.text "file_data"
-    t.string "slug", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["exam_id"], name: "index_polda_reports_on_exam_id"
-    t.index ["polda_region_id"], name: "index_polda_reports_on_polda_region_id"
-    t.index ["slug"], name: "index_polda_reports_on_slug", unique: true
-    t.index ["user_id"], name: "index_polda_reports_on_user_id"
-  end
-
-  create_table "polda_staffs", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.bigint "polda_region_id", null: false
-    t.string "name"
-    t.string "phone"
-    t.string "identity"
-    t.string "slug"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["identity"], name: "index_polda_staffs_on_identity", unique: true
-    t.index ["polda_region_id"], name: "index_polda_staffs_on_polda_region_id"
-    t.index ["user_id"], name: "index_polda_staffs_on_user_id"
   end
 
   create_table "registrations", force: :cascade do |t|
@@ -306,11 +262,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_13_225706) do
   add_foreign_key "excel_uploads", "exams"
   add_foreign_key "letter_contents", "letters"
   add_foreign_key "letters", "exams"
-  add_foreign_key "polda_reports", "exams"
-  add_foreign_key "polda_reports", "polda_regions"
-  add_foreign_key "polda_reports", "users"
-  add_foreign_key "polda_staffs", "polda_regions"
-  add_foreign_key "polda_staffs", "users"
   add_foreign_key "registrations", "exam_sessions"
   add_foreign_key "registrations", "users"
   add_foreign_key "result_docs", "exams"

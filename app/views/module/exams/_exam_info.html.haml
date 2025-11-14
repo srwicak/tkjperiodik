@@ -3,23 +3,39 @@
   %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
     %tbody
       %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Tanggal Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Nama Ujian
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
-          .my-2 
-            %span.text-red-500.font-semibold= I18n.l(@exam.exam_date_start, format: :date_only)
-            sampai
-            %span.text-red-500.font-semibold= I18n.l(@exam.exam_date_end, format: :date_only)
+          .my-2
+            %span.text-red-500.font-semibold= @exam.name
       
-      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Waktu Mulai
-        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= I18n.l(@exam.exam_start, format: :time_wib)
-      
-      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Kuota Peserta
-        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) 
-          #{@exam.batch * @exam.size * @exam_days} Personel [
-          %span.text-red-500.font-bold #{@exam.registered_count}
-          terdaftar ]
+      - if @available_schedules.present?
+        - earliest_schedule = @available_schedules.min_by(&:exam_date)
+        - latest_schedule = @available_schedules.max_by { |s| s.exam_date_end || s.exam_date }
+        - latest_date = latest_schedule.exam_date_end || latest_schedule.exam_date
+        
+        %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Jadwal Tersedia
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+            .my-2 
+              %span.text-red-500.font-semibold= I18n.l(earliest_schedule.exam_date, format: :date_only)
+              sampai
+              %span.text-red-500.font-semibold= I18n.l(latest_date, format: :date_only)
+        
+        %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Total Peserta Terdaftar
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) 
+            %span.text-red-500.font-bold #{@exam.registered_count}
+            Personel
+        
+        %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Jumlah Jadwal
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) 
+            %span.text-primary.font-bold #{@available_schedules.count}
+            jadwal tersedia
+      - else
+        %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" colspan="2" ) 
+            .text-gray-500.italic Belum ada jadwal ujian yang tersedia
       
       %tr( class="transition-colors duration-300 hover:bg-slate-50" )
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 text-center" colspan="2" ) Informasi Lanjut Ujian

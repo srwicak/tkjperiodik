@@ -15,7 +15,7 @@ example_staff_count = 10
 # The magic happens here, xoxo :D
 # The seeds only worked in development
 if Rails.env.development?
-  puts "Seed initialization for TKJ PERIODIK+"
+  puts "Seed initialization for TKJ BERKALA+"
   puts "==========================================================="
 
   print "Are you sure you want to delete all data before seeding? (y[es]/n[o]/a[dd]): "

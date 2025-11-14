@@ -102,14 +102,14 @@ class Manage::Exam::ActivesController < ApplicationController
         .order(created_at: :desc)
         .offset(offset)
         .limit(size)
-        .pluck(:id, :name, :exam_date_start, :exam_date_end, :exam_start, :start_register, :notes, :status, :slug, :created_at)
+        .pluck(:id, :name, :exam_date_start, :exam_date_end, :start_register, :notes, :status, :slug, :created_at)
       total = 1
     else
       active_exams = Exam.all
         .order(created_at: :desc)
         .offset(offset)
         .limit(size)
-        .pluck(:id, :name, :exam_date_start, :exam_date_end,:exam_start, :start_register, :notes, :status, :slug, :created_at)
+        .pluck(:id, :name, :exam_date_start, :exam_date_end, :start_register, :notes, :status, :slug, :created_at)
       total = Exam.all.count
     end
 
@@ -118,20 +118,18 @@ class Manage::Exam::ActivesController < ApplicationController
     paginated_exams = active_exams.map do |exam|
       exam_date_start = I18n.l(exam[2], format: :default)
       exam_date_end = I18n.l(exam[3], format: :default)
-      exam_start = I18n.l(exam[4], format: :time_only)
-      start_register = I18n.l(exam[5], format: :default)
+      start_register = I18n.l(exam[4], format: :default)
       end_register = ''
-      created_at = I18n.l(exam[9], format: :simple)
+      created_at = I18n.l(exam[8], format: :simple)
       {
         id: exam[0],
         name: exam[1],
         exam_date: "#{exam_date_start} - #{exam_date_end}",
-        exam_start: exam_start,
         start_register: start_register,
         end_register: end_register,
-        notes: exam[6],
-        status: I18n.t("exam.statuses.#{exam[7]}"),
-        slug: exam[8],
+        notes: exam[5],
+        status: I18n.t("exam.statuses.#{exam[6]}"),
+        slug: exam[7],
         created_at: created_at,
       }
     end
@@ -150,7 +148,7 @@ class Manage::Exam::ActivesController < ApplicationController
   end
 
   def exam_params
-    params.require(:exam).permit(:name, :short_name, :slug, :size, :batch, :break_time, :exam_date_start, :exam_date_end, :exam_start, :exam_duration, :status, :notes, :descriptions, :start_register, :exam_rest_start, :exam_rest_end)
+    params.require(:exam).permit(:name, :short_name, :slug, :size, :exam_date_start, :exam_date_end, :status, :notes, :descriptions, :start_register)
   end
 
   def set_info

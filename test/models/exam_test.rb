@@ -3,15 +3,9 @@
 # Table name: exams
 #
 #  id              :bigint           not null, primary key
-#  batch           :integer          not null
-#  break_time      :integer          not null
 #  descriptions    :text
 #  exam_date_end   :date
 #  exam_date_start :date
-#  exam_duration   :integer          not null
-#  exam_rest_end   :time
-#  exam_rest_start :time
-#  exam_start      :time             not null
 #  name            :string           not null
 #  notes           :text
 #  short_name      :string

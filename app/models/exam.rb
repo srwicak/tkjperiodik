@@ -3,15 +3,9 @@
 # Table name: exams
 #
 #  id              :bigint           not null, primary key
-#  batch           :integer          not null
-#  break_time      :integer          not null
 #  descriptions    :text
 #  exam_date_end   :date
 #  exam_date_start :date
-#  exam_duration   :integer          not null
-#  exam_rest_end   :time
-#  exam_rest_start :time
-#  exam_start      :time             not null
 #  name            :string           not null
 #  notes           :text
 #  short_name      :string
@@ -57,14 +51,9 @@ class Exam < ApplicationRecord
     archieve: 2,
   }
 
-  # validate :register_dates_cannot_be_equal
-
   validate :check_and_handle_registrations, on: :update
 
   before_save :set_slug
-  
-  # 2025 Update: Disable auto-generate sessions, use ExamSchedule instead
-  # after_create :generate_sessions
   after_create :create_result_doc
 
   def active?
@@ -131,8 +120,8 @@ class Exam < ApplicationRecord
 
   def check_and_handle_registrations
     if registrations.exists?
-      if start_register_changed? || exam_date_start_changed? || exam_date_end_changed? || exam_duration_changed?
-        errors.add(:base, "Tidak dapat mengubah tanggal ujian dan durasi jika ada pendaftar.")
+      if start_register_changed? || exam_date_start_changed? || exam_date_end_changed?
+        errors.add(:base, "Tidak dapat mengubah tanggal ujian jika ada pendaftar.")
       end
     end
   end

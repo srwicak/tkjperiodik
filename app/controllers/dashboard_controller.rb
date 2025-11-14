@@ -15,11 +15,6 @@ class DashboardController < ApplicationController
       @start_time = @nearest_exam.start_register + 0.minute
       @end_time = ""
       @registerable = today >= @nearest_exam.start_register ? true : false
-
-      # only warking days
-      start_date = @nearest_exam.exam_date_start
-      end_date = @nearest_exam.exam_date_end
-      @exam_days = (start_date..end_date).count { |date| (1..5).include?(date.wday) }
     end
 
     if @admin
@@ -29,9 +24,6 @@ class DashboardController < ApplicationController
       @forgot_user = User.where(is_forgotten: true).count
       @nonactive_user = User.where(account_status: statuses).count
     end
-
-    # 2025 update
-    @polda_staff = current_user.is_polda_staff?
   end
 
   private

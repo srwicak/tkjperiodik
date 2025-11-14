@@ -58,6 +58,126 @@ class Registration < ApplicationRecord
     exam_session&.exam
   end
 
+  # Calculate age at exam date
+  def age_at_exam
+    return nil unless user&.user_detail&.date_of_birth && exam_schedule&.exam_date
+    
+    exam_date = exam_schedule.exam_date
+    dob = user.user_detail.date_of_birth
+    
+    age = exam_date.year - dob.year
+    age -= 1 if exam_date < dob + age.years
+    age
+  end
+
+  # Calculate age with years, months, and days precision
+  def age_in_years_and_days_at_exam
+    return nil unless user&.user_detail&.date_of_birth && exam_schedule&.exam_date
+    
+    exam_date = exam_schedule.exam_date
+    dob = user.user_detail.date_of_birth
+    
+    # Calculate years
+    years = exam_date.year - dob.year
+    years -= 1 if exam_date.month < dob.month || (exam_date.month == dob.month && exam_date.day < dob.day)
+    
+    # Calculate months
+    months = exam_date.month - dob.month
+    if months < 0
+      months += 12
+    elsif months == 0 && exam_date.day < dob.day
+      months = 11
+    end
+    
+    if exam_date.day < dob.day
+      months -= 1 if months > 0
+    end
+    
+    # Calculate days
+    if exam_date.day >= dob.day
+      days = exam_date.day - dob.day
+    else
+      # Get days in previous month
+      prev_month = exam_date.prev_month
+      days_in_prev_month = Date.new(prev_month.year, prev_month.month, -1).day
+      days = days_in_prev_month - dob.day + exam_date.day
+    end
+    
+    { years: years, months: months, days: days }
+  end
+
+  # Get age category based on exam date
+  # 1: < 31 years (30 years 11 months 30 days still category 1)
+  # 2: 31-40 years
+  # 3: 41-50 years
+  # 4: >= 51 years
+  def age_category_at_exam
+    age_data = age_in_years_and_days_at_exam
+    return nil unless age_data
+    
+    years = age_data[:years]
+    
+    if years < 31
+      '1'
+    elsif years < 41
+      '2'
+    elsif years < 51
+      '3'
+    else
+      '4'
+    end
+  end
+
+  # DEPRECATED: Age calculation moved to client-side (JavaScript)
+  # These class methods are kept for backward compatibility only
+  # Use client-side JavaScript calculation in views instead
+  
+  # Helper method to calculate age for any user and date (class method)
+  def self.calculate_age_at_date(date_of_birth, target_date)
+    return nil unless date_of_birth && target_date
+    
+    # Calculate years
+    years = target_date.year - date_of_birth.year
+    years -= 1 if target_date.month < date_of_birth.month || (target_date.month == date_of_birth.month && target_date.day < date_of_birth.day)
+    
+    # Calculate months
+    months = target_date.month - date_of_birth.month
+    if months < 0
+      months += 12
+    elsif months == 0 && target_date.day < date_of_birth.day
+      months = 11
+    end
+    
+    if target_date.day < date_of_birth.day
+      months -= 1 if months > 0
+    end
+    
+    # Calculate days
+    if target_date.day >= date_of_birth.day
+      days = target_date.day - date_of_birth.day
+    else
+      # Get days in previous month
+      prev_month = target_date.prev_month
+      days_in_prev_month = Date.new(prev_month.year, prev_month.month, -1).day
+      days = days_in_prev_month - date_of_birth.day + target_date.day
+    end
+    
+    { years: years, months: months, days: days }
+  end
+
+  # Helper method to calculate category for any age (class method)
+  def self.age_category(years)
+    if years < 31
+      '1'
+    elsif years < 41
+      '2'
+    elsif years < 51
+      '3'
+    else
+      '4'
+    end
+  end
+
   private
 
   def assign_to_session

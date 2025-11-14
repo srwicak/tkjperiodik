@@ -12,68 +12,79 @@
       - if @available_schedules.empty?
         .alert.alert-warning
           %i.ri-information-line
-          %span Belum ada jadwal ujian yang tersedia untuk satuan Anda.
+          %span Belum ada jadwal ujian yang tersedia.
       - else
-        = form_with url: new_module_exam_path(@exam.slug), method: :post, local: true, id: "registration-form" do |f|
+        = form_with url: new_module_exam_path(@exam.slug), method: :post, local: true, id: "registration-form", data: { dob: @user.user_detail&.date_of_birth } do |f|
           .divider.divider-start Pilih Jadwal Ujian
 
           .mb-8 
             %p.mb-6.font-semibold.text-xl Pilih Tanggal Ujian
+            - if @user.user_detail.date_of_birth.blank?
+              .alert.alert-error.mb-4
+                %i.ri-error-warning-line
+                %span Tanggal lahir Anda belum diisi. Silakan lengkapi profil Anda terlebih dahulu.
+                %a.btn.btn-sm.btn-error.ml-2{ href: edit_module_profile_path } Lengkapi Profil
             .space-y-4.mb-6
               - @available_schedules.each do |schedule|
-                .border.rounded-lg.p-4.cursor-pointer.transition-colors.hover:bg-base-200{ onclick: "selectSchedule(this, #{schedule.id})" }
-                  .flex.items-start.gap-3
-                    = f.radio_button :exam_schedule_id, schedule.id, required: true, class: "radio radio-primary mt-1"
-                    .flex-1
-                      %label.cursor-pointer{ for: "exam_schedule_id_#{schedule.id}" }
-                        .font-bold.text-lg
-                          %i.ri-calendar-line.text-primary
-                          = schedule.exam_date.strftime("%A, %d %B %Y")
-                        .text-sm.text-gray-600.mt-1
-                          %strong Jam: 
-                          = schedule.start_time.strftime("%H:%M")
-                          WIB
-                        .text-sm.text-gray-600
-                          %strong Durasi: 
-                          = schedule.exam_duration
-                          menit
-                        .text-sm.text-gray-600
-                          %strong Nama: 
-                          = schedule.display_name
-                        .text-sm.text-gray-600
-                          %strong Satuan: 
-                          = schedule.unit_names.join(", ")
-                        .text-sm.text-gray-600
-                          %strong Peserta Terdaftar: 
-                          %span.font-bold.text-primary= schedule.registered_count
-                          - if schedule.max_participants
-                            = " / #{schedule.max_participants}"
-                          orang
-                        - if schedule.notes.present?
-                          .text-sm.text-gray-600.mt-2
-                            %i.ri-information-line
-                            = schedule.notes
+                - # Generate all dates in range (include all days, no weekend filter)
+                - start_date = schedule.exam_date
+                - end_date = schedule.exam_date_end.presence || schedule.exam_date
+                - date_range = (start_date..end_date).to_a
+                - date_range.each do |exam_date|
+                  .border.rounded-lg.p-4.cursor-pointer.transition-colors.hover:bg-base-200{ onclick: "selectSchedule(this, '#{schedule.id}_#{exam_date.to_s}')", data: { exam_date: exam_date.to_s, schedule_id: schedule.id } }
+                    .flex.items-start.gap-3
+                      = f.radio_button :selected_date, "#{schedule.id}|#{exam_date.to_s}", required: true, class: "radio radio-primary mt-1", id: "selected_date_#{schedule.id}_#{exam_date.to_s.gsub('-', '_')}"
+                      .flex-1
+                        %label.cursor-pointer{ for: "selected_date_#{schedule.id}_#{exam_date.to_s.gsub('-', '_')}" }
+                          .font-bold.text-lg
+                            %i.ri-calendar-line.text-primary
+                            = exam_date.strftime("%A, %d %B %Y")
+                          .text-sm.text-gray-600.mt-1
+                            %i.ri-time-line
+                            %strong Jam: 
+                            = schedule.start_time.strftime("%H:%M")
+                            -
+                            = schedule.end_time.strftime("%H:%M")
+                            WIB
+                          .text-sm.text-gray-600
+                            %strong Nama: 
+                            = schedule.display_name
+                          .text-sm.text-gray-600
+                            %strong Satuan: 
+                            = schedule.unit_names.join(", ")
+                          .text-sm.text-gray-600
+                            %strong Peserta Terdaftar: 
+                            %span.font-bold.text-primary= schedule.registered_count
+                            - if schedule.max_participants
+                              = " / #{schedule.max_participants}"
+                            orang
+                          - if @user.user_detail.date_of_birth.present?
+                            .mt-3.p-3.bg-blue-50.rounded-lg.border.border-blue-200.age-info{ data: { exam_date: exam_date.to_s } }
+                              .text-sm.font-semibold.text-blue-800.mb-1
+                                %i.ri-user-heart-line.mr-1
+                                Umur Anda saat ujian:
+                              .text-base.font-bold.text-blue-900.age-display
+                                Menghitung...
+                              .mt-2.text-sm.font-semibold
+                                %span.text-gray-600 Kategori Ujian: 
+                                %span.badge.badge-lg.age-category-badge
+                                  Menghitung...
+                              .text-xs.text-gray-500.mt-2.italic.age-category-desc
+                          - if schedule.notes.present?
+                            .text-sm.text-gray-600.mt-2
+                              %i.ri-information-line
+                              = schedule.notes
 
-          .divider.divider-start Jenis pendaftaran
-
-          .mb-8 
-            %p.mb-6.font-semibold.text-xl Jenis Keikutsertaan Ujian
-            %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
-              %tbody
-                %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-                  %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 md:w-[200px] w-[100px]" ) Ujian Untuk
-                  %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
-                    .my-2
-                      .flex.flex-col.space-y-2.justify-center
-                        .flex.items-center.space-x-1
-                          = f.radio_button :reg_type, 'berkala', required: true
-                          %label{ for: "reg_type_berkala" } Berkala
-                        .flex.items-center.space-x-1
-                          = f.radio_button :reg_type, 'kenaikan_pangkat', required: true
-                          %label{ for: "reg_type_kenaikan_pangkat" } Kenaikan Pangkat
+          = f.hidden_field :reg_type, value: 'berkala'
     
     - if @available_schedules.present?
-      %button.btn.btn-lg.btn-success.w-full.text-white.font-bold{ onclick: "confirm_modal.showModal()" } DAFTAR UJIAN
+      - if @user.user_detail.date_of_birth.blank?
+        .alert.alert-error.mb-6
+          %i.ri-error-warning-line
+          %span.font-bold Tanggal lahir Anda belum diisi. Silakan lengkapi profil Anda terlebih dahulu untuk dapat mendaftar ujian.
+          %a.btn.btn-error.ml-4{ href: edit_module_profile_path } Lengkapi Profil
+      - else
+        %button.btn.btn-lg.btn-success.w-full.text-white.font-bold{ onclick: "confirm_modal.showModal()" } DAFTAR UJIAN
 
   %dialog#confirm_modal.modal
     .modal-box
@@ -86,12 +97,111 @@
         %button.btn.btn-success.grow.text-white.uppercase{ type: "button", onclick: "document.getElementById('registration-form').submit()" } Konfirmasi
 
 :javascript
-  function selectSchedule(element, scheduleId) {
+  // Calculate age at specific date
+  function calculateAge(dob, examDate) {
+    const birthDate = new Date(dob);
+    const targetDate = new Date(examDate);
+    
+    let years = targetDate.getFullYear() - birthDate.getFullYear();
+    let months = targetDate.getMonth() - birthDate.getMonth();
+    let days = targetDate.getDate() - birthDate.getDate();
+    
+    // Adjust years if birthday hasn't occurred yet this year
+    if (months < 0 || (months === 0 && days < 0)) {
+      years--;
+      months += 12;
+    }
+    
+    // Adjust months and days
+    if (days < 0) {
+      months--;
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+      // Get days in previous month
+      const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
+      days = prevMonth.getDate() - birthDate.getDate() + targetDate.getDate();
+    }
+    
+    return { years, months, days };
+  }
+  
+  function getAgeCategory(years) {
+    if (years < 31) return '1';
+    if (years < 41) return '2';
+    if (years < 51) return '3';
+    return '4';
+  }
+  
+  function getCategoryBadgeClass(category) {
+    switch(category) {
+      case '1': return 'badge-success';
+      case '2': return 'badge-info';
+      case '3': return 'badge-warning';
+      case '4': return 'badge-error';
+      default: return 'badge-neutral';
+    }
+  }
+  
+  function getCategoryDescription(category) {
+    switch(category) {
+      case '1': return 'Golongan 1: Di bawah 31 tahun';
+      case '2': return 'Golongan 2: 31 - 40 tahun';
+      case '3': return 'Golongan 3: 41 - 50 tahun';
+      case '4': return 'Golongan 4: 51 tahun ke atas';
+      default: return '';
+    }
+  }
+  
+  function selectSchedule(element, scheduleKey) {
     document.querySelectorAll('.border.rounded-lg').forEach(el => {
       el.classList.remove('bg-base-200', 'border-primary');
     });
     element.classList.add('bg-base-200', 'border-primary');
-    document.getElementById('exam_schedule_id_' + scheduleId).checked = true;
+    document.getElementById('selected_date_' + scheduleKey).checked = true;
+  }
+  
+  // Initialize age calculations
+  function initAgeCalculation() {
+    const form = document.getElementById('registration-form');
+    const dobStr = form?.dataset.dob;
+    
+    if (!dobStr) return;
+    
+    document.querySelectorAll('.age-info').forEach(function(ageInfo) {
+      const examDateStr = ageInfo.dataset.examDate;
+      if (!examDateStr) return;
+      
+      const ageData = calculateAge(dobStr, examDateStr);
+      const category = getAgeCategory(ageData.years);
+      
+      // Update age display
+      const ageDisplay = ageInfo.querySelector('.age-display');
+      if (ageDisplay) {
+        ageDisplay.textContent = `${ageData.years} tahun ${ageData.months} bulan ${ageData.days} hari`;
+      }
+      
+      // Update category badge
+      const categoryBadge = ageInfo.querySelector('.age-category-badge');
+      if (categoryBadge) {
+        categoryBadge.textContent = `Golongan ${category}`;
+        categoryBadge.className = 'badge badge-lg ' + getCategoryBadgeClass(category);
+      }
+      
+      // Update category description
+      const categoryDesc = ageInfo.querySelector('.age-category-desc');
+      if (categoryDesc) {
+        categoryDesc.textContent = getCategoryDescription(category);
+      }
+    });
+  }
+  
+  // Run on both DOMContentLoaded AND immediate (handles both cases)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAgeCalculation);
+  } else {
+    initAgeCalculation();
   }
 
 = render "layouts/dashboard"

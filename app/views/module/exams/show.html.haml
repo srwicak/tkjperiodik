@@ -11,6 +11,54 @@
       .alert.alert-warning.mb-6
         %i.ri-information-line
         %span Belum ada jadwal ujian yang tersedia untuk saat ini.
+    - else
+      .rounded-lg.p-8.bg-white.mb-8
+        %h3.text-2xl.font-bold.mb-6.text-gray-800
+          %i.ri-calendar-schedule-line.text-primary.mr-2
+          Jadwal Ujian Tersedia
+        .overflow-x-auto
+          %table.table.table-zebra.w-full
+            %thead
+              %tr
+                %th.text-center No
+                %th Tanggal Ujian
+                %th Waktu
+                %th Nama/Keterangan
+                %th Satuan
+                %th.text-center Kuota
+            %tbody
+              - @available_schedules.each_with_index do |schedule, index|
+                %tr
+                  %td.text-center= index + 1
+                  %td
+                    .font-semibold= schedule.exam_date.strftime("%A, %d %B %Y")
+                    - if schedule.exam_date_end.present? && schedule.exam_date_end != schedule.exam_date
+                      .text-sm.text-gray-600 sampai #{schedule.exam_date_end.strftime('%d %B %Y')}
+                    - if schedule.total_days > 1
+                      .text-xs.text-gray-500
+                        %i.ri-calendar-2-line
+                        = "#{schedule.total_days} hari kerja"
+                  %td
+                    .text-sm
+                      = schedule.start_time.strftime("%H:%M")
+                      \-
+                      = schedule.end_time.strftime("%H:%M")
+                      WIB
+                  %td
+                    = schedule.display_name
+                    - if schedule.notes.present?
+                      .text-xs.text-gray-500.mt-1
+                        %i.ri-information-line
+                        = schedule.notes
+                  %td
+                    .text-sm= schedule.unit_names.join(", ")
+                  %td.text-center
+                    - if schedule.max_participants
+                      %span.font-bold{ class: schedule.full? ? 'text-error' : 'text-primary' }
+                        = schedule.registered_count
+                      = " / #{schedule.max_participants}"
+                    - else
+                      %span.font-bold.text-primary= schedule.registered_count
 
     .flex.justify-center
       - if @is_registered 

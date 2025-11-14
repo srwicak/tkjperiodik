@@ -44,5 +44,8 @@
 
         %tr
           %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Peserta terdaftar
-          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) #{@exam.registered_count} dari #{@exam.batch * @exam.size * @exam_days} peserta
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) 
+            #{@exam.registered_count} peserta
+            %br
+            %span.text-xs.italic (dari #{@exam.exam_schedules.count} jadwal yang dibuat)
                    

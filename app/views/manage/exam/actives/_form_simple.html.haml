@@ -19,7 +19,7 @@
 
       .form-control
         = form.label :name, "Nama Ujian *", class: "label font-bold"
-        = form.text_field :name, class: "input input-bordered w-full", placeholder: "Contoh: TKJ Periodik 2025 Semester 1", required: true
+        = form.text_field :name, class: "input input-bordered w-full", placeholder: "Contoh: TKJ Berkala 2025 Semester 1", required: true
         .label
           %span.label-text-alt.text-gray-500 Nama lengkap ujian
 
@@ -58,16 +58,10 @@
       .label
         %span.label-text-alt.text-gray-500 Catatan internal untuk panitia (maks 2000 karakter)
 
-    / Hidden fields untuk backward compatibility dengan nilai default
+    / Hidden fields dengan nilai default (hanya yang masih ada di schema)
     = form.hidden_field :size, value: 50
-    = form.hidden_field :batch, value: 1
-    = form.hidden_field :break_time, value: 15
     = form.hidden_field :exam_date_start, value: Date.today
     = form.hidden_field :exam_date_end, value: Date.today + 30
-    = form.hidden_field :exam_start, value: "08:00"
-    = form.hidden_field :exam_duration, value: 90
-    = form.hidden_field :exam_rest_start, value: "12:00"
-    = form.hidden_field :exam_rest_end, value: "13:00"
 
     .divider.my-6
 

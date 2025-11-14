@@ -47,9 +47,6 @@ class User < ApplicationRecord
   has_one :user_detail, dependent: :destroy
   has_many :registration, dependent: :destroy
 
-  # 2025 Update
-  has_one :polda_staff, dependent: :destroy
-
   devise :two_factor_authenticatable
   devise :registerable,
          :rememberable, :validatable, :trackable,
@@ -118,14 +115,9 @@ class User < ApplicationRecord
     identity.length == 8
   end
 
-  # 2025 update
-  def is_polda_staff?
-    identity.length == 10
-  end
-
-  # Check if the length of the identity is either 8 or 16, and add an error if it's not.
+  # Check if the length of the identity is either 8 or 18, and add an error if it's not.
   def identity_length_must_be_valid
-    unless [8, 10, 18].include?(identity&.length)
+    unless [8, 18].include?(identity&.length)
       errors.add(:identity, :invalid_length)
     end
   end

@@ -9,25 +9,16 @@ class Module::ExamsController < ApplicationController
   end
 
   def show
-    session_calculation
     @is_registered = user_registered_for_exam?
     
     # 2025 Update - Check using exam schedules
+    # Allow all users to see all schedules regardless of unit
     @available_schedules = @exam.exam_schedules
       .where("exam_date >= ?", Date.tomorrow)
       .order(:exam_date)
     
-    # Check if user's unit has any available schedule
-    if current_user.is_police?
-      user_unit = current_user.user_detail.unit
-      @user_available_schedules = @available_schedules.select { |schedule| schedule.available_for_unit?(user_unit) }
-    else
-      @user_available_schedules = []
-    end
-    
-    if @exam.registered_count >= (@exam.batch * @exam.size * @exam_days)
-      @full_capacity = true
-    end
+    # Check if all schedules are full
+    @full_capacity = @available_schedules.present? && @available_schedules.all?(&:full?)
   end
 
   def new
@@ -35,23 +26,22 @@ class Module::ExamsController < ApplicationController
       redirect_to index_module_history_path, notice: "Anda sudah terdaftar"
       return
     end
-    if @exam.registered_count >= (@exam.batch * @exam.size * @exam_days)
-      redirect_to index_module_history_path, alert: "Kuota sudah penuh!"
+    
+    @user = current_user
+    
+    # 2025 Update - Get all available schedules regardless of unit
+    @available_schedules = @exam.exam_schedules
+      .where("exam_date >= ?", Date.tomorrow)
+      .order(:exam_date)
+    
+    if @available_schedules.empty?
+      redirect_to show_module_exam_path(@exam.slug), alert: "Belum ada jadwal ujian yang tersedia."
       return
     end
     
-    @user = current_user
-    session_calculation
-    
-    # 2025 Update - Get available schedules for user's unit
-    user_unit = @user.user_detail.unit
-    @available_schedules = @exam.exam_schedules
-      .where("exam_date >= ?", Date.tomorrow)
-      .select { |schedule| schedule.available_for_unit?(user_unit) }
-      .sort_by(&:exam_date)
-    
-    if @available_schedules.empty?
-      redirect_to show_module_exam_path(@exam.slug), alert: "Belum ada jadwal ujian yang tersedia untuk satuan Anda."
+    # Check if all schedules are full
+    if @available_schedules.all?(&:full?)
+      redirect_to show_module_exam_path(@exam.slug), alert: "Semua jadwal ujian sudah penuh!"
       return
     end
   end
@@ -86,29 +76,37 @@ class Module::ExamsController < ApplicationController
   def create
     @user = current_user
 
+    # Check if date of birth is present
+    unless @user.user_detail.date_of_birth.present?
+      flash[:alert] = "Tanggal lahir Anda belum diisi. Silakan lengkapi profil Anda terlebih dahulu."
+      redirect_to edit_module_profile_path and return
+    end
+
     unless params[:reg_type].present?
       flash[:alert] = "Anda harus memilih salah satu jenis keikutsertaan ujian."
       redirect_to new_module_exam_path(@exam.slug) and return
     end
 
-    unless params[:exam_schedule_id].present?
-      flash[:alert] = "Anda harus memilih jadwal ujian."
+    unless params[:selected_date].present?
+      flash[:alert] = "Anda harus memilih tanggal ujian."
       redirect_to new_module_exam_path(@exam.slug) and return
     end
 
     Exam.transaction do
+      # Parse selected_date format: "schedule_id|exam_date"
+      schedule_id, exam_date_str = params[:selected_date].split('|')
+      exam_date = Date.parse(exam_date_str) rescue nil
+      
+      unless schedule_id && exam_date
+        flash[:alert] = "Format tanggal ujian tidak valid."
+        redirect_to new_module_exam_path(@exam.slug) and return
+      end
+      
       # Find the selected schedule
-      schedule = @exam.exam_schedules.find_by(id: params[:exam_schedule_id])
+      schedule = @exam.exam_schedules.find_by(id: schedule_id)
       
       unless schedule
         flash[:alert] = "Jadwal ujian tidak ditemukan."
-        redirect_to new_module_exam_path(@exam.slug) and return
-      end
-
-      # Check if schedule is available for user's unit
-      user_unit = @user.user_detail.unit
-      unless schedule.available_for_unit?(user_unit)
-        flash[:alert] = "Jadwal ujian tidak tersedia untuk satuan Anda."
         redirect_to new_module_exam_path(@exam.slug) and return
       end
 
@@ -118,8 +116,13 @@ class Module::ExamsController < ApplicationController
         redirect_to new_module_exam_path(@exam.slug) and return
       end
 
-      # Get or create exam session for this schedule
-      session = schedule.exam_sessions.first
+      # Find exam session for the specific date
+      session = schedule.exam_sessions.find_by("DATE(start_time) = ?", exam_date)
+      
+      unless session
+        flash[:alert] = "Sesi ujian untuk tanggal tersebut tidak ditemukan."
+        redirect_to new_module_exam_path(@exam.slug) and return
+      end
 
       registration = Registration.find_or_initialize_by(user: @user, exam_session: session)
 
@@ -128,7 +131,8 @@ class Module::ExamsController < ApplicationController
         return
       end
 
-      registration.registration_type = params[:reg_type]
+      # Set default registration type to berkala
+      registration.registration_type = params[:reg_type] || 'berkala'
       registration.save!
 
       redirect_to show_module_history_path(registration.slug), notice: "Pendaftaran Berhasil! Segera cetak berkas pendaftaran!"
@@ -153,21 +157,6 @@ class Module::ExamsController < ApplicationController
     end
   end
 
-  def session_calculation
-    exam_start = @exam.exam_start
-    exam_duration = @exam.exam_duration.minutes
-    break_time = @exam.break_time.minutes
-    batch = [@exam.batch, 10].min
-
-    @sessions = []
-    batch.times do |i|
-      session_start = exam_start
-      session_end = session_start + exam_duration
-      @sessions << { start: session_start, end: session_end }
-      exam_start = session_end + break_time
-    end
-  end
-
   def find_available_session(exam)
     tomorrow_start = Time.zone.now.beginning_of_day + 1.day
 
@@ -188,12 +177,21 @@ class Module::ExamsController < ApplicationController
 
   def set_exam
     @exam = Exam.find_by!(slug: params[:slug])
-    if @exam.status != "active" || @exam.start_register > Date.today || @exam.exam_date_end < Date.today
+    # Check if exam is active and registration period is valid
+    if @exam.status != "active" || @exam.start_register > Date.today
+      redirect_to index_module_exam_path
+      return
+    end
+    
+    # 2025 Update: Check if exam has any schedules
+    # If exam has schedules, use them. Otherwise fall back to exam_date_end
+    if @exam.has_schedules?
+      latest_schedule = @exam.exam_schedules.maximum(:exam_date_end) || @exam.exam_schedules.maximum(:exam_date)
+      if latest_schedule && latest_schedule < Date.today
+        redirect_to index_module_exam_path
+      end
+    elsif @exam.exam_date_end.present? && @exam.exam_date_end < Date.today
       redirect_to index_module_exam_path
     end
-    #only warking days
-    start_date = @exam.exam_date_start
-    end_date = @exam.exam_date_end
-    @exam_days = (start_date..end_date).count { |date| (1..5).include?(date.wday) }
   end
 end

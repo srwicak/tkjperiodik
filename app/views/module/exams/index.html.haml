@@ -16,23 +16,46 @@
       - else
         .space-y-6
           - @exams.each do |exam|
-            - exam_days = (exam.exam_date_end - exam.exam_date_start).to_i + 1
             .bg-white.shadow-lg.rounded-lg.overflow-hidden
               .p-6
                 %p.text-2xl.font-bold.mb-4= exam.name
                 .divider.uppercase.text-sm.text-gray-400.font-bold detil ujian
-                %p.text-gray-600
-                  %i.ri-calendar-event-line
-                  %span.font-semibold= I18n.l(exam.exam_date_start, format: :date_only)
-                  sampai
-                  %span.font-semibold= I18n.l(exam.exam_date_end, format: :date_only)
-                %p.text-gray-600
-                  %i.ri-time-line
-                  Mulai dari
-                  %span= I18n.l(exam.exam_start, format: :time_wib)
+                
+                - if exam.has_schedules?
+                  - available_schedules = exam.exam_schedules.where("exam_date >= ?", Date.today).order(:exam_date)
+                  - if available_schedules.any?
+                    - earliest = available_schedules.first
+                    - latest = available_schedules.last
+                    - latest_date = latest.exam_date_end || latest.exam_date
+                    
+                    %p.text-gray-600
+                      %i.ri-calendar-event-line
+                      %span.font-semibold= I18n.l(earliest.exam_date, format: :date_only)
+                      sampai
+                      %span.font-semibold= I18n.l(latest_date, format: :date_only)
+                    
+                    %p.text-gray-600
+                      %i.ri-calendar-schedule-line
+                      %span.font-semibold #{available_schedules.count} jadwal tersedia
+                  - else
+                    %p.text-gray-600.italic
+                      %i.ri-information-line
+                      Belum ada jadwal tersedia
+                - else
+                  %p.text-gray-600
+                    %i.ri-calendar-event-line
+                    %span.font-semibold= I18n.l(exam.exam_date_start, format: :date_only)
+                    sampai
+                    %span.font-semibold= I18n.l(exam.exam_date_end, format: :date_only)
+                  %p.text-gray-600
+                    %i.ri-time-line
+                    Mulai dari
+                    %span= I18n.l(exam.exam_start, format: :time_wib)
+                
                 %p.text-gray-600.mb-2
                   %i.ri-team-fill
-                  Kuota: #{exam.batch * exam.size * exam_days } Personil
+                  Terdaftar: #{exam.registered_count} Personil
+                
                 %p.text-gray-700.mb-4= truncate(exam.descriptions, length: 100)
                 .divider.uppercase.text-sm.text-gray-400.font-bold info pendaftaran
                 %p.text-red-500 Waktu pendaftaran

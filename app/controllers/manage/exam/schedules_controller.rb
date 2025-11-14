@@ -15,7 +15,7 @@ class Manage::Exam::SchedulesController < ApplicationController
     @schedule = @exam.exam_schedules.build(schedule_params)
 
     if @schedule.save
-      redirect_to manage_exam_schedules_path(@exam), notice: "Jadwal ujian berhasil ditambahkan."
+      redirect_to manage_exam_schedules_path(@exam.slug), notice: "Jadwal ujian berhasil ditambahkan."
     else
       render :new, status: :unprocessable_entity
     end
@@ -26,7 +26,7 @@ class Manage::Exam::SchedulesController < ApplicationController
 
   def update
     if @schedule.update(schedule_params)
-      redirect_to manage_exam_schedules_path(@exam), notice: "Jadwal ujian berhasil diperbarui."
+      redirect_to manage_exam_schedules_path(@exam.slug), notice: "Jadwal ujian berhasil diperbarui."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -34,10 +34,10 @@ class Manage::Exam::SchedulesController < ApplicationController
 
   def destroy
     if @schedule.registrations.exists?
-      redirect_to manage_exam_schedules_path(@exam), alert: "Tidak bisa menghapus jadwal yang sudah ada pendaftarnya."
+      redirect_to manage_exam_schedules_path(@exam.slug), alert: "Tidak bisa menghapus jadwal yang sudah ada pendaftarnya."
     else
       @schedule.destroy
-      redirect_to manage_exam_schedules_path(@exam), notice: "Jadwal ujian berhasil dihapus."
+      redirect_to manage_exam_schedules_path(@exam.slug), notice: "Jadwal ujian berhasil dihapus."
     end
   end
 
@@ -52,6 +52,6 @@ class Manage::Exam::SchedulesController < ApplicationController
   end
 
   def schedule_params
-    params.require(:exam_schedule).permit(:exam_date, :schedule_name, :max_participants, :notes, :start_time, :exam_duration, units: [])
+    params.require(:exam_schedule).permit(:exam_date, :exam_date_end, :schedule_name, :max_participants, :notes, :start_time, :end_time, units: [])
   end
 end

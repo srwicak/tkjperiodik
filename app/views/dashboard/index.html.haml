@@ -11,18 +11,24 @@
             Pendaftaran Ujian Terdekat
           %h2.text-xl.md:text-2xl.font-bold.my-4.text-gray-800= @nearest_exam.name
           .bg-white.rounded-xl.p-4.md:p-6.mb-4.shadow-sm
+            - if @nearest_exam.has_schedules?
+              - start_date = @nearest_exam.exam_schedules.minimum(:exam_date)
+              - end_date   = @nearest_exam.exam_schedules.maximum(:exam_date_end) || @nearest_exam.exam_schedules.maximum(:exam_date)
+            - else
+              - start_date = @nearest_exam.exam_date_start
+              - end_date   = @nearest_exam.exam_date_end
             .flex.flex-col.md:flex-row.items-center.justify-center.gap-2.md:gap-4.mb-4
               .flex.items-center.gap-2
                 .bg-red-100.p-2.rounded-lg
                   %i.ri-calendar-event-fill.text-red-500.text-xl
                 .flex.flex-col.items-start
                   %span.text-xs.text-gray-500 Tanggal Ujian
-                  %span.font-bold.text-red-600.text-sm.md:text-base= I18n.l(@nearest_exam.exam_date_start, format: :date_only)
+                  %span.font-bold.text-red-600.text-sm.md:text-base= I18n.l(start_date, format: :date_only) if start_date
               .hidden.md:block.text-gray-300 -
               .flex.items-center.gap-2
                 .flex.flex-col.items-start
                   %span.text-xs.text-gray-500 Sampai
-                  %span.font-bold.text-red-600.text-sm.md:text-base= I18n.l(@nearest_exam.exam_date_end, format: :date_only)
+                  %span.font-bold.text-red-600.text-sm.md:text-base= I18n.l(end_date, format: :date_only) if end_date
             .flex.items-center.justify-center.gap-2.text-gray-700
               .bg-blue-100.p-2.rounded-lg
                 %i.ri-time-line.text-blue-500.text-xl
@@ -35,8 +41,8 @@
               .bg-red-500.p-3.rounded-full
                 %i.ri-group-line.text-white.text-xl
               .flex.flex-col
-                %span.text-xs.text-gray-500 Total Kuota
-                %span.text-xl.md:text-2xl.font-black.text-red-600= "#{@nearest_exam.batch * @nearest_exam.size * @exam_days}"
+                %span.text-xs.text-gray-500 Peserta Terdaftar
+                %span.text-xl.md:text-2xl.font-black.text-red-600= "#{@nearest_exam.registered_count}"
                 %span.text-xs.text-gray-600 Personel
           .bg-gradient-to-br.from-green-50.to-white.p-4.rounded-xl.border.border-green-100
             .flex.items-center.gap-3

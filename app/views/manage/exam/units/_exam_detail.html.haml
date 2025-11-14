@@ -36,38 +36,13 @@
           %span #{@exam.size}
           %span Personel
       %tr 
-        %td Jumlah sesi per hari
+        %td Jumlah jadwal
         %td
-          %span #{@exam.batch}
-          %span Sesi
-      %tr 
-        %td Jumlah hari ujian
-        %td
-          %span #{@exam_days}
-          %span Hari
-      %tr 
-        %td Kapasitas peserta
-        %td
-          %span #{@exam.size * @exam.batch * @exam_days}
-          %span Personel
+          %span #{@exam.exam_schedules.count}
+          %span Jadwal
       %tr 
         %td Tanggal ujian
         %td #{I18n.l(@exam.exam_date_start, format: :default)} - #{I18n.l(@exam.exam_date_end, format: :default)}
-      %tr 
-        %td Waktu mulai ujian
-        %td
-          %span #{I18n.l(@exam.exam_start, format: :time_only)}
-          %span WIB
-      %tr 
-        %td Durasi ujian
-        %td
-          %span #{@exam.exam_duration}
-          %span Menit
-      %tr 
-        %td Jeda antar sesi
-        %td
-          %span #{@exam.break_time}
-          %span Menit
       %tr
         %td( colspan="2") Catatan
       %tr
