@@ -29,12 +29,6 @@
                 .flex.flex-col.items-start
                   %span.text-xs.text-gray-500 Sampai
                   %span.font-bold.text-red-600.text-sm.md:text-base= I18n.l(end_date, format: :date_only) if end_date
-            .flex.items-center.justify-center.gap-2.text-gray-700
-              .bg-blue-100.p-2.rounded-lg
-                %i.ri-time-line.text-blue-500.text-xl
-              .flex.flex-col.items-start
-                %span.text-xs.text-gray-500 Waktu Mulai
-                %span.font-semibold.text-sm.md:text-base= I18n.l(@nearest_exam.exam_start, format: :time_wib)
         .grid.grid-cols-1.md:grid-cols-2.gap-3.md:gap-4.mb-6
           .bg-gradient-to-br.from-red-50.to-white.p-4.rounded-xl.border.border-red-100
             .flex.items-center.gap-3

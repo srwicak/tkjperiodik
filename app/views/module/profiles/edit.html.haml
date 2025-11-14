@@ -20,27 +20,6 @@
                 .my-4 
                   = current_user.identity
 
-            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama
-              // 2025 update
-              - if current_user.is_polda_staff?
-                %td( class="h-12 px-6 transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 " )
-                  .my-4 
-                    = @user_detail.name
-              - else 
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.text_field :name, class: "input input-bordered my-2 w-full"
-            
-            // 2025 update
-            - if !current_user.is_polda_staff?
-              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jenis Kelamin
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
-                  .flex.items-center.space-x-2
-                    = form.radio_button :gender, 1, class: "radio", checked: @user_detail.gender == true
-                    = form.label :gender, "PRIA"
-                    = form.radio_button :gender, 0, class: "radio", checked: @user_detail.gender == false
-                    = form.label :gender, "WANITA"
-
               %tr( class="transition-colors duration-300 hover:bg-slate-50" )
                 %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tanggal Lahir
                 %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
