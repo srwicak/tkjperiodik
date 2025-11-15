@@ -34,9 +34,9 @@ class UserDetail < ApplicationRecord
   validates :name, presence: true, format: { with: /\A[a-zA-Z.,'\- ]+\z/, message: "hanya boleh berisi alfabet, titik, koma, apostrof, dan tanda hubung" }
 
   validates :gender, inclusion: { in: [true, false] }
-  validates :rank, presence: true, if: -> { user.is_police? }
-  validates :unit, presence: true, if: -> { user.is_police? }
-  #validates :position, presence: true, if: -> { user.is_police? }
+  validates :rank, presence: true
+  validates :unit, presence: true
+  validates :position, presence: true
 
   private
 

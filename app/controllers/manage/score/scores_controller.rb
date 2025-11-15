@@ -148,13 +148,26 @@ class Manage::Score::ScoresController < ApplicationController
   def update
     Rails.logger.info "Received parameters: #{params.inspect}"
 
-    if @score.update(
+    attrs = {
       score_detail: score_params[:score_detail],
       score_grade: score_params[:score_grade],
       score_number: score_params[:score_number],
       notes: score_params[:notes],
       exam_present: true
-    )
+    }
+
+    # set first input metadata if not present, otherwise update last edited metadata
+    if @score.first_input_by_id.nil?
+      attrs[:first_input_by_id] = current_user.id
+      attrs[:first_input_at] = Time.current
+      attrs[:last_edited_by_id] = current_user.id
+      attrs[:last_edited_at] = Time.current
+    else
+      attrs[:last_edited_by_id] = current_user.id
+      attrs[:last_edited_at] = Time.current
+    end
+
+    if @score.update(attrs)
       @registration.update(is_attending: true)
       redirect_to show_manage_score_path(@score.slug), notice: 'Nilai telah sukses dirubah.'
     else

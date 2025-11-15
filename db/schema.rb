@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_14_034656) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_15_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -205,7 +205,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_034656) do
     t.text "result_report_data"
     t.integer "result_report_status", default: 0
     t.string "result_report_slug"
+    t.bigint "first_input_by_id"
+    t.datetime "first_input_at"
+    t.bigint "last_edited_by_id"
+    t.datetime "last_edited_at"
     t.index ["code"], name: "index_scores_on_code", unique: true
+    t.index ["first_input_by_id"], name: "index_scores_on_first_input_by_id"
+    t.index ["last_edited_by_id"], name: "index_scores_on_last_edited_by_id"
     t.index ["registration_id"], name: "index_scores_on_registration_id", unique: true
     t.index ["result_report_slug"], name: "index_scores_on_result_report_slug", unique: true
     t.index ["slug"], name: "index_scores_on_slug", unique: true
@@ -277,4 +283,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_14_034656) do
   add_foreign_key "registrations", "users"
   add_foreign_key "result_docs", "exams"
   add_foreign_key "scores", "registrations"
+  add_foreign_key "scores", "users", column: "first_input_by_id"
+  add_foreign_key "scores", "users", column: "last_edited_by_id"
 end

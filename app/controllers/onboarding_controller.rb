@@ -4,6 +4,7 @@ class OnboardingController < ApplicationController
 
   def new
     @user_detail = UserDetail.new
+    @available_ranks = current_user.is_police? ? UserDetail.ranks_for_police : UserDetail.ranks_for_pns
   end
 
   def create
@@ -17,10 +18,6 @@ class OnboardingController < ApplicationController
     end
     
     @user_detail = current_user.build_user_detail(user_detail_params)
-
-    unless current_user.is_police?
-      @user_detail.is_operator_granted = true
-    end
 
     ActiveRecord::Base.transaction do
       user_detail_saved = @user_detail.save!

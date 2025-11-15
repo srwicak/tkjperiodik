@@ -3,6 +3,7 @@ class Module::ProfilesController < ApplicationController
   before_action :set_profile
   def edit
     @url = edit_module_profile_path
+    @available_ranks = current_user.is_police? ? UserDetail.ranks_for_police : UserDetail.ranks_for_pns
   end
 
   def update

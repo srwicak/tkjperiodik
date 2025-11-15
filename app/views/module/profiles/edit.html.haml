@@ -26,21 +26,21 @@
                   = form.text_field :date_of_birth, value: @user_detail.date_of_birth&.strftime('%d-%m-%Y'), placeholder: "DD-MM-YYYY (contoh: 17-08-1945)", class: "input input-bordered my-2 w-full", maxlength: 10, id: "date_of_birth_field"
                   %p.text-xs.text-gray-500.mt-1.italic Format: DD-MM-YYYY (contoh: 17-08-1945)
 
-            - if current_user.is_police?
-              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Pangkat
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
-                  = form.select :rank, UserDetail.ranks.keys.map { |key| [key.humanize.upcase, key] }, { include_blank: 'Pilih Pangkat' }, class: "select select-bordered my-2 w-full"
-              
-              
-              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jabatan
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= form.text_field :position, class: "input input-bordered my-2 w-full"
-        
-              %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kesatuan
-                %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
-                  = form.select :unit, UserDetail.units.keys.map { |key| [key.humanize.upcase, key] }, { include_blank: 'Pilih Kesatuan' }, class: "select select-bordered my-2 w-full"
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Pangkat
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = form.select :rank, @available_ranks.keys.map { |key| [key, key] }, { include_blank: 'Pilih Pangkat' }, class: "select select-bordered my-2 w-full"
+            
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jabatan
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = form.text_field :position, class: "input input-bordered my-2 w-full", placeholder: "Masukkan jabatan atau tanda \"-\" jika tidak ada"
+      
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Satuan Kerja
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = form.select :unit, UserDetail.units.keys.map { |key| [key, key] }, { include_blank: 'Pilih Satuan Kerja' }, class: "select select-bordered my-2 w-full"
                 
             %tr( class="transition-colors duration-300 hover:bg-slate-50" )
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kata sandi

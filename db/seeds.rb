@@ -15,7 +15,7 @@ example_staff_count = 10
 # The magic happens here, xoxo :D
 # The seeds only worked in development
 if Rails.env.development?
-  puts "Seed initialization for TKJ BERKALA+"
+  puts "Seed initialization for TKJ PERIODIK+"
   puts "==========================================================="
 
   print "Are you sure you want to delete all data before seeding? (y[es]/n[o]/a[dd]): "
@@ -114,6 +114,9 @@ if Rails.env.development?
       if staff.is_verified? && staff.active?
         UserDetail.find_or_create_by(user: staff) do |user_detail|
           user_detail.name = Faker::Name.name
+          user_detail.rank = (22...39).to_a.sample  # PNS ranks 22-38
+          user_detail.unit = (0...24).to_a.sample
+          user_detail.position = ["STAFF", "PEGAWAI", "ADMINISTRASI", "-"].sample
           user_detail.gender = [true, false].sample
           user_detail.is_operator_granted = [true, false].sample
           user_detail.is_superadmin_granted = [true, false].sample

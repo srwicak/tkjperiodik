@@ -5,6 +5,7 @@ module UserDetailEnums
     enum person_status: { police: 0, staff: 1 }
 
     enum rank: {
+      # Pangkat POLRI
       # Tamtama
       BHARADA: 0,
       BHARATU: 1,
@@ -32,6 +33,29 @@ module UserDetailEnums
       IRJEN: 19,
       KOMJEN: 20,
       JENDERAL: 21,
+
+      # Pangkat PNS
+      # Golongan I (Juru)
+      "Juru Muda": 22,
+      "Juru Muda Tingkat I": 23,
+      "Juru": 24,
+      "Juru Tingkat I": 25,
+      # Golongan II (Pengatur)
+      "Pengatur Muda": 26,
+      "Pengatur Muda Tingkat I": 27,
+      "Pengatur": 28,
+      "Pengatur Tingkat I": 29,
+      # Golongan III (Penata)
+      "Penata Muda": 30,
+      "Penata Muda Tingkat I": 31,
+      "Penata": 32,
+      "Penata Tingkat I": 33,
+      # Golongan IV (Pembina)
+      "Pembina": 34,
+      "Pembina Tingkat I": 35,
+      "Pembina Utama Muda": 36,
+      "Pembina Utama Madya": 37,
+      "Pembina Utama": 38,
     }
 
     # Scope atau method tambahan untuk memudahkan pengelompokan
@@ -40,6 +64,15 @@ module UserDetailEnums
     scope :pama, -> { where(rank: [ranks[:IPDA], ranks[:IPTU], ranks[:AKP]]) }
     scope :pamen, -> { where(rank: [ranks[:KOMPOL], ranks[:AKBP], ranks[:KOMBES]]) }
     scope :pati, -> { where(rank: [ranks[:BRIGJEN], ranks[:IRJEN], ranks[:KOMJEN], ranks[:JENDERAL]]) }
+
+    # Helper method untuk mendapatkan pangkat berdasarkan tipe user
+    def self.ranks_for_police
+      ranks.select { |key, _| key.to_s.match?(/^[A-Z]+$/) }
+    end
+
+    def self.ranks_for_pns
+      ranks.reject { |key, _| key.to_s.match?(/^[A-Z]+$/) }
+    end
 
     def group
       case rank
@@ -53,6 +86,14 @@ module UserDetailEnums
         "Perwira Menengah (Pamen)"
       when "BRIGJEN", "IRJEN", "KOMJEN", "JENDERAL"
         "Perwira Tinggi (Pati)"
+      when "Juru Muda", "Juru Muda Tingkat I", "Juru", "Juru Tingkat I"
+        "Golongan I (Juru)"
+      when "Pengatur Muda", "Pengatur Muda Tingkat I", "Pengatur", "Pengatur Tingkat I"
+        "Golongan II (Pengatur)"
+      when "Penata Muda", "Penata Muda Tingkat I", "Penata", "Penata Tingkat I"
+        "Golongan III (Penata)"
+      when "Pembina", "Pembina Tingkat I", "Pembina Utama Muda", "Pembina Utama Madya", "Pembina Utama"
+        "Golongan IV (Pembina)"
       else
         "Unknown"
       end

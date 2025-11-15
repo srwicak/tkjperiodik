@@ -13,7 +13,7 @@ class GenerateResultReportJob < ApplicationJob
     # Buat URL QR dari slug
     qr_url = Rails.application.routes.url_helpers.result_report_slug_url(
       score.result_report_slug,
-      host: "https://tkjberkala.com" # ganti sesuai production host
+      host: "https://tkjperiodik.com" # ganti sesuai production host
     )
 
     # Generate QR PNG IO

@@ -14,7 +14,21 @@
     
     %tr( class="transition-colors duration-300 hover:bg-slate-50" )
       %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Terakhir diubah
-      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= I18n.l(@score.updated_at, format: :full_wib)
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+        - if @score.last_edited_by.present?
+          = link_to @score.last_edited_by.identity, show_manage_user_active_path(@score.last_edited_by.slug)
+          = " — " + I18n.l(@score.last_edited_at || @score.updated_at, format: :full_wib)
+        - else
+          = I18n.l(@score.updated_at, format: :full_wib)
+
+    %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Pertama diinput
+      %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+        - if @score.first_input_by.present?
+          = link_to @score.first_input_by.identity, show_manage_user_active_path(@score.first_input_by.slug)
+          = " — " + I18n.l(@score.first_input_at, format: :full_wib)
+        - else
+          Tidak tersedia
     
     %tr( class="transition-colors duration-300 hover:bg-slate-50" )
       %td( scope="col" class="h-12 px-6 text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="2" ) Catatan
