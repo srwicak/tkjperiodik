@@ -14,7 +14,24 @@
           %i.ri-information-line
           %span Belum ada jadwal ujian yang tersedia.
       - else
-        = form_with url: new_module_exam_path(@exam.slug), method: :post, local: true, id: "registration-form", data: { dob: @user.user_detail&.date_of_birth } do |f|
+        = form_with url: new_module_exam_path(@exam.slug), method: :post, local: true, id: "registration-form", data: { dob: @user.user_detail&.date_of_birth&.strftime('%Y-%m-%d') } do |f|
+          .divider.divider-start Data Tinggi & Berat Badan
+          .mb-8
+            %p.text-sm.text-gray-600.mb-4 Masukkan tinggi badan dan berat badan Anda saat ini untuk keperluan ujian.
+            .grid.grid-cols-2.gap-4
+              .form-control
+                %label.label
+                  %span.label-text.font-semibold
+                    Tinggi Badan (cm)
+                    %span.text-error *
+                = f.number_field :tb, class: "input input-bordered w-full", placeholder: "Contoh: 170", required: true, min: 100, max: 250, id: "tb_field"
+              .form-control
+                %label.label
+                  %span.label-text.font-semibold
+                    Berat Badan (kg)
+                    %span.text-error *
+                = f.number_field :bb, class: "input input-bordered w-full", placeholder: "Contoh: 65", required: true, min: 30, max: 200, id: "bb_field"
+
           .divider.divider-start Pilih Jadwal Ujian
 
           .mb-8 
@@ -85,7 +102,7 @@
           %span.font-bold Tanggal lahir Anda belum diisi. Silakan lengkapi profil Anda terlebih dahulu untuk dapat mendaftar ujian.
           %a.btn.btn-error.ml-4{ href: edit_module_profile_path } Lengkapi Profil
       - else
-        %button.btn.btn-lg.btn-success.w-full.text-white.font-bold{ onclick: "confirm_modal.showModal()" } DAFTAR UJIAN
+        %button.btn.btn-lg.btn-success.w-full.text-white.font-bold{ type: "button", onclick: "validateAndShowModal()" } DAFTAR UJIAN
 
   %dialog#confirm_modal.modal
     .modal-box
@@ -98,6 +115,57 @@
         %button.btn.btn-success.grow.text-white.uppercase{ type: "button", onclick: "document.getElementById('registration-form').submit()" } Konfirmasi
 
 :javascript
+  // Validate TB and BB before showing modal
+  function validateAndShowModal() {
+    const tbField = document.getElementById('tb_field');
+    const bbField = document.getElementById('bb_field');
+    const tbValue = tbField.value.trim();
+    const bbValue = bbField.value.trim();
+    
+    // Check if fields are empty
+    if (!tbValue || !bbValue) {
+      let errorMessage = 'Harap lengkapi data berikut:\n';
+      if (!tbValue) errorMessage += '- Tinggi Badan\n';
+      if (!bbValue) errorMessage += '- Berat Badan\n';
+      
+      alert(errorMessage);
+      
+      // Focus on first empty field
+      if (!tbValue) {
+        tbField.focus();
+      } else if (!bbValue) {
+        bbField.focus();
+      }
+      return false;
+    }
+    
+    // Validate TB range
+    const tb = parseInt(tbValue);
+    if (tb < 100 || tb > 250) {
+      alert('Tinggi badan harus antara 100-250 cm');
+      tbField.focus();
+      return false;
+    }
+    
+    // Validate BB range
+    const bb = parseInt(bbValue);
+    if (bb < 30 || bb > 200) {
+      alert('Berat badan harus antara 30-200 kg');
+      bbField.focus();
+      return false;
+    }
+    
+    // Check if a date is selected
+    const selectedDate = document.querySelector('input[name="selected_date"]:checked');
+    if (!selectedDate) {
+      alert('Silakan pilih tanggal ujian terlebih dahulu');
+      return false;
+    }
+    
+    // All validations passed, show modal
+    confirm_modal.showModal();
+  }
+  
   // Calculate age at specific date
   // Fixed for Safari/WebKit compatibility
   function calculateAge(dob, examDate) {

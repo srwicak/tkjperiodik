@@ -31,7 +31,7 @@ class UserDetail < ApplicationRecord
   include UserDetailMappings
 
   validates :user, presence: true
-  validates :name, presence: true, format: { with: /\A[a-zA-Z.,'\- ]+\z/, message: "hanya boleh berisi alfabet, titik, koma, apostrof, dan tanda hubung" }
+  validates :name, presence: true, format: { with: /\A[a-zA-Z.,'\'\- ]+\z/, message: "hanya boleh berisi alfabet, titik, koma, apostrof, dan tanda hubung" }
 
   validates :gender, inclusion: { in: [true, false] }
   validates :rank, presence: true

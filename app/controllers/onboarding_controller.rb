@@ -38,6 +38,7 @@ class OnboardingController < ApplicationController
       @user_detail.errors.add(:email, "telah digunakan. Masukkan email lain")
     end
 
+    @available_ranks = current_user.is_police? ? UserDetail.ranks_for_police : UserDetail.ranks_for_pns
     render :new, status: :unprocessable_entity
   end
 

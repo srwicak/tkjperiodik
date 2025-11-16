@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_15_123000) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_16_104423) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -174,6 +174,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_15_123000) do
     t.integer "registration_type"
     t.boolean "is_attending"
     t.integer "golongan"
+    t.integer "tb"
+    t.integer "bb"
     t.index ["exam_session_id"], name: "index_registrations_on_exam_session_id"
     t.index ["slug"], name: "index_registrations_on_slug", unique: true
     t.index ["user_id", "exam_session_id"], name: "index_registrations_on_user_id_and_exam_session_id", unique: true

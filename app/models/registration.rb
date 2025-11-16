@@ -3,12 +3,14 @@
 # Table name: registrations
 #
 #  id                :bigint           not null, primary key
+#  bb                :integer
 #  golongan          :integer
 #  is_attending      :boolean
 #  pdf_data          :text
 #  pdf_status        :integer
 #  registration_type :integer
 #  slug              :string
+#  tb                :integer
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  exam_session_id   :bigint           not null
@@ -41,6 +43,8 @@ class Registration < ApplicationRecord
   # 2025 Update
   # This version is more robust and handles various edge cases better.
   validates :user_id, uniqueness: { scope: :exam_session_id, message: "sudah terdaftar di sesi ini" }
+  validates :tb, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 300 }, allow_nil: true
+  validates :bb, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 500 }, allow_nil: true
 
   before_save :set_slug, if: :new_record?
   after_create :increment_session_size

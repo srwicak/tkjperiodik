@@ -146,6 +146,10 @@ class Module::ExamsController < ApplicationController
         end
       end
       
+      # Set TB and BB from params
+      registration.tb = params[:tb] if params[:tb].present?
+      registration.bb = params[:bb] if params[:bb].present?
+      
       registration.save!
 
       redirect_to show_module_history_path(registration.slug), notice: "Pendaftaran Berhasil! Segera cetak berkas pendaftaran!"

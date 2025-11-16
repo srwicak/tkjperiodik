@@ -231,10 +231,14 @@ class Manage::Score::ScoresController < ApplicationController
     @exam_session = @registration.exam_session
     @exam = @exam_session.exam
     @user = @registration.user
+    @user_detail = @user.user_detail
 
     # Calculate age and check golongan
     @age_at_exam = @registration.age_at_exam
     @golongan = @registration.golongan
+    
+    # Get gender (true = male, false = female)
+    @is_male = @user_detail.gender
     
     # Determine if should use simplified form (golongan 4 or age >= 51)
     @use_simplified_form = (@golongan == 4) || (@age_at_exam && @age_at_exam >= 51)
@@ -256,6 +260,11 @@ class Manage::Score::ScoresController < ApplicationController
       }
     else
       # Full form: Ujian Kesamaptaan A + B
+      # For Kesamaptaan B, use pull-ups for males, chinning for females
+      upper_body_exercise = @is_male ? 
+        { "code": "pull_ups", "subject": "PULL-UPS" } : 
+        { "code": "chinning", "subject": "CHINNING" }
+      
       @score_sheet = {
         "exam_type": "kesamaptaan_full",
         "categories": [
@@ -270,7 +279,7 @@ class Manage::Score::ScoresController < ApplicationController
             "code": "kesamaptaan_b",
             "name": "Ujian Kesamaptaan B",
             "content": [
-              { "code": "pull_ups", "subject": "PULL-UPS" },
+              upper_body_exercise,
               { "code": "sit_ups", "subject": "SIT-UPS" },
               { "code": "push_ups", "subject": "PUSH-UPS" },
               { "code": "shuttle_run", "subject": "SHUTTLE RUN" }

@@ -27,6 +27,22 @@
               %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
                 %span.badge.badge-lg{ class: @registration.golongan == 4 ? 'badge-error' : (@registration.golongan == 3 ? 'badge-warning' : (@registration.golongan == 2 ? 'badge-info' : 'badge-success')) }
                   Golongan #{@registration.golongan}
+          
+          %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Tinggi Badan (TB)
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+              - if @registration.tb.present?
+                %span.font-semibold= "#{@registration.tb} cm"
+              - else
+                %span.text-gray-500.italic Belum dimasukkan
+          
+          %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" ) Berat Badan (BB)
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+              - if @registration.bb.present?
+                %span.font-semibold= "#{@registration.bb} kg"
+              - else
+                %span.text-gray-500.italic Belum dimasukkan
       
       .divider.divider-start.uppercase.text-xl.font-black detil ujian
       %p.mb-4.text-sm Mohon untuk dapat hadir pada hari ujian dan datang sebelum waktu yang ditentukan atau mengikuti informasi lanjut ujian.

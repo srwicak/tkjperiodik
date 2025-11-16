@@ -3,12 +3,14 @@
 # Table name: registrations
 #
 #  id                :bigint           not null, primary key
+#  bb                :integer
 #  golongan          :integer
 #  is_attending      :boolean
 #  pdf_data          :text
 #  pdf_status        :integer
 #  registration_type :integer
 #  slug              :string
+#  tb                :integer
 #  created_at        :datetime         not null
 #  updated_at        :datetime         not null
 #  exam_session_id   :bigint           not null

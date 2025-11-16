@@ -11,6 +11,46 @@
     .max-w-4xl.w-full
       = render "exam_user_info"
 
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 informasi penilai
+
+    .max-w-4xl.w-full
+      %table.w-full.text-left.border.border-separate.rounded.border-slate-200{ cellspacing: "0" }
+        %tbody
+          %tr
+            %th.h-12.px-6.text-sm.stroke-slate-700.text-slate-700.bg-slate-100.rounded-t.font-bold{ scope: "col", colspan: "2" } Informasi Penilai
+
+          %tr.transition-colors.duration-300.hover:bg-slate-50
+            %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ class: "w-[200px]" } NRP Penginput Nilai
+            %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+              - if @score.first_input_by.present?
+                = link_to @score.first_input_by.identity, show_manage_user_active_path(@score.first_input_by.slug), class: "link link-hover text-blue-600"
+              - else
+                %span.text-gray-400.italic Belum ada pengisian nilai
+
+          %tr.transition-colors.duration-300.hover:bg-slate-50
+            %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ class: "w-[200px]" } Waktu Pembuatan Nilai
+            %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+              - if @score.first_input_at.present?
+                = I18n.l(@score.first_input_at, format: :full_wib)
+              - else
+                %span.text-gray-400.italic Belum ada pengisian nilai
+
+          %tr.transition-colors.duration-300.hover:bg-slate-50
+            %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ class: "w-[200px]" } NRP Pengubah Terakhir
+            %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+              - if @score.last_edited_by.present?
+                = link_to @score.last_edited_by.identity, show_manage_user_active_path(@score.last_edited_by.slug), class: "link link-hover text-blue-600"
+              - else
+                %span.text-gray-400.italic Belum ada perubahan nilai
+
+          %tr.transition-colors.duration-300.hover:bg-slate-50
+            %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{ class: "w-[200px]" } Waktu Terakhir Pengubahan
+            %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+              - if @score.last_edited_at.present?
+                = I18n.l(@score.last_edited_at, format: :full_wib)
+              - else
+                %span.text-gray-400.italic Belum ada perubahan nilai
+
     .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 ubah nilai ujian
 
     .max-w-4xl.w-full
