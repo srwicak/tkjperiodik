@@ -99,9 +99,29 @@
 
 :javascript
   // Calculate age at specific date
+  // Fixed for Safari/WebKit compatibility
   function calculateAge(dob, examDate) {
-    const birthDate = new Date(dob);
-    const targetDate = new Date(examDate);
+    // Parse dates manually to avoid Safari timezone issues
+    // Expected format: YYYY-MM-DD
+    const parseDateSafely = (dateStr) => {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        // Create date with year, month (0-indexed), day
+        // This avoids timezone issues in Safari
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      }
+      // Fallback: try native parsing
+      return new Date(dateStr);
+    };
+    
+    const birthDate = parseDateSafely(dob);
+    const targetDate = parseDateSafely(examDate);
+    
+    // Validate dates
+    if (isNaN(birthDate.getTime()) || isNaN(targetDate.getTime())) {
+      console.error('Invalid date format:', dob, examDate);
+      return { years: 0, months: 0, days: 0 };
+    }
     
     let years = targetDate.getFullYear() - birthDate.getFullYear();
     let months = targetDate.getMonth() - birthDate.getMonth();
