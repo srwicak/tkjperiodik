@@ -1,12 +1,12 @@
 %div.max-w-xl.mx-auto.text-center.bg-white.px-4.sm:px-8.py-10.rounded-xl.shadow(x-data="search()")
   %header.mb-4
     %h1.text-2xl.font-bold.mb-2 Masukkan Identitas Peserta
-    %p.text-slate-500 Masukkan NRP lengkap
+    %p.text-slate-500 Masukkan "NRP/NIP" lengkap
 
   %form#search-form{ "@submit.prevent": "performSearch" }
     .flex.flex-row.justify-center.space-x-2
       .flex
-        %input{ type: "text", placeholder: "Masukkan NRP", "x-model": "identity", class: "w-[250px] p-2 border border-gray-300 rounded input input-bordered text-center", oninput: "this.value = this.value.replace(/[^0-9]/g, '');"  }
+        %input{ type: "text", placeholder: "Masukkan NRP/NIP", "x-model": "identity", class: "w-[250px] p-2 border border-gray-300 rounded input input-bordered text-center", oninput: "this.value = this.value.replace(/[^0-9]/g, '');"  }
       .flex
         %button{ type: "submit", class: "btn bg-blue-500 hover:bg-blue-600 text-white uppercase rounded" } 
           %i.ri-search-line
@@ -30,7 +30,7 @@
               %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
                 %p{ "x-text": "userName" }
             %tr
-              %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500 NRP
+              %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500 NRP/NIP
               %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
                 %p{ "x-text": "userIdentity" }
         %table.text-left.border.border-collapse.rounded-xl.sm:border-separate.border-slate-200.bg-white.w-full{ cellspacing: "0" }  
@@ -81,7 +81,7 @@
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        fetch('/kelola/nilai-nrp/data', {
+        fetch('/kelola/nilai-id/data', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

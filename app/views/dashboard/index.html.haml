@@ -2,7 +2,7 @@
   Beranda - Dasbor
 
 - content_for :content do
-  - if @admin || @police
+  - unless @admin && !@police
     .my-4.md:my-8.bg-gradient-to-br.from-white.to-red-50.rounded-2xl.shadow-xl.text-slate-700.border.border-red-100.p-4.md:p-8.w-full.max-w-2xl.mx-auto{ class:"hover:shadow-2xl transition-all duration-300" }
       - if @nearest_exam
         .text-center.mb-6

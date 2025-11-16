@@ -58,7 +58,17 @@ class Superadmin::ParticipantsController < ApplicationController
   def register_participant(participant)
     Exam.transaction do
       session = find_available_session
-      session.registrations.create!(user: participant, registration_type: params[:reg_type])
+      registration = session.registrations.build(user: participant, registration_type: params[:reg_type])
+      
+      # Calculate and set golongan
+      if participant.user_detail.date_of_birth.present? && session.exam_schedule&.exam_date.present?
+        age_data = Registration.calculate_age_at_date(participant.user_detail.date_of_birth, session.exam_schedule.exam_date)
+        if age_data
+          registration.golongan = Registration.age_category(age_data[:years]).to_i
+        end
+      end
+      
+      registration.save!
     end
   end
 

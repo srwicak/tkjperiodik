@@ -18,7 +18,8 @@
                 %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{ class: "w-[20px]" }= index + 1
                 %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500= item[:subject]
                 %td.h-12.p-2.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center{ class: "w-[120px]" }
-                  %input.input.input-bordered.text-center.p-2{ class: "w-[60px]", inputmode: "numeric", oninput: "this.value = this.value.replace(/[^0-9]/g, '');", maxlength: "3", value: "", "x-model": "score['#{item[:code]}']", "@change": "calculateScore()" }
+                  - is_first_input = (category == @categories.first && index == 0)
+                  %input.input.input-bordered.text-center.p-2{ class: "w-[60px]", inputmode: "numeric", oninput: "this.value = this.value.replace(/[^0-9]/g, '');", maxlength: "3", value: "", "x-model": "score['#{item[:code]}']", "@change": "calculateScore()", autofocus: is_first_input }
 
       %tbody
         %th(scope="col" class="h-12 p-2 text-center uppercase text-sm stroke-slate-700 text-slate-700 bg-slate-100 rounded-t font-bold" colspan="5") catatan opsional (Maksimal 1000 karakter)

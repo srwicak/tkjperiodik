@@ -8,7 +8,7 @@ class Manage::Score::ScoreByNrpsController < ApplicationController
     user = User.find_by(identity: params[:identity])
 
     if user
-      if user.is_police?
+      if user.is_police? || user.is_staff?
         registrations = Registration.includes(exam_session: :exam, user: :user_detail)
           .where(users: { identity: params[:identity] })
           .order(created_at: :desc)
@@ -37,7 +37,7 @@ class Manage::Score::ScoreByNrpsController < ApplicationController
           render json: { success: false, message: 'Pengguna belum pernah daftar ujian apapun.' }
         end
       else
-        render json: { success: false, message: 'Pengguna ini bukan polisi.' }
+        render json: { success: false, message: 'Pengguna ini bukan polisi atau staf.' }
       end
     else
       render json: { success: false, message: 'Pengguna tidak ditemukan.' }

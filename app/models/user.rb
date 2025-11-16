@@ -115,6 +115,10 @@ class User < ApplicationRecord
     identity.length == 8
   end
 
+  def is_staff?
+    identity.length == 18
+  end
+
   # Check if the length of the identity is either 8 or 18, and add an error if it's not.
   def identity_length_must_be_valid
     unless [8, 18].include?(identity&.length)

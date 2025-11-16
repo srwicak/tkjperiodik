@@ -186,6 +186,7 @@ Rails.application.routes.draw do
         get "/", to: "manage/score/scores#index", as: :index_manage_score
         post "cari", to: "manage/score/scores#search", as: :search_manage_score
         get "data", to: "manage/score/scores#data", as: :data_manage_score
+        get ":code/isi", to: "manage/score/qr_access#show", as: :qr_access_manage_score, constraints: { code: /[A-Z0-9\-]+/ }
         get "/:slug", to: "manage/score/scores#show", as: :show_manage_score
         get "/:slug/buat-dokumen", to: "manage/score/scores#generate_doc", as: :generate_doc_manage_score
         get "/:slug/unduh", to: "manage/score/scores#download_doc", as: :download_doc_manage_score
@@ -194,7 +195,7 @@ Rails.application.routes.draw do
         put "/:slug/ubah", to: "manage/score/scores#update"
       end
 
-      scope "nilai-nrp" do
+      scope "nilai-id" do
         get "/", to: "manage/score/score_by_nrps#index", as: :index_manage_score_by_nrp
         post "data", to: "manage/score/score_by_nrps#data", as: :data_manage_score_by_nrp
       end

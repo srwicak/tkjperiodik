@@ -27,12 +27,13 @@
 
           = render "score_spoiler"
 
-    - if !@is_scored
-      .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 dokumen hasil
-
-      .max-w-4xl.w-full
-        .p-6.bg-white.rounded-xl
-          =render "document"
+    -# Temporarily hidden - document section
+    -# - if !@is_scored
+    -#   .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 dokumen hasil
+    -#
+    -#   .max-w-4xl.w-full
+    -#     .p-6.bg-white.rounded-xl
+    -#       =render "document"
         
         
 = render "layouts/dashboard"

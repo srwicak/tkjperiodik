@@ -31,13 +31,6 @@
       %tr( class="transition-colors duration-300 hover:bg-slate-50" )
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jabatan
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )#{@user.user_detail.position}
-      
-      - if @golongan.present?
-        %tr( class="transition-colors duration-300 hover:bg-slate-50" )
-          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Golongan Saat Ujian
-          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
-            %span.badge.badge-lg{ class: @golongan == 4 ? 'badge-error' : (@golongan == 3 ? 'badge-warning' : (@golongan == 2 ? 'badge-info' : 'badge-success')) }
-              Golongan #{@golongan}
 
       %tr
         %th( scope="col" class="h-12 px-6 text-sm border-l first:border-l-0 stroke-slate-700 text-slate-700 bg-slate-100 font-bold" colspan="2" ) 
@@ -66,3 +59,23 @@
       %tr( class="transition-colors duration-300 hover:bg-slate-50" )
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Sesi Ujian
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )#{I18n.l(@exam_session.start_time, format: :simple_no_sec)} - #{I18n.l(@exam_session.end_time, format: :time_only)} WIB
+      
+      %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Golongan Saat Ujian
+        %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+          - if @golongan.present?
+            - golongan_text = case @golongan
+            - when 1
+              - "Golongan 1 (Di bawah 31 tahun)"
+            - when 2
+              - "Golongan 2 (31-40 tahun)"
+            - when 3
+              - "Golongan 3 (41-50 tahun)"
+            - when 4
+              - "Golongan 4 (51 tahun ke atas)"
+            - else
+              - "Golongan #{@golongan}"
+            %span.badge.badge-lg{ class: @golongan == 4 ? 'badge-error' : (@golongan == 3 ? 'badge-warning' : (@golongan == 2 ? 'badge-info' : 'badge-success')) }
+              = golongan_text
+          - else
+            %span.text-gray-500.italic Data golongan belum tersedia (pendaftaran lama)

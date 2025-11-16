@@ -1,3 +1,5 @@
+require 'rqrcode'
+
 class GeneratePdfJob < ApplicationJob
   queue_as :default
 
@@ -44,8 +46,29 @@ class GeneratePdfJob < ApplicationJob
       date_of_birth_formatted = I18n.l(user_detail.date_of_birth, format: :default).upcase
     end
     
+    # Golongan saat ujian
+    golongan = ""
+    if registration.golongan.present?
+      case registration.golongan
+      when 1
+        golongan = "1 (USIA 18-30 TAHUN)"
+      when 2
+        golongan = "2 (USIA 31-40 TAHUN)"
+      when 3
+        golongan = "3 (USIA 41-50 TAHUN)"
+      when 4
+        golongan = "4 (USIA 51 TAHUN KE ATAS)"
+      else
+        golongan = registration.golongan.to_s
+      end
+    end
+    
     # Registration code for bottom of each page
     code = "#{registration.score.code[0, 3]}-#{registration.score.code[-4, 4]}"
+    
+    # Generate QR code for quick access - use Rails URL helper for dynamic domain
+    qr_code_url = Rails.application.routes.url_helpers.qr_access_manage_score_url(code: code, host: ENV.fetch('APP_HOST', 'localhost:3000'))
+    qrcode = RQRCode::QRCode.new(qr_code_url)
     
     # 2025 Update - Exam name
     exam_name = exam.name.upcase
@@ -79,8 +102,8 @@ class GeneratePdfJob < ApplicationJob
     end
 
     # Template paths
-    template_a_path = Rails.root.join("private", "assets", "templates", "ukj-a.pdf")
-    template_b_path = Rails.root.join("private", "assets", "templates", "ukj-b.pdf")
+    template_a_path = Rails.root.join("private", "assets", "templates", "tkj-a.pdf")
+    template_b_path = Rails.root.join("private", "assets", "templates", "tkj-b.pdf")
     output_path = Rails.root.join("tmp", "pendaftaran_#{SecureRandom.hex}.pdf")
 
     unless File.exist?(template_a_path)
@@ -131,12 +154,14 @@ class GeneratePdfJob < ApplicationJob
         pdf.text_box unit, at: [x_pos, y_pos], size: 12
         y_pos -= 32
         pdf.text_box date_of_birth_formatted, at: [x_pos, y_pos], size: 12
+        y_pos -= 32
+        pdf.text_box golongan, at: [x_pos, y_pos], size: 12
         
-        # Print date (Jakarta, tanggal ujian)
-        pdf.text_box print_date, at: [350, 470], size: 12, width: 220, align: :center, style: :bold
+        # Print date (Jakarta, tanggal ujian) - lowered by 32px
+        pdf.text_box print_date, at: [350, 438], size: 12, width: 220, align: :center, style: :bold
         
-        # Signer box for Form A (right side of page)
-        signer_y = 440
+        # Signer box for Form A (right side of page) - lowered by 32px
+        signer_y = 408
         signer_x = 350
         
         # Jabatan Polisi (kalau ada)
@@ -160,6 +185,9 @@ class GeneratePdfJob < ApplicationJob
         if form_a_name.present?
           pdf.text_box form_a_name, at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
           signer_y -= 20
+        else
+          # If no name, lower the line more
+          signer_y -= 30
         end
         
         # Garis
@@ -173,8 +201,32 @@ class GeneratePdfJob < ApplicationJob
           pdf.text_box form_a_rank_nrp, at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
         end
         
-        # Code at bottom
-        pdf.text_box code, at: [50, 50], size: 10
+        # QR Code and Code at bottom
+        # Generate QR code as PNG in memory
+        qr_png = qrcode.as_png(
+          bit_depth: 1,
+          border_modules: 0,
+          color_mode: ChunkyPNG::COLOR_GRAYSCALE,
+          color: 'black',
+          file: nil,
+          fill: 'white',
+          module_px_size: 3,
+          resize_exactly_to: false,
+          resize_gte_to: 60
+        )
+        
+        # Save QR code to temp file
+        qr_temp_path = Rails.root.join("tmp", "qr_#{SecureRandom.hex}.png")
+        IO.binwrite(qr_temp_path, qr_png.to_s)
+        
+        # Add QR code image above the text (same X position as code text: 24)
+        pdf.image qr_temp_path, at: [24, 96], width: 60, height: 60
+        
+        # Delete temp QR file
+        File.delete(qr_temp_path) if File.exist?(qr_temp_path)
+        
+        # Code at bottom (below QR code with 8px spacing)
+        pdf.text_box "KODE REGISTRASI: #{code}", at: [24, 28], size: 10
       end
 
       # Generate overlay for Form B (if needed)
@@ -208,12 +260,14 @@ class GeneratePdfJob < ApplicationJob
           pdf.text_box unit, at: [x_pos, y_pos], size: 12
           y_pos -= 32
           pdf.text_box date_of_birth_formatted, at: [x_pos, y_pos], size: 12
+          y_pos -= 32
+          pdf.text_box golongan, at: [x_pos, y_pos], size: 12
           
-          # Print date (Jakarta, tanggal ujian)
-          pdf.text_box print_date, at: [350, 270], size: 12, width: 220, align: :center, style: :bold
+          # Print date (Jakarta, tanggal ujian) - lowered by 32px
+          pdf.text_box print_date, at: [350, 238], size: 12, width: 220, align: :center, style: :bold
           
-          # Signer box for Form B (right side of page)
-          signer_y = 240
+          # Signer box for Form B (right side of page) - lowered by 32px
+          signer_y = 208
           signer_x = 350
           
           # Jabatan Polisi (kalau ada)
@@ -237,6 +291,9 @@ class GeneratePdfJob < ApplicationJob
           if form_b_name.present?
             pdf.text_box form_b_name, at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
             signer_y -= 20
+          else
+            # If no name, lower the line more
+            signer_y -= 30
           end
           
           # Garis
@@ -248,10 +305,32 @@ class GeneratePdfJob < ApplicationJob
           # Rank NRP
           if form_b_rank_nrp.present?
             pdf.text_box form_b_rank_nrp, at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
-          end
+          end          # QR Code and Code at bottom
+          # Generate QR code as PNG in memory
+          qr_png = qrcode.as_png(
+            bit_depth: 1,
+            border_modules: 0,
+            color_mode: ChunkyPNG::COLOR_GRAYSCALE,
+            color: 'black',
+            file: nil,
+            fill: 'white',
+            module_px_size: 3,
+            resize_exactly_to: false,
+            resize_gte_to: 60
+          )
           
-          # Code at bottom
-          pdf.text_box code, at: [50, 50], size: 10
+          # Save QR code to temp file
+          qr_temp_path = Rails.root.join("tmp", "qr_#{SecureRandom.hex}.png")
+          IO.binwrite(qr_temp_path, qr_png.to_s)
+          
+          # Add QR code image above the text (same X position as code text: 24)
+          pdf.image qr_temp_path, at: [24, 96], width: 60, height: 60
+          
+          # Delete temp QR file
+          File.delete(qr_temp_path) if File.exist?(qr_temp_path)
+          
+          # Code at bottom (below QR code with 8px spacing)
+          pdf.text_box "KODE REGISTRASI: #{code}", at: [24, 28], size: 10
         end
       end
 

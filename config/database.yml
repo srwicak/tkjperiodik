@@ -50,6 +50,6 @@ test:
 #
 production:
   <<: *default
-  database: siberdir_pangkatplus
-  username: siberdir_master
-  password: Jg^LV@G3l#?!
+  database: 
+  username: 
+  password: 

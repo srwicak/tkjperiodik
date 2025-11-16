@@ -2,107 +2,103 @@
   Riwayat Ujian - Dasbor
 
 - content_for :content do
-  - if !@police
-    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
-      %p.font-bold Mohon maaf laman ini hanya bisa diakses oleh personil Polisi.
-  - else
-    .max-w-4xl.mx-auto.w-full.my-8
-      %p.text-3xl.text-red-500.font-black.uppercase.mb-4 riwayat ujian
-      .divider.divider-end.text-sm.text-gray-400.font-semibold.mb-8.italic Pastikan hadir pada hari yang ditentukan
+  .max-w-4xl.mx-auto.w-full.my-8
+    %p.text-3xl.text-red-500.font-black.uppercase.mb-4 riwayat ujian
+    .divider.divider-end.text-sm.text-gray-400.font-semibold.mb-8.italic Pastikan hadir pada hari yang ditentukan
 
-      - if @registrations.empty?
-        .bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
-          %p.font-bold Anda belum mendaftar ujian apapun.
+    - if @registrations.empty?
+      .bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+        %p.font-bold Anda belum mendaftar ujian apapun.
 
-      - else
-        - upcoming = @registrations.select { |r| r.exam_session.end_time >= Time.current }
-        - past = @registrations.select { |r| r.exam_session.end_time < Time.current }
+    - else
+      - upcoming = @registrations.select { |r| r.exam_session.end_time >= Time.current }
+      - past = @registrations.select { |r| r.exam_session.end_time < Time.current }
 
-        - if upcoming.any?
-          .space-y-6
-            - upcoming.each do |registration|
-              - exam_session = registration.exam_session
-              - exam = exam_session.exam
-              .bg-white.shadow-lg.rounded-lg.overflow-hidden
-                .p-6
-                  %p.text-2xl.font-bold #{exam.name}
-                  %p.text.font-bold.text-gray-500 
-                    %i.ri-calendar-event-line
-                    #{I18n.l(exam_session.start_time, format: :date_only)}
-                  %p.text.font-bold.text-gray-500 
-                    %i.ri-time-line
-                    #{I18n.l(exam_session.start_time, format: :time_only)} - #{I18n.l(exam_session.end_time, format: :time_only)} WIB
+      - if upcoming.any?
+        .space-y-6
+          - upcoming.each do |registration|
+            - exam_session = registration.exam_session
+            - exam = exam_session.exam
+            .bg-white.shadow-lg.rounded-lg.overflow-hidden
+              .p-6
+                %p.text-2xl.font-bold #{exam.name}
+                %p.text.font-bold.text-gray-500 
+                  %i.ri-calendar-event-line
+                  #{I18n.l(exam_session.start_time, format: :date_only)}
+                %p.text.font-bold.text-gray-500 
+                  %i.ri-time-line
+                  #{I18n.l(exam_session.start_time, format: :time_only)} - #{I18n.l(exam_session.end_time, format: :time_only)} WIB
 
-                  .divider.mb-1.mt-1
-                  %p Waktu daftar: 
-                  %p.font-semibold #{I18n.l(registration.created_at, format: :default)} WIB
-                  .flex.flex-col.justify-end.mt-4.items-center.space-y-2{class: "md:flex-row md:space-x-2 md:space-y-0"} 
-                    - if registration.pdf_data.nil?
-                      %a.btn.bg-green-600.text-white{ class:"hover:bg-green-700", href: download_pdf_module_history_path(registration.slug), target: "_blank" }
-                        %i.ri-download-2-line
-                        Unduh Pendaftaran
+                .divider.mb-1.mt-1
+                %p Waktu daftar: 
+                %p.font-semibold #{I18n.l(registration.created_at, format: :default)} WIB
+                .flex.flex-col.justify-end.mt-4.items-center.space-y-2{class: "md:flex-row md:space-x-2 md:space-y-0"} 
+                  - if registration.pdf_data.nil?
+                    %a.btn.bg-green-600.text-white{ class:"hover:bg-green-700", href: download_pdf_module_history_path(registration.slug), target: "_blank" }
+                      %i.ri-download-2-line
+                      Unduh Pendaftaran
 
-                    - elsif registration.processing?
-                      %div.text-xs.text-gray-800
-                        %p Berkas masih diproses... 
-                        %p (mohon dicek berkala)
+                  - elsif registration.processing?
+                    %div.text-xs.text-gray-800
+                      %p Berkas masih diproses... 
+                      %p (mohon dicek berkala)
 
-                    - elsif registration.completed?
-                      %a.btn.bg-green-600.text-white{ class:"hover:bg-green-700", href: download_pdf_module_history_path(registration.slug), target: "_blank" }
-                        %i.ri-download-2-line
-                        Unduh Pendaftaran
+                  - elsif registration.completed?
+                    %a.btn.bg-green-600.text-white{ class:"hover:bg-green-700", href: download_pdf_module_history_path(registration.slug), target: "_blank" }
+                      %i.ri-download-2-line
+                      Unduh Pendaftaran
 
-                    - elsif registration.error?
-                      %div.text-xs
-                        %p.text-red-600 Terjadi Galat! 
-                        %p (segera hubungi operator)
-                    
-                    %a.btn.bg-indigo-600.text-white{ class:"hover:bg-indigo-700", href: show_module_history_path(registration.slug) }
-                      %i.ri-search-line
-                      Detil Ujian
+                  - elsif registration.error?
+                    %div.text-xs
+                      %p.text-red-600 Terjadi Galat! 
+                      %p (segera hubungi operator)
+                  
+                  %a.btn.bg-indigo-600.text-white{ class:"hover:bg-indigo-700", href: show_module_history_path(registration.slug) }
+                    %i.ri-search-line
+                    Detil Ujian
 
-        - if past.any?
-          .divider.divider-end.text-sm.text-gray-400.font-semibold.my-8.italic Ujian yang telah dilaksanakan
-          %div
-            - past.each do |registration|
-              - exam_session = registration.exam_session
-              - exam = exam_session.exam
-              - score_grade = registration.score&.score_grade
-              - score_number = registration.score&.score_number
-              .bg-white.shadow-lg.rounded-lg.overflow-hidden.my-6
-                .p-6
-                  %p.text-2xl.font-bold #{exam.name}
-                  %p.text.font-bold.text-gray-500 
-                    %i.ri-calendar-event-line
-                    #{I18n.l(exam_session.start_time, format: :date_only)}
-                  %p.text.font-bold.text-gray-500 
-                    %i.ri-time-line
-                    #{I18n.l(exam_session.start_time, format: :time_only)} - #{I18n.l(exam_session.end_time, format: :time_only)} WIB
+      - if past.any?
+        .divider.divider-end.text-sm.text-gray-400.font-semibold.my-8.italic Ujian yang telah dilaksanakan
+        %div
+          - past.each do |registration|
+            - exam_session = registration.exam_session
+            - exam = exam_session.exam
+            - score_grade = registration.score&.score_grade
+            - score_number = registration.score&.score_number
+            .bg-white.shadow-lg.rounded-lg.overflow-hidden.my-6
+              .p-6
+                %p.text-2xl.font-bold #{exam.name}
+                %p.text.font-bold.text-gray-500 
+                  %i.ri-calendar-event-line
+                  #{I18n.l(exam_session.start_time, format: :date_only)}
+                %p.text.font-bold.text-gray-500 
+                  %i.ri-time-line
+                  #{I18n.l(exam_session.start_time, format: :time_only)} - #{I18n.l(exam_session.end_time, format: :time_only)} WIB
 
-                  .divider.mb-1.mt-1
-                  %p Waktu daftar: 
-                  %p.font-semibold #{I18n.l(registration.created_at, format: :default)} WIB
-                  %div.flex.flex-wrap.gap-4.items-center.mb-2
-                    %span.text-gray-500 Nilai:
-                    - if score_grade.present?
-                      %span.font-bold.text-green-700= " #{score_grade}"
-                      %span.text-gray-500= " (#{score_number})"
-                    - else
-                      %span.text-yellow-700 Nilai belum tersedia
-                  .flex.flex-row.justify-end.mt-4.items-center.space-x-2{class: "md:space-x-2"}
-                    -# Temporarily hidden - print result buttons
-                    -# - if score_grade.present?
-                    -#   - if registration.score.result_report_slug.present?
-                    -#     = link_to result_report_slug_path(registration.score.result_report_slug), class: "btn bg-green-600 text-white hover:bg-green-700", target: "_blank" do
-                    -#       %i.ri-file-line
-                    -#       Lihat Hasil
-                    -#   - else
-                    -#     = button_to generate_result_report_path(registration.score.slug), method: :post, class: "btn bg-red-500 text-white hover:bg-red-600" do
-                    -#       %i.ri-printer-line
-                    -#       Cetak Hasil
+                .divider.mb-1.mt-1
+                %p Waktu daftar: 
+                %p.font-semibold #{I18n.l(registration.created_at, format: :default)} WIB
+                %div.flex.flex-wrap.gap-4.items-center.mb-2
+                  %span.text-gray-500 Nilai:
+                  - if score_grade.present?
+                    %span.font-bold.text-green-700= " #{score_grade}"
+                    %span.text-gray-500= " (#{score_number})"
+                  - else
+                    %span.text-yellow-700 Nilai belum tersedia
+                .flex.flex-row.justify-end.mt-4.items-center.space-x-2{class: "md:space-x-2"}
+                  -# Temporarily hidden - print result buttons
+                  -# - if score_grade.present?
+                  -#   - if registration.score.result_report_slug.present?
+                  -#     = link_to result_report_slug_path(registration.score.result_report_slug), class: "btn bg-green-600 text-white hover:bg-green-700", target: "_blank" do
+                  -#       %i.ri-file-line
+                  -#       Lihat Hasil
+                  -#   - else
+                  -#     = button_to generate_result_report_path(registration.score.slug), method: :post, class: "btn bg-red-500 text-white hover:bg-red-600" do
+                  -#       %i.ri-printer-line
+                  -#       Cetak Hasil
 
-                    = link_to show_module_history_path(registration.slug), class: "btn bg-indigo-600 text-white hover:bg-indigo-700" do
-                      %i.ri-search-line
-                      Detil Ujian
+                  = link_to show_module_history_path(registration.slug), class: "btn bg-indigo-600 text-white hover:bg-indigo-700" do
+                    %i.ri-search-line
+                    Detil Ujian
 
 = render "layouts/dashboard"

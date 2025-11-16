@@ -1,9 +1,7 @@
 class Module::ExamsController < ApplicationController
   before_action :check_admin_status
-  before_action :police_only, except: :index
   before_action :set_exam, only: %i[show new create]
   def index
-    @police = current_user.is_police?
     today = Date.today
     @exams = Exam.where("exam_date_end > ?", today).where(status: :active).order(:start_register)
   end
@@ -135,7 +133,18 @@ class Module::ExamsController < ApplicationController
       registration.registration_type = params[:reg_type] || 'berkala'
       
       # Set golongan based on age category
-      registration.golongan = params[:golongan] if params[:golongan].present?
+      if params[:golongan].present?
+        registration.golongan = params[:golongan]
+      else
+        # Calculate golongan as backup if not provided from form
+        if @user.user_detail.date_of_birth.present? && exam_date.present?
+          age_data = Registration.calculate_age_at_date(@user.user_detail.date_of_birth, exam_date)
+          if age_data
+            registration.golongan = Registration.age_category(age_data[:years]).to_i
+            Rails.logger.info "Golongan calculated server-side: #{registration.golongan} for user #{@user.id}"
+          end
+        end
+      end
       
       registration.save!
 
@@ -154,12 +163,6 @@ class Module::ExamsController < ApplicationController
 
 
   private
-
-  def police_only
-    unless current_user.is_police?
-      redirect_to index_module_exam_path and return
-    end
-  end
 
   def find_available_session(exam)
     tomorrow_start = Time.zone.now.beginning_of_day + 1.day

@@ -1,10 +1,8 @@
 class Module::HistoriesController < ApplicationController
   before_action :check_admin_status
-  before_action :set_is_police, except: [:download_pdf]
   before_action :set_registration, only: %i[show download_pdf]
   before_action :authorize_user, only: [:download_pdf]
   def index
-    @police = current_user.is_police?
     @registrations = Registration.where(user: current_user).order(created_at: :desc)
   end
 
@@ -36,10 +34,6 @@ class Module::HistoriesController < ApplicationController
 
   def set_registration
     @registration = Registration.find_by!(slug: params[:slug])
-  end
-
-  def set_is_police
-    @police = current_user.is_police?
   end
 
 
