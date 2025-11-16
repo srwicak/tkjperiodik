@@ -155,8 +155,9 @@ class ExamSchedule < ApplicationRecord
     current_date = exam_date
 
     while current_date <= end_date
-      start_datetime = Time.zone.parse("#{current_date} #{start_time}")
-      end_datetime = Time.zone.parse("#{current_date} #{end_time}")
+      # Convert time to datetime on specific date
+      start_datetime = Time.zone.parse("#{current_date} #{start_time.strftime('%H:%M:%S')}")
+      end_datetime = Time.zone.parse("#{current_date} #{end_time.strftime('%H:%M:%S')}")
 
       exam_sessions.create!(
         exam_id: exam.id,

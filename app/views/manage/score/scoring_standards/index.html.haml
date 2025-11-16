@@ -1,0 +1,37 @@
+- content_for :title do
+  Standar Penilaian - Dasbor
+
+- content_for :content do
+  .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 Standar Penilaian Fisik
+
+  .max-w-6xl.w-full
+    .bg-white.p-6.rounded-xl
+      %p.text-sm.text-gray-600.mb-6 
+        Kelola standar penilaian fisik untuk setiap golongan dan jenis kelamin. 
+        Klik "Ubah" untuk mengedit data penilaian.
+
+      %table.w-full.text-left.border.border-separate.rounded.border-slate-200{ cellspacing: "0" }
+        %thead
+          %tr
+            %th.h-12.px-6.text-sm.stroke-slate-700.text-slate-700.bg-slate-100.font-bold{ class: "w-[150px]" } Golongan
+            %th.h-12.px-6.text-sm.stroke-slate-700.text-slate-700.bg-slate-100.font-bold{ class: "w-[150px]" } Jenis Kelamin
+            %th.h-12.px-6.text-sm.stroke-slate-700.text-slate-700.bg-slate-100.font-bold Tes yang Tersedia
+            %th.h-12.px-6.text-sm.stroke-slate-700.text-slate-700.bg-slate-100.font-bold.text-center{ class: "w-[120px]" } Aksi
+        
+        %tbody
+          - @standards.each do |standard|
+            %tr.transition-colors.duration-300.hover:bg-slate-50
+              %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                %span.badge.badge-info= "Golongan #{standard.golongan.gsub('golongan_', '')}"
+              %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                - if standard.pria?
+                  %span.badge.badge-primary Pria
+                - else
+                  %span.badge.badge-secondary Wanita
+              %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                - standard.valid_test_types.each do |test_type|
+                  %span.badge.badge-outline.badge-sm.mr-1= test_type.upcase
+              %td.h-12.px-6.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500.text-center
+                = link_to "Ubah", edit_manage_score_scoring_standard_path(standard), class: "btn btn-sm btn-primary"
+
+= render "layouts/dashboard"

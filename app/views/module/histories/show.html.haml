@@ -75,28 +75,25 @@
               - if score_grade.present? && score_number.present?
                 .flex.flex-col.md:flex-row.md:items-center.md:justify-between.gap-4
                   .flex.items-center.gap-2.text-gray-800
-                    %span.font-semibold= score_grade
-                    %span.text-sm.text-gray-500.mr-2= "(#{score_number})"
+                    %span.font-semibold= score_number
+                    %span.text-sm.text-gray-500.mr-2= "(#{score_grade})"
 
-                  -# Temporarily hidden - print result buttons
-                  -# - if @registration.score.result_report_status == "completed"
-                  -#   .flex.flex-wrap.gap-2
-                  -#     = link_to result_report_slug_path(@registration.score.result_report_slug),
-                  -#       class: "inline-flex items-center px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 shadow-sm transition", target: "_blank" do
-                  -#       %i.ri-file-line.mr-2
-                  -#       Lihat Hasil
-                  -#
-                  -#     = button_to generate_result_report_path(@registration.score.slug),
-                  -#       method: :post,
-                  -#       class: "inline-flex items-center px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition" do
-                  -#       %i.ri-printer-line.mr-2
-                  -#       Cetak Ulang
-                  -# - else
-                  -#   = button_to generate_result_report_path(@registration.score.slug),
-                  -#     method: :post,
-                  -#     class: "inline-flex items-center px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition" do
-                  -#     %i.ri-printer-line.mr-2
-                  -#     Cetak Hasil
+                  - if @registration.score.result_report_status == "completed"
+                    .flex.flex-wrap.gap-2
+                      = link_to result_report_slug_path(@registration.score.result_report_slug),
+                        class: "inline-flex items-center px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 shadow-sm transition", target: "_blank" do
+                        %i.ri-file-line.mr-2
+                        Lihat Hasil
+
+                      %button.inline-flex.items-center.px-4.py-2.rounded-xl.bg-red-500.text-white.shadow-sm.transition{ class: "hover:bg-red-600", onclick: "modal_cetak_ulang.showModal()" }
+                        %i.ri-printer-line.mr-2
+                        Cetak Ulang
+                  - else
+                    = button_to generate_result_report_path(@registration.score.slug),
+                      method: :post,
+                      class: "inline-flex items-center px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 shadow-sm transition" do
+                      %i.ri-printer-line.mr-2
+                      Cetak Hasil
               - else
                 %span.text-yellow-700.font-medium Nilai belum diinput
       
@@ -120,5 +117,19 @@
                 %a.btn.bg-green-600.text-white.my-2{ class:"hover:bg-green-700", href: download_pdf_module_history_path(@registration.slug), target: "_blank" }
                   %i.ri-download-2-line
                   .text-xs Unduh Berkas
+
+-# Modal Konfirmasi Cetak Ulang
+- if @registration.score&.result_report_status == "completed"
+  %dialog#modal_cetak_ulang.modal
+    .modal-box
+      %h3.font-bold.text-lg Cetak Ulang Hasil Ujian?
+      %p.py-4 Apakah Anda yakin ingin mencetak ulang hasil ujian? Hasil ujian yang lama akan diganti dengan yang baru.
+      .modal-action
+        %form{ method: "dialog" }
+          %button.btn Batal
+        = button_to generate_result_report_path(@registration.score.slug),
+          method: :post,
+          class: "btn bg-red-500 text-white hover:bg-red-600" do
+          Cetak Ulang
 
 = render "layouts/dashboard"

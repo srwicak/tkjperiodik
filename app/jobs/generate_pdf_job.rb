@@ -107,14 +107,9 @@ class GeneratePdfJob < ApplicationJob
       print_date = "Jakarta, #{I18n.l(registration.exam_session.start_time.to_date, format: :default)}"
     end
 
-    # Get gender from user_detail for template selection
-    is_male = user_detail.gender # true = male, false = female
-
     # Template paths
     template_a_path = Rails.root.join("private", "assets", "templates", "tkj-a.pdf")
-    # Use gender-specific template for Form B
-    template_b_filename = is_male ? "tkj-b-male.pdf" : "tkj-b-female.pdf"
-    template_b_path = Rails.root.join("private", "assets", "templates", template_b_filename)
+    template_b_path = Rails.root.join("private", "assets", "templates", "tkj-b.pdf")
     output_path = Rails.root.join("tmp", "pendaftaran_#{SecureRandom.hex}.pdf")
 
     unless File.exist?(template_a_path)
@@ -167,10 +162,6 @@ class GeneratePdfJob < ApplicationJob
         pdf.text_box date_of_birth_formatted, at: [x_pos, y_pos], size: 12
         y_pos -= 32
         pdf.text_box golongan, at: [x_pos, y_pos], size: 12
-        y_pos -= 32
-        # TB/BB data at position 6
-        tb_bb_text = "#{registration.bb || '-'} KG / #{registration.tb || '-'} CM"
-        pdf.text_box tb_bb_text, at: [x_pos, y_pos], size: 12
         
         # Print date (Jakarta, tanggal ujian) - lowered by 32px
         pdf.text_box print_date, at: [350, 438], size: 12, width: 220, align: :center, style: :bold
@@ -277,16 +268,12 @@ class GeneratePdfJob < ApplicationJob
           pdf.text_box date_of_birth_formatted, at: [x_pos, y_pos], size: 12
           y_pos -= 32
           pdf.text_box golongan, at: [x_pos, y_pos], size: 12
-          y_pos -= 32
-          # TB/BB data at position 6
-          tb_bb_text = "#{registration.bb || '-'} KG / #{registration.tb || '-'} CM"
-          pdf.text_box tb_bb_text, at: [x_pos, y_pos], size: 12
           
-          # Print date (Jakarta, tanggal ujian) - lowered by 32px from original position (238 - 32 = 206)
-          pdf.text_box print_date, at: [350, 206], size: 12, width: 220, align: :center, style: :bold
+          # Print date (Jakarta, tanggal ujian) - lowered by 32px
+          pdf.text_box print_date, at: [350, 238], size: 12, width: 220, align: :center, style: :bold
           
-          # Signer box for Form B (right side of page) - lowered by 32px from original position (208 - 32 = 176)
-          signer_y = 176
+          # Signer box for Form B (right side of page) - lowered by 32px
+          signer_y = 208
           signer_x = 350
           
           # Jabatan Polisi (kalau ada)

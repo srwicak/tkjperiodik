@@ -67,21 +67,34 @@ function initDashboard() {
   }
 
   document.querySelectorAll('.sidebar-dropdown-toggle').forEach(function (item) {
+    // Use both click and touchend for better iOS support
     item.addEventListener('click', function (e) {
-      e.preventDefault()
-      // Safari-compatible closest() with fallback
-      let parent = item.closest ? item.closest('.group') : findAncestor(item, 'group');
-      if (parent && parent.classList.contains('selected')) {
-        parent.classList.remove('selected')
-      } else if (parent) {
-        document.querySelectorAll('.sidebar-dropdown-toggle').forEach(function (i) {
-          let p = i.closest ? i.closest('.group') : findAncestor(i, 'group');
-          if (p) p.classList.remove('selected')
-        })
-        parent.classList.add('selected')
-      }
-    })
-  })
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSubmenu(item);
+    });
+    
+    // Add touch support for iOS devices
+    item.addEventListener('touchend', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSubmenu(item);
+    }, { passive: false });
+  });
+
+  function toggleSubmenu(item) {
+    // Safari-compatible closest() with fallback
+    let parent = item.closest ? item.closest('.group') : findAncestor(item, 'group');
+    if (parent && parent.classList.contains('selected')) {
+      parent.classList.remove('selected');
+    } else if (parent) {
+      document.querySelectorAll('.sidebar-dropdown-toggle').forEach(function (i) {
+        let p = i.closest ? i.closest('.group') : findAncestor(i, 'group');
+        if (p) p.classList.remove('selected');
+      });
+      parent.classList.add('selected');
+    }
+  }
 
   // Helper function for older browsers
   function findAncestor(el, cls) {

@@ -1,0 +1,118 @@
+- content_for :title do
+  Tambah Peserta Ujian - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold Tambah Peserta Ujian Massal
+
+    .max-w-4xl.w-full.bg-white.p-6.rounded-xl
+      .font-bold.text-sm.mb-6 
+        %p.text-gray-500 Sistem mendukung penambahan peserta dengan NRP (8 digit) atau NIP (18 digit)
+        %p.text-gray-500 Mohon pastikan identitas yang dimasukkan benar
+        %p.text-red-500 Hanya bisa menambahkan peserta pada ujian dengan status DRAF atau AKTIF
+
+      %form{ action: "", method: "post" }
+        .container(x-data="participants()")
+          %select#exam-select{ "x-model": "selectedExam", name: "exam_id", class: "input input-bordered w-full" }
+            %option{ value: "" } Pilih ujian
+            - @exams.each do |exam|
+              %option{ value: exam.slug}= exam.name
+
+          %template(x-for="(identity, index) in identities" :key="index")
+            .identity-row.my-4
+              %input{ type: "text", name: "identities[]", "x-model": "identities[index]", placeholder: "Masukkan NRP (8 digit) atau NIP (18 digit)", class: "input input-bordered text-center w-[400px]", "x-bind:class": "{ 'border-red-500': status[index] && status[index] !== 'Sedang proses...' }", oninput: "this.value = this.value.replace(/[^0-9]/g, '');" }
+              %button{ type: "button", "x-show": "identities.length > 1", "@click": "removeIdentity(index)", class: "ml-4 btn btn-error text-white uppercase" }
+                %i.ri-delete-bin-line
+              %span.ml-2(x-text="status[index]" class="text-red-500")
+
+
+          %button{ type: "button", "@click": "addIdentity()", class: "btn btn-secondary uppercase text-white mb-4" }
+            %i.ri-add-fill
+            Tambah Peserta
+
+          %input{ type: "submit", value: "Daftar", class: "btn btn-success w-full uppercase text-white", "@click.prevent": "submitForm()" }
+
+= render "layouts/dashboard"
+
+:javascript
+  function participants() {
+    return {
+      identities: [''],
+      registrationTypes: [''],
+      status: [],
+      selectedExam: '',
+
+      addIdentity() {
+        this.identities.push('');
+        this.registrationTypes.push('');
+        this.status.push('');
+      },
+
+      removeIdentity(index) {
+        if (this.identities.length > 1) {
+          this.identities.splice(index, 1);
+          this.registrationTypes.splice(index, 1);
+          this.status.splice(index, 1);
+        }
+      },
+
+      validateInputs() {
+        this.status = this.identities.map(identity => {
+          const length = identity.length;
+          if (length === 8) {
+            return ''; // Valid NRP
+          } else if (length === 18) {
+            return ''; // Valid NIP
+          } else if (length === 0) {
+            return 'Identitas tidak boleh kosong.';
+          } else {
+            return `Invalid: ${length} digit (harus 8 untuk NRP atau 18 untuk NIP)`;
+          }
+        });
+      },
+
+      async submitForm() {
+        this.validateInputs();
+
+        if (this.status.some(status => status !== '')) {
+          return;
+        }
+
+        if (this.selectedExam.trim() === '') {
+          alert('Anda harus memilih ujian terlebih dahulu.');
+          return;
+        }
+
+        for (let i = 0; i < this.identities.length; i++) {
+          const identity = this.identities[i];
+          const regType = this.registrationTypes[i] ? 'kenaikan_pangkat' : 'berkala' ;
+
+          if (identity.trim() === '') {
+            this.status[i] = 'Identitas tidak boleh kosong.';
+            continue;
+          }
+
+          try {
+            this.status[i] = 'Sedang proses...'; 
+            const response = await fetch('/kelola/manajemen-peserta/tambah', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+              },
+              body: JSON.stringify({ identity, exam_slug: this.selectedExam, reg_type: regType })
+            });
+
+            const result = await response.json();
+
+            this.status[i] = response.ok ? result.status : `Gagal: ${result.status || 'Terjadi kesalahan.'}`;
+          } catch (error) {
+            this.status[i] = 'Terjadi kesalahan jaringan.'; 
+          }
+        }
+      }
+    };
+  }

@@ -39,7 +39,7 @@
 
         .form-control
           = form.label :start_register, "Mulai Pendaftaran *", class: "label font-bold"
-          = form.date_field :start_register, class: "input input-bordered w-full", required: true, min: Date.today
+          = form.date_field :start_register, class: "input input-bordered w-full", required: true
           .label
             %span.label-text-alt.text-gray-500 Pendaftaran mulai pukul 00:00 WIB
 
@@ -48,6 +48,13 @@
           = form.select :status, Exam.statuses.keys.map { |key| [I18n.t("exam.statuses.#{key}"), key] }, {}, { class: "select select-bordered w-full", required: true }
           .label
             %span.label-text-alt.text-gray-500 Set "Aktif" jika ingin peserta bisa mendaftar
+
+      .form-control
+        .label.cursor-pointer.justify-start.gap-3
+          = form.check_box :allow_onspot_registration, class: "checkbox checkbox-primary"
+          .flex.flex-col.items-start
+            = form.label :allow_onspot_registration, "Izinkan Pendaftaran Langsung (On-the-Spot)", class: "label-text font-bold"
+            %span.label-text-alt.text-gray-500 Aktifkan untuk membolehkan peserta mendaftar langsung di hari ujian tanpa akun sebelumnya
 
     .divider.my-6
 

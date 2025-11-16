@@ -1,0 +1,197 @@
+- content_for :title do
+  Tambah Pengguna - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold Tambah Pengguna
+
+    .max-w-4xl.w-full.bg-white.p-6.rounded-xl
+      .font-bold.text-sm.mb-6 
+        %p Laman ini bisa untuk menambah pengguna peserta ujian baik Polisi (NRP) maupun PNS (NIP).
+        %p Sistem akan otomatis mendeteksi tipe pengguna berdasarkan panjang ID yang dimasukkan:
+        %p.ml-4 • NRP (8 digit angka) = Polisi
+        %p.ml-4 • NIP (18 digit angka) = PNS
+        %p.text-red-500 Mohon pastikan isi semua data diisi dan benar
+      = form_with(model: @user, url: @url, method: :post, local: true) do |form|
+        %table( class="w-full text-left border border-separate rounded border-slate-200" cellspacing="0" )
+          %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) 
+              %span#identity-label NRP / NIP
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+              = form.text_field :identity, id: "user_identity", class: "input input-bordered my-2 w-full", oninput: "this.value = this.value.replace(/[^0-9]/g, ''); updateRankOptions();", required: true
+              %div#identity-hint.text-xs.text-gray-500.mt-1 Masukkan 8 digit untuk NRP atau 18 digit untuk NIP
+          
+          %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kata sandi
+            %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+              %div
+                = form.text_field :password, class: "input input-bordered my-2 w-full", required: true
+                .text-sm.mb-2 (minimal 8 karakter dengan campuran angka dan huruf)
+          
+          = form.fields_for :user_detail do |detail|
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama Lengkap
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                %div
+                  = detail.text_field :name, class: "input input-bordered my-2 w-full", required: true
+                  .text-sm.mb-2 (mohon dikapital nama secara manual, nama tidak boleh ada angka)
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tanggal Lahir
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = detail.date_field :date_of_birth, class: "input input-bordered my-2 w-full", required: true
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jenis Kelamin
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                .flex.items-center.space-x-2
+                  = detail.radio_button :gender, 1, class: "radio", required: true
+                  = detail.label :gender, "PRIA"
+                  = detail.radio_button :gender, 0, class: "radio"
+                  = detail.label :gender, "WANITA"
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Pangkat
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = detail.select :rank, [], { include_blank: 'Pilih Pangkat' }, { id: "rank_select", class: "select select-bordered my-2 w-full", required: true }
+                %div#rank-hint.text-xs.text-gray-500.mt-1 Masukkan ID terlebih dahulu untuk melihat opsi pangkat
+
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Jabatan
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )= detail.text_field :position, class: "input input-bordered my-2 w-full", required: true
+            
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Kesatuan
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = detail.select :unit, UserDetail.units.keys.map { |key| [key.humanize.upcase, key] }, { include_blank: 'Pilih Kesatuan' }, class: "select select-bordered my-2 w-full", required: true
+        
+        = form.submit "Tambah Pengguna", class: "btn btn-primary mt-4 w-full text-white font-bold uppercase"               
+  
+  :javascript
+    // Data pangkat untuk Polisi (NRP)
+    const policeRanks = {
+      'BHARADA': 'BHARADA',
+      'BHARATU': 'BHARATU', 
+      'BHARAKA': 'BHARAKA',
+      'ABRIPDA': 'ABRIPDA',
+      'ABRIPTU': 'ABRIPTU',
+      'ABRIP': 'ABRIP',
+      'BRIPDA': 'BRIPDA',
+      'BRIPTU': 'BRIPTU',
+      'BRIGPOL': 'BRIGPOL',
+      'BRIPKA': 'BRIPKA',
+      'AIPDA': 'AIPDA',
+      'AIPTU': 'AIPTU',
+      'IPDA': 'IPDA',
+      'IPTU': 'IPTU',
+      'AKP': 'AKP',
+      'KOMPOL': 'KOMPOL',
+      'AKBP': 'AKBP',
+      'KOMBES': 'KOMBES',
+      'BRIGJEN': 'BRIGJEN',
+      'IRJEN': 'IRJEN',
+      'KOMJEN': 'KOMJEN',
+      'JENDERAL': 'JENDERAL'
+    };
+    
+    // Data pangkat untuk PNS (NIP)
+    const pnsRanks = {
+      'Juru Muda': 'Juru Muda',
+      'Juru Muda Tingkat I': 'Juru Muda Tingkat I',
+      'Juru': 'Juru',
+      'Juru Tingkat I': 'Juru Tingkat I',
+      'Pengatur Muda': 'Pengatur Muda',
+      'Pengatur Muda Tingkat I': 'Pengatur Muda Tingkat I',
+      'Pengatur': 'Pengatur',
+      'Pengatur Tingkat I': 'Pengatur Tingkat I',
+      'Penata Muda': 'Penata Muda',
+      'Penata Muda Tingkat I': 'Penata Muda Tingkat I',
+      'Penata': 'Penata',
+      'Penata Tingkat I': 'Penata Tingkat I',
+      'Pembina': 'Pembina',
+      'Pembina Tingkat I': 'Pembina Tingkat I',
+      'Pembina Utama Muda': 'Pembina Utama Muda',
+      'Pembina Utama Madya': 'Pembina Utama Madya',
+      'Pembina Utama': 'Pembina Utama'
+    };
+    
+    function updateRankOptions() {
+      const identityInput = document.getElementById('user_identity');
+      const rankSelect = document.getElementById('rank_select');
+      const identityLabel = document.getElementById('identity-label');
+      const identityHint = document.getElementById('identity-hint');
+      const rankHint = document.getElementById('rank-hint');
+      
+      if (!identityInput || !rankSelect) return;
+      
+      const identityValue = identityInput.value;
+      const identityLength = identityValue.length;
+      
+      // Clear existing options
+      rankSelect.innerHTML = '<option value="">Pilih Pangkat</option>';
+      
+      let ranks = {};
+      let personType = '';
+      
+      if (identityLength === 8) {
+        // NRP - Polisi
+        ranks = policeRanks;
+        personType = 'Polisi (NRP)';
+        identityLabel.textContent = 'NRP';
+        identityHint.textContent = '8 digit - Terdeteksi sebagai Polisi';
+        identityHint.className = 'text-xs text-green-600 mt-1 font-semibold';
+        rankHint.textContent = 'Pilih pangkat Polisi';
+      } else if (identityLength === 18) {
+        // NIP - PNS
+        ranks = pnsRanks;
+        personType = 'PNS (NIP)';
+        identityLabel.textContent = 'NIP';
+        identityHint.textContent = '18 digit - Terdeteksi sebagai PNS';
+        identityHint.className = 'text-xs text-blue-600 mt-1 font-semibold';
+        rankHint.textContent = 'Pilih pangkat PNS';
+      } else if (identityLength > 0) {
+        // Belum valid
+        identityLabel.textContent = 'NRP / NIP';
+        if (identityLength < 8) {
+          identityHint.textContent = `${identityLength}/8 digit untuk NRP atau ${identityLength}/18 digit untuk NIP`;
+        } else if (identityLength < 18) {
+          identityHint.textContent = `${identityLength} digit - Bukan NRP (8) atau NIP (18) yang valid`;
+        } else {
+          identityHint.textContent = `${identityLength} digit - Terlalu panjang (max 18 untuk NIP)`;
+        }
+        identityHint.className = 'text-xs text-gray-500 mt-1';
+        rankHint.textContent = 'Masukkan ID yang valid terlebih dahulu';
+        rankSelect.disabled = true;
+        return;
+      } else {
+        identityLabel.textContent = 'NRP / NIP';
+        identityHint.textContent = 'Masukkan 8 digit untuk NRP atau 18 digit untuk NIP';
+        identityHint.className = 'text-xs text-gray-500 mt-1';
+        rankHint.textContent = 'Masukkan ID terlebih dahulu untuk melihat opsi pangkat';
+        rankSelect.disabled = true;
+        return;
+      }
+      
+      // Populate rank options
+      rankSelect.disabled = false;
+      for (const [key, value] of Object.entries(ranks)) {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = value;
+        rankSelect.appendChild(option);
+      }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateRankOptions();
+    });
+               
+            
+
+
+  
+= render "layouts/dashboard"

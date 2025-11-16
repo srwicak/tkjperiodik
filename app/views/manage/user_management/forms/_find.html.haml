@@ -1,0 +1,114 @@
+%div.max-w-xl.mx-auto.text-center.bg-white.px-4.sm:px-8.py-10.rounded-xl.shadow(x-data="search()")
+  %header.mb-4
+    %h1.text-2xl.font-bold.mb-2 Masukkan Identitas Peserta
+    %p.text-slate-500 Masukkan NRP (8 digit) atau NIP (18 digit) lengkap
+
+  %form#search-form{ "@submit.prevent": "performSearch" }
+    .flex.flex-row.justify-center.space-x-2
+      .flex
+        %input{ type: "text", placeholder: "NRP (8 digit) atau NIP (18 digit)", "x-model": "identity", class: "w-[350px] p-2 border border-gray-300 rounded input input-bordered text-center", oninput: "this.value = this.value.replace(/[^0-9]/g, '');"  }
+      .flex
+        %button{ type: "submit", class: "btn bg-blue-500 hover:bg-blue-600 text-white uppercase rounded" } 
+          %i.ri-search-line
+          Cari
+
+  %div#search-results.mt-4
+    %template(x-if="dataFound")
+      %div
+        %p.font-semibold Hanya menampilkan 3 ujian terakhir
+        %p Untuk riwayat ujian lebih lengkap dapat mengunjungi
+        %template(x-if="userStatus == 'active'")
+          %a.btn.mb-6{ href:"#", "x-bind:href": "`/kelola/pengguna/${userSlug}#riwayat`" } Profil Pengguna
+        %template(x-if="userStatus != 'active'")
+          %a.btn.mb-6{ href:"#", "x-bind:href": "`/kelola/pengguna/nonaktif/${userSlug}#riwayat`" } Profil Pengguna
+        %table.text-left.border.border-collapse.rounded-xl.sm:border-separate.border-slate-200.bg-white.w-full.mb-6{ cellspacing: "0" }
+          %tbody
+            %tr
+              %th.h-12.px-4.text-sm.border-l.first:border-l-0.stroke-slate-700.text-slate-700.bg-slate-100.rounded-t-xl.font-bold{ colspan: "2" } Informasi Pengguna
+            %tr
+              %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{class: "w-[170px]"} Nama Pengguna
+              %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                %p{ "x-text": "userName" }
+            %tr
+              %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                %span{ "x-text": "identityLabel" } Identitas
+              %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                %p{ "x-text": "userIdentity" }
+        %table.text-left.border.border-collapse.rounded-xl.sm:border-separate.border-slate-200.bg-white.w-full{ cellspacing: "0" }  
+          %thead
+            %th.h-12.px-4.text-sm.border-l.first:border-l-0.stroke-slate-700.text-slate-700.bg-slate-100.font-bold.rounded-t-xl{ colspan: "2" } Registrasi 3 Ujian Terakhir
+          %template(x-for="registration in registrations")
+            %tbody
+              %tr
+                %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500{class: "w-[170px]"} Nama Ujian
+                %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                  %p.my-2{ "x-text": "registration.exam_name" }
+              %tr
+                %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500 Sesi Ujian
+                %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                  %p{ "x-text": "registration.exam_session" }
+              %tr
+                %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500 Unduh Berkas
+                %td.h-12.px-4.text-sm.transition.duration-300.border-t.border-l.first:border-l-0.border-slate-200.stroke-slate-500.text-slate-500
+                  %a.btn.bg-green-600.text-white{ class:"hover:bg-green-800", href:"#", "x-bind:href": "`/riwayat/${registration.exam_slug}/unduh`", target: "_blank" }
+                    %i.ri-download-2-line
+                    Unduh Berkas Pendaftaran
+
+    %p.text-red-500{"x-show":"!dataFound && !isLoading && message", "x-text":"message"}
+    %p.text-gray-500{"x-show":"isLoading"}  Sedang mencari...
+
+:javascript
+  function search() {
+    return {
+      identity: '',
+      isLoading: false,
+      dataFound: false,
+      message: '',
+      userIdentity: '',
+      userName: '',
+      userSlug: '',
+      userStatus: '',
+      identityLabel: 'Identitas',
+      registrations: [],
+
+      performSearch() {
+        // Validate identity length
+        if (this.identity.length !== 8 && this.identity.length !== 18) {
+          this.message = 'Identitas harus 8 digit (NRP) atau 18 digit (NIP)';
+          return;
+        }
+        
+        this.isLoading = true;
+        this.dataFound = false;
+        this.message = '';
+        this.registrations = [];
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch('/kelola/manajemen-borang/data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({ identity: this.identity })
+        })
+        .then(response => response.json())
+        .then(data => {
+          this.isLoading = false;
+          if (data.success) {
+            this.dataFound = true;
+            this.userIdentity = data.user_identity;
+            this.userName = data.user_name;
+            this.userSlug = data.user_slug;
+            this.userStatus = data.user_status;
+            this.identityLabel = data.user_identity.length === 8 ? 'NRP' : 'NIP';
+            this.registrations = data.registrations;
+          } else {
+            this.dataFound = false;
+            this.message = data.message;
+          }
+        })
+      }
+    }
+  }

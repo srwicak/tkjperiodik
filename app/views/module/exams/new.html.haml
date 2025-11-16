@@ -48,6 +48,8 @@
                 - end_date = schedule.exam_date_end.presence || schedule.exam_date
                 - date_range = (start_date..end_date).to_a.reject { |date| date.wday == 0 || date.wday == 6 }
                 - date_range.each do |exam_date|
+                  - exam_session = schedule.exam_sessions.find { |s| s.start_time.to_date == exam_date }
+                  - session_count = exam_session ? exam_session.registration_count : 0
                   .border.rounded-lg.p-4.cursor-pointer.transition-colors.hover:bg-base-200{ onclick: "selectSchedule(this, '#{schedule.id}_#{exam_date.to_s}')", data: { exam_date: exam_date.to_s, schedule_id: schedule.id } }
                     .flex.items-start.gap-3
                       = f.radio_button :selected_date, "#{schedule.id}|#{exam_date.to_s}", required: true, class: "radio radio-primary mt-1", id: "selected_date_#{schedule.id}_#{exam_date.to_s.gsub('-', '_')}"
@@ -71,7 +73,7 @@
                             = schedule.unit_names.join(", ")
                           .text-sm.text-gray-600
                             %strong Peserta Terdaftar: 
-                            %span.font-bold.text-primary= schedule.registered_count
+                            %span.font-bold.text-primary= session_count
                             - if schedule.max_participants
                               = " / #{schedule.max_participants}"
                             orang

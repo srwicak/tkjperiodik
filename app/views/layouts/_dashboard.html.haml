@@ -4,7 +4,6 @@
   %script{ src: "https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.4/luxon.min.js" }
   %script{ src: "https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js", defer: true }
   %link{rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/tabulator/6.2.5/css/tabulator_semanticui.min.css", integrity: "sha512-V5osaNojM1vXQvKtRIjCawiV39/632N1HTlfUnlBu35bY7CTbUbeubWOiQcWPuWxGrj+DDXh/Kl1qAILGA/8Og==", crossorigin: "anonymous", referrerpolicy: "no-referrer"}
-
 .text-gray-800
   - # start side navigation
   %aside{ class: "fixed left-0 top-0 w-64 h-full bg-gradient-to-b from-[#f8f4f3] to-red-50 p-4 z-40 sidebar-menu transition-transform md:translate-x-0 -translate-x-full shadow-xl" }
@@ -18,35 +17,11 @@
         TKJ PERIODIK
 
     %ul.mt-4
-      - menu_items = [ { link: root_path, 
-      icon: "ri-home-2-line", caption: "Beranda" },
-        { icon: "ri-a-b", caption: "Ujian",
-        submenu: [ { link: index_module_exam_path, caption: "Lihat" }, 
-        { link: index_module_history_path, caption: "Riwayat" } ] } ]
+      - menu_items = [ { link: root_path, icon: "ri-home-2-line", caption: "Beranda" }, { icon: "ri-a-b", caption: "Ujian", submenu: [ { link: index_module_exam_path, caption: "Lihat" }, { link: index_module_history_path, caption: "Riwayat" } ] } ]
 
-      - admin_menu_items = [ { icon: "ri-group-line", 
-      caption: "Kelola Pengguna", submenu: [ { link: index_manage_user_active_path,
-      caption: "Pengguna Aktif" },
-        { link: index_manage_user_verification_path, caption: "Belum Terverifikasi" }, 
-        { link: index_manage_user_forgot_path, caption: "Lupa Kata Sandi" }, 
-        { link: index_manage_user_nonactive_path, caption: "Pengguna Nonaktif" }, ] }, 
-        { icon: "ri-calendar-check-fill", caption: "Kelola Ujian", submenu: [ { link: new_manage_exam_active_path, caption: "Buat Ujian" },
-        { link: index_manage_exam_active_path, caption: "Semua Ujian" }, ] }, 
-        { icon: "ri-medal-line", caption: "Kelola Nilai", submenu: [ { link: index_manage_score_by_nrp_path, caption: "Berdasarkan ID" },
-        { link: index_manage_score_path, caption: "Dengan Kode Fomulir"}, ] },
-        ]
+      - admin_menu_items = [ { icon: "ri-group-line", caption: "Kelola Pengguna", submenu: [ { link: index_manage_user_active_path, caption: "Pengguna Aktif" }, { link: index_manage_user_verification_path, caption: "Belum Terverifikasi" }, { link: index_manage_user_forgot_path, caption: "Lupa Kata Sandi" }, { link: index_manage_user_nonactive_path, caption: "Pengguna Nonaktif" }, ] }, { icon: "ri-calendar-check-fill", caption: "Kelola Ujian", submenu: [ { link: new_manage_exam_active_path, caption: "Buat Ujian" }, { link: index_manage_exam_active_path, caption: "Semua Ujian" }, ] }, { icon: "ri-medal-line", caption: "Kelola Nilai", submenu: [ { link: index_manage_score_by_nrp_path, caption: "Berdasarkan ID" }, { link: index_manage_score_path, caption: "Dengan Kode Fomulir"}, { link: manage_score_scoring_standards_path, caption: "Standar Penilaian"}, ] }, { icon: "ri-tools-fill", caption: "Fitur Lainnya", submenu: [ { link: new_manage_user_path, caption: "Tambah Pengguna" }, { link: new_manage_participant_path, caption: "Tambah Peserta Ujian" }, { link: search_manage_forms_path, caption: "Cetak Formulir Ujian" }, ] } ]
       
-      - superadmin_menu_items = [ { icon: "ri-admin-line", 
-      caption: "Kelola Operator", submenu: [ { link: new_superadmin_promote_path,
-      caption: "Tambah Operator" },
-        { link: index_superadmin_promote_path, caption: "Semua Operator" }, 
-        ] },
-        { icon: "ri-tools-fill", 
-      caption: "Fitur Lainnya", submenu: [ { link: new_superadmin_user_path,
-      caption: "Tambah Pengguna" },
-        { link: new_superadmin_participant_path, caption: "Tambah Peserta Ujian" }, 
-        { link: search_superadmin_forms_path, caption: "Cetak Formulir Ujian" }, 
-        ] } ]
+      - superadmin_menu_items = [ { icon: "ri-admin-line", caption: "Kelola Operator", submenu: [ { link: new_superadmin_promote_path, caption: "Tambah Operator" }, { link: index_superadmin_promote_path, caption: "Semua Operator" }, ] } ]
 
       // 2025 Update
       - polda_menu_items = [ { icon: "ri-file-copy-2-line", caption: "Kelola Laporan", link: new_superadmin_promote_path },

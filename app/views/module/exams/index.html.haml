@@ -18,7 +18,7 @@
               .divider.uppercase.text-sm.text-gray-400.font-bold detil ujian
               
               - if exam.has_schedules?
-                - available_schedules = exam.exam_schedules.where("exam_date >= ?", Date.today).order(:exam_date)
+                - available_schedules = exam.exam_schedules.where("exam_date >= ? OR (exam_date_end IS NOT NULL AND exam_date_end >= ?)", Date.today, Date.today).order(:exam_date)
                 - if available_schedules.any?
                   - earliest = available_schedules.first
                   - latest = available_schedules.last

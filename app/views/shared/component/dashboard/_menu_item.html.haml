@@ -1,10 +1,15 @@
 %li.mb-1.group
-  %a{ href: link, class: "flex font-semibold items-center py-2.5 px-3 text-gray-800 hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 hover:text-white rounded-lg transition-all duration-200 group-[.active]:bg-gradient-to-r group-[.active]:from-red-500 group-[.active]:to-red-600 group-[.active]:text-white group-[.selected]:bg-red-50 group-[.selected]:text-red-600 shadow-sm hover:shadow-md #{submenu ? 'sidebar-dropdown-toggle' : '' }" }
-    %div{ class: "bg-red-50 group-hover:bg-white/20 group-[.active]:bg-white/20 p-1.5 rounded-lg mr-2 transition-colors" }
-      %i{ class: "#{icon} text-base text-red-500 group-hover:text-white group-[.active]:text-white" }
-    %span.text-xs.md:text-sm.flex-1= caption
-    - if submenu
+  - if submenu
+    %a{ href: "javascript:void(0)", class: "flex font-semibold items-center py-2.5 px-3 text-gray-800 hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 hover:text-white rounded-lg transition-all duration-200 group-[.selected]:bg-red-50 group-[.selected]:text-red-600 shadow-sm hover:shadow-md sidebar-dropdown-toggle", style: "cursor: pointer; -webkit-tap-highlight-color: transparent;" }
+      %div{ class: "bg-red-50 group-hover:bg-white/20 p-1.5 rounded-lg mr-2 transition-colors" }
+        %i{ class: "#{icon} text-base text-red-500 group-hover:text-white" }
+      %span.text-xs.md:text-sm.flex-1= caption
       %i{ class:"ri-arrow-right-s-line text-sm transition-transform group-[.selected]:rotate-90" }
+  - else
+    %a{ href: link, class: "flex font-semibold items-center py-2.5 px-3 text-gray-800 hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 hover:text-white rounded-lg transition-all duration-200 group-[.active]:bg-gradient-to-r group-[.active]:from-red-500 group-[.active]:to-red-600 group-[.active]:text-white shadow-sm hover:shadow-md", style: "-webkit-tap-highlight-color: transparent;" }
+      %div{ class: "bg-red-50 group-hover:bg-white/20 group-[.active]:bg-white/20 p-1.5 rounded-lg mr-2 transition-colors" }
+        %i{ class: "#{icon} text-base text-red-500 group-hover:text-white group-[.active]:text-white" }
+      %span.text-xs.md:text-sm.flex-1= caption
   - if submenu
     %ul{ class: "pl-8 mt-1 hidden group-[.selected]:block space-y-1"}
       - submenu.each do |subitem|

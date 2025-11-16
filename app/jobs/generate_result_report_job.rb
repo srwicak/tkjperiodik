@@ -62,7 +62,9 @@ class GenerateResultReportJob < ApplicationJob
   end
 
   def generate_pdf_with_qr(qr_io, score)
-    template_path = Rails.root.join("private/assets/templates/result_report_v2.pdf")
+    # Tentukan template berdasarkan tipe user dan usia
+    template_filename = determine_template(score)
+    template_path = Rails.root.join("private/assets/templates", template_filename)
 
     # Load template PDF
     template_pdf = CombinePDF.load(template_path)
@@ -80,54 +82,156 @@ class GenerateResultReportJob < ApplicationJob
     io
   end
 
+  def determine_template(score)
+    registration = score.registration
+    user = registration.user
+    user_detail = user.user_detail
+    
+    # Hitung usia berdasarkan tanggal ujian
+    exam_date = registration.exam_session.start_time.to_date
+    birth_date = user_detail.date_of_birth
+    age = exam_date.year - birth_date.year
+    age -= 1 if exam_date < birth_date + age.years
+    
+    # Tentukan tipe (polisi atau pns) berdasarkan user type atau identity format
+    is_police = user.identity.match?(/^\d{8}$/) # NRP 8 digit
+    
+    # Pilih template
+    if is_police
+      age >= 51 ? "hasil-ujian-51-nrp.pdf" : "hasil-ujian-50-nrp.pdf"
+    else
+      age >= 51 ? "hasil-ujian-51-nip.pdf" : "hasil-ujian-50-nip.pdf"
+    end
+  end
+
   def generate_qr_pdf(qr_io, score)
-    pdf = Prawn::Document.new(page_size: "A4")
+    pdf = Prawn::Document.new(margin: 0, page_size: "LEGAL")
 
-    # Konten
-    data_nilai = JSON.parse(score.score_detail)
-    grouped = Hash.new { |h, k| h[k] = [] } 
-    data_nilai["score"].each do |key, value|
-      person = key.split('_')[1] # ambil angka kedua, yaitu nomor orang
-      grouped[person] << value.to_i
-    end
-
-    averages = grouped.transform_values do |scores|
-      (scores.sum.to_f / scores.size).round(2)
-    end
-
-    nilai_akhir = "#{(averages.values.sum / averages.size).round(2)} / #{score.score_grade}"
-
-    semester, tahun = score.registration.exam_session.exam.name.match(/SEMESTER\s+([IVXLCDM]+).*?(?:T\.A\.|TAHUN(?:\s+ANGGARAN)?)\s+(\d{4})/).captures
-    user_detail = score.registration.user.user_detail
+    # Ambil data peserta
+    registration = score.registration
+    user = registration.user
+    user_detail = user.user_detail
+    
     name = user_detail.name
-    unit = user_detail.unit
     position = user_detail.position
+    unit = user_detail.unit
     rank = user_detail.rank
-    identity = score.registration.user.identity
+    identity = user.identity
+    golongan = registration.golongan
+    
+    # Tentukan keterangan golongan usia (sesuai formulir pendaftaran)
+    golongan_text = case golongan
+    when 1
+      "I (Usia 18 s.d 30 Tahun)"
+    when 2
+      "II (Usia 31 s.d 40 Tahun)"
+    when 3
+      "III (Usia 41 s.d 50 Tahun)"
+    when 4
+      "IV (Usia 51 Tahun Keatas)"
+    else
+      "-"
+    end
+    
+    # Tentukan apakah usia 51+ (untuk template yang tidak ada nilai B)
+    exam_date = registration.exam_session.start_time.to_date
+    birth_date = user_detail.date_of_birth
+    age = exam_date.year - birth_date.year
+    age -= 1 if exam_date < birth_date + age.years
+    is_51_plus = age >= 51
 
-    arial_mt_path = Rails.root.join("private", "assets", "fonts", "arialmt.ttf")
+    # Parse data nilai dari score_detail
+    data_nilai = JSON.parse(score.score_detail)
+    score_data = data_nilai["score"]
+    
+    # Nilai A: score lari_12_menit
+    nilai_a = score_data["lari_12_menit"].to_f
+    
+    # Nilai B: rata-rata 4 item setelah lari (hanya untuk usia < 51)
+    if is_51_plus
+      nilai_b = nil # Tidak ada nilai B untuk usia 51+
+    else
+      chinning = score_data["chinning"].to_f
+      sit_ups = score_data["sit_ups"].to_f
+      push_ups = score_data["push_ups"].to_f
+      shuttle_run = score_data["shuttle_run"].to_f
+      nilai_b = ((chinning + sit_ups + push_ups + shuttle_run) / 4).round(2)
+    end
+    
+    # Nilai akhir
+    nilai_akhir_angka = score.score_number.to_f
+    nilai_akhir_grade = score.score_grade
+    nilai_akhir = "#{nilai_akhir_angka} (#{nilai_akhir_grade})"
 
-    pdf.font_families.update("Arial MT" => {
-      normal: arial_mt_path,
-      bold: arial_mt_path,
-      italic: arial_mt_path,
-      bold_italic: arial_mt_path,
+    # Ambil semester dan tahun dari nama ujian
+    exam_name = score.registration.exam_session.exam.name
+    
+    # Coba parse berbagai format nama ujian
+    # Format 1: "SEMESTER I T.A. 2024" atau "SEMESTER II TAHUN 2024"
+    # Format 2: "Semester 1 TA 2025"
+    match = exam_name.match(/[Ss]emester\s+([IVXLCDM]+|\d+).*?(?:[Tt]\.?[Aa]\.?|[Tt]ahun(?:\s+[Aa]nggaran)?)\s*(\d{4})/)
+    
+    if match
+      semester_raw = match[1]
+      tahun = match[2]
+      
+      # Konversi angka ke romawi jika perlu
+      semester = case semester_raw.upcase
+      when '1', 'I' then 'I'
+      when '2', 'II' then 'II'
+      when '3', 'III' then 'III'
+      when '4', 'IV' then 'IV'
+      else semester_raw
+      end
+    else
+      # Fallback jika tidak bisa parse
+      semester = "-"
+      tahun = Date.today.year.to_s
+    end
+    
+    # Buat judul periode tes lengkap
+    periode_tes = "Periode Tes: Semester #{semester} Tahun #{tahun}"
+
+    times_path = Rails.root.join("private", "assets", "fonts", "times.ttf")
+
+    pdf.font_families.update("Times" => {
+      normal: times_path,
+      bold: times_path,
+      italic: times_path,
+      bold_italic: times_path,
     })
-    pdf.font "Arial MT"
+    pdf.font "Times"
 
+    # Judul Periode Tes (center atas)
+    # Kertas A4 width = 595 points, center di 297.5
+    pdf.text_box periode_tes, 
+      at: [0, 844],
+      width: 612,
+      height: 50,
+      size: 14,
+      align: :center
 
-    pdf.text_box semester, at: [302, 648], size: 9
-    pdf.text_box tahun, at: [340, 648], size: 9
-    pdf.text_box name, at: [60, 612], size: 9
-    pdf.text_box position, at: [60, 598], size: 9
-    pdf.text_box unit, at: [60, 584], size: 9
-    pdf.text_box rank, at: [398, 612], size: 9
-    pdf.text_box identity, at: [398, 598], size: 9
+    # TODO: Sesuaikan koordinat dengan template PDF yang baru
+    # Ini adalah contoh, perlu disesuaikan dengan posisi field di template
+    pdf.text_box name, at: [130, 812], size: 12
+    pdf.text_box position, at: [130, 788], size: 12
+    pdf.text_box unit, at: [130, 764], size: 12
+    pdf.text_box rank, at: [410, 812], size: 12
+    pdf.text_box identity, at: [410, 788], size: 12
+    pdf.text_box golongan_text, at: [410, 764], size: 12
 
-    pdf.text_box averages["1"].round(2).to_s, at: [438, 532], size: 9
-    pdf.text_box averages["2"].round(2).to_s, at: [438, 514], size: 9
-    pdf.text_box averages["3"].round(2).to_s, at: [438, 498], size: 9
-    pdf.text_box nilai_akhir, at: [430, 480], size: 9
+    # Data nilai
+    pdf.text_box nilai_a.to_s, at: [500, 662], size: 12
+    
+    # Nilai B dan koordinat nilai akhir berbeda untuk usia < 51 vs 51+
+    if nilai_b
+      # Usia < 51: Ada Nilai A, B, dan Nilai Akhir
+      pdf.text_box nilai_b.to_s, at: [500, 634], size: 12
+      pdf.text_box nilai_akhir, at: [500, 604], size: 12 # Koordinat untuk template < 51
+    else
+      # Usia 51+: Hanya Nilai A dan Nilai Akhir (koordinat nilai akhir lebih tinggi)
+      pdf.text_box nilai_akhir, at: [500, 634], size: 12 # Koordinat untuk template 51+
+    end
 
     
     # Simpan sementara QR sebagai file PNG
@@ -136,7 +240,7 @@ class GenerateResultReportJob < ApplicationJob
     image_file.rewind
 
     # Tempelkan image ke posisi tertentu
-    pdf.image image_file.path, at: [-10, 460], width: 80
+    pdf.image image_file.path, at: [22, 500], width: 80
 
     image_file.close
     image_file.unlink

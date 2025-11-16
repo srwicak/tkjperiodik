@@ -1,0 +1,324 @@
+<% content_for :title do %>
+  Pendaftaran Langsung - <%= @exam.name %>
+<% end %>
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
+  <!-- Decorative background -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full opacity-10 blur-3xl"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400 rounded-full opacity-10 blur-3xl"></div>
+  </div>
+
+  <div class="w-full mx-auto max-w-[540px] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div class="max-w-[540px] mx-auto w-full">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg mb-4">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Pendaftaran Langsung</h1>
+        <p class="text-base text-gray-600 mb-1"><%= @exam.name %></p>
+        <p class="text-sm text-gray-500">Isi formulir untuk mendaftar ujian hari ini</p>
+      </div>
+
+      <!-- Error Messages -->
+      <% if flash[:alert] %>
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+          <div class="flex items-start">
+            <svg class="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <p class="ml-3 text-sm text-red-700"><%= flash[:alert] %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Form -->
+      <%= form_with url: create_onspot_registration_path(@exam.slug), method: :post, html: { class: 'bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8', data: { controller: 'onspot-form', onspot_form_exam_date_value: @exam.exam_schedules.where(exam_date: Date.current).first&.exam_date&.iso8601 } } do |form| %>
+        
+        <div class="space-y-6">
+          <!-- Identity Section -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+              </svg>
+              Data Identitas
+            </h3>
+
+            <!-- NRP/NIP -->
+            <div class="space-y-2">
+              <label class="flex items-center text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                NRP (8 digit) / NIP (18 digit)
+              </label>
+              <%= text_field_tag :identity, nil, 
+                class: 'block w-full h-12 px-4 py-3 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-medium',
+                placeholder: '12345678 atau 123456789012345678',
+                required: true,
+                data: { onspot_form_target: 'identity', action: 'input->onspot-form#detectIdentityType' }
+              %>
+              <p class="text-xs text-gray-500 flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1.5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                NRP untuk anggota Polri (8 digit), NIP untuk PNS (18 digit)
+              </p>
+            </div>
+
+            <!-- Password -->
+            <div class="space-y-2">
+              <label class="flex items-center text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                Kata Sandi
+              </label>
+              <%= password_field_tag :password, nil,
+                class: 'block w-full h-12 px-4 py-3 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm',
+                placeholder: 'Masukkan kata sandi',
+                required: true
+              %>
+              <p class="text-xs text-gray-500 flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1.5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                Jika sudah punya akun, gunakan kata sandi yang sama
+              </p>
+            </div>
+          </div>
+
+          <!-- Personal Data Section -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center pt-4 border-t border-gray-200">
+              <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+              Data Pribadi
+            </h3>
+
+            <!-- Name -->
+            <div class="space-y-2">
+              <label class="flex items-center text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Nama Lengkap
+              </label>
+              <%= text_field_tag :name, nil,
+                class: 'block w-full h-12 px-4 py-3 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm',
+                placeholder: 'Nama lengkap dengan gelar',
+                required: true,
+                data: { action: 'input->onspot-form#autoCapitalizeName' }
+              %>
+            </div>
+
+            <!-- Date of Birth -->
+            <div class="space-y-2">
+              <label class="flex items-center text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Tanggal Lahir
+              </label>
+              <div class="flex items-center gap-3">
+                <%= text_field_tag :dob_day, nil,
+                  class: 'w-20 h-12 px-4 py-3 text-center placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-medium',
+                  placeholder: 'DD',
+                  maxlength: 2,
+                  required: true,
+                  data: { action: 'input->onspot-form#calculateGolongan' }
+                %>
+                <span class="text-2xl text-gray-400 font-light">−</span>
+                <%= text_field_tag :dob_month, nil,
+                  class: 'w-20 h-12 px-4 py-3 text-center placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-medium',
+                  placeholder: 'MM',
+                  maxlength: 2,
+                  required: true,
+                  data: { action: 'input->onspot-form#calculateGolongan' }
+                %>
+                <span class="text-2xl text-gray-400 font-light">−</span>
+                <%= text_field_tag :dob_year, nil,
+                  class: 'w-28 h-12 px-4 py-3 text-center placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-medium',
+                  placeholder: 'YYYY',
+                  maxlength: 4,
+                  required: true,
+                  data: { action: 'input->onspot-form#calculateGolongan' }
+                %>
+              </div>
+              <p class="text-xs text-gray-500 flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1.5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                Contoh: <span class="font-semibold ml-1">17 - 08 - 1945</span> untuk 17 Agustus 1945
+              </p>
+              <div data-onspot-form-target="golonganDisplay" class="hidden p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-xs font-medium text-blue-900">Golongan Usia: <span data-onspot-form-target="golonganText" class="font-bold"></span></p>
+              </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="space-y-2">
+              <label class="flex items-center text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                Jenis Kelamin
+              </label>
+              <div class="grid grid-cols-2 gap-3">
+                <label class="relative flex items-center justify-center h-12 cursor-pointer">
+                  <%= radio_button_tag :gender, true, false, class: 'peer sr-only', required: true %>
+                  <div class="w-full h-full flex items-center justify-center border-2 border-gray-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition-all hover:border-gray-300">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">PRIA</span>
+                  </div>
+                </label>
+                <label class="relative flex items-center justify-center h-12 cursor-pointer">
+                  <%= radio_button_tag :gender, false, false, class: 'peer sr-only', required: true %>
+                  <div class="w-full h-full flex items-center justify-center border-2 border-gray-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 transition-all hover:border-gray-300">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">WANITA</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Employment Data Section -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center pt-4 border-t border-gray-200">
+              <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+              Data Kepegawaian
+            </h3>
+
+            <!-- Rank -->
+            <div class="space-y-2">
+              <label class="flex items-center text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                </svg>
+                Pangkat
+              </label>
+              <%= select_tag :rank, 
+                options_for_select([]),
+                class: 'block w-full h-12 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm',
+                required: true,
+                data: { onspot_form_target: 'rankSelect' }
+              %>
+              <p class="text-xs text-gray-500 flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1.5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                Pangkat akan terisi otomatis setelah NRP/NIP diisi
+              </p>
+            </div>
+
+            <!-- Position -->
+            <div class="space-y-2">
+              <label class="flex items-center text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Jabatan
+              </label>
+              <%= text_field_tag :position, nil,
+                class: 'block w-full h-12 px-4 py-3 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm',
+                placeholder: 'Masukkan jabatan atau "-" jika tidak ada',
+                required: true,
+                data: { action: 'input->onspot-form#autoCapitalize' }
+              %>
+            </div>
+
+            <!-- Unit -->
+            <div class="space-y-2">
+              <label class="flex items-center text-sm font-medium text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                Kesatuan
+              </label>
+              <%= select_tag :unit,
+                options_for_select(@units.keys.map { |k| [k, k] }),
+                {
+                  include_blank: 'Pilih Kesatuan',
+                  class: 'block w-full h-12 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm',
+                  required: true
+                }
+              %>
+            </div>
+          </div>
+
+          <!-- Physical Data Section -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center pt-4 border-t border-gray-200">
+              <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+              Data Fisik
+            </h3>
+
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Height -->
+              <div class="space-y-2">
+                <label class="flex items-center text-sm font-medium text-gray-700">
+                  Tinggi Badan (cm)
+                </label>
+                <%= number_field_tag :tb, nil,
+                  class: 'block w-full h-12 px-4 py-3 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm',
+                  placeholder: '170',
+                  min: 100,
+                  max: 250,
+                  required: true
+                %>
+              </div>
+
+              <!-- Weight -->
+              <div class="space-y-2">
+                <label class="flex items-center text-sm font-medium text-gray-700">
+                  Berat Badan (kg)
+                </label>
+                <%= number_field_tag :bb, nil,
+                  class: 'block w-full h-12 px-4 py-3 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-sm',
+                  placeholder: '70',
+                  min: 30,
+                  max: 200,
+                  required: true
+                %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden field for golongan -->
+          <%= hidden_field_tag :golongan, nil, data: { onspot_form_target: 'golonganField' } %>
+
+          <!-- Submit Button -->
+          <div class="pt-6 border-t border-gray-200">
+            <%= submit_tag 'Daftar Ujian Sekarang', 
+              class: 'w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-4 text-base font-semibold text-white hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center'
+            %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Data for JavaScript -->
+      <script type="application/json" id="ranks-data">
+        {
+          "police": <%= raw @police_ranks.keys.to_json %>,
+          "pns": <%= raw @pns_ranks.keys.to_json %>
+        }
+      </script>
+    </div>
+  </div>
+</div>

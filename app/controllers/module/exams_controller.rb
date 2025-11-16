@@ -12,7 +12,8 @@ class Module::ExamsController < ApplicationController
     # 2025 Update - Check using exam schedules
     # Allow all users to see all schedules regardless of unit
     @available_schedules = @exam.exam_schedules
-      .where("exam_date >= ?", Date.tomorrow)
+      .includes(exam_sessions: :registrations)
+      .where("exam_date >= ?", Date.today)
       .order(:exam_date)
     
     # Check if all schedules are full
@@ -28,8 +29,10 @@ class Module::ExamsController < ApplicationController
     @user = current_user
     
     # 2025 Update - Get all available schedules regardless of unit
+    # Eager load exam_sessions and their registrations for performance
     @available_schedules = @exam.exam_schedules
-      .where("exam_date >= ?", Date.tomorrow)
+      .includes(exam_sessions: :registrations)
+      .where("exam_date >= ?", Date.today)
       .order(:exam_date)
     
     if @available_schedules.empty?
@@ -115,7 +118,10 @@ class Module::ExamsController < ApplicationController
       end
 
       # Find exam session for the specific date
-      session = schedule.exam_sessions.find_by("DATE(start_time) = ?", exam_date)
+      # Use BETWEEN to handle timezone properly
+      start_of_day = exam_date.in_time_zone.beginning_of_day
+      end_of_day = exam_date.in_time_zone.end_of_day
+      session = schedule.exam_sessions.find_by("start_time BETWEEN ? AND ?", start_of_day, end_of_day)
       
       unless session
         flash[:alert] = "Sesi ujian untuk tanggal tersebut tidak ditemukan."

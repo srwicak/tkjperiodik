@@ -1,0 +1,94 @@
+- content_for :title do
+  Ubah Standar Penilaian - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+  
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 
+      = "Ubah Standar Penilaian - Golongan #{@scoring_standard.golongan.gsub('golongan_', '')} #{@scoring_standard.jenis_kelamin.capitalize}"
+
+    .max-w-6xl.w-full
+      .bg-yellow-50.border-l-4.border-yellow-500.p-4.mb-6
+        %p.text-sm.text-yellow-800
+          %strong Petunjuk:
+          Masukkan data dalam format JSON. Setiap test type berisi pasangan "nilai_raw": score.
+        %p.text-sm.text-yellow-800.mt-2
+          %strong Contoh untuk lari:
+          %code.bg-white.px-2.py-1.rounded "3444": 100, "3422": 99, "3401": 98
+        %p.text-sm.text-yellow-800.mt-2
+          %strong Untuk shuttle run gunakan desimal:
+          %code.bg-white.px-2.py-1.rounded "16.2": 100, "16.3": 99, "16.4": 98
+
+      = form_with(model: @scoring_standard, url: manage_score_scoring_standard_path(@scoring_standard), method: :patch, local: true) do |form|
+        .bg-white.p-6.rounded-xl
+          %h3.text-lg.font-bold.mb-4 Data Standar Penilaian
+          
+          - @test_types.each do |test_type|
+            .mb-6
+              %label.label
+                %span.label-text.font-bold.text-base= test_type.upcase
+              %textarea.textarea.textarea-bordered.w-full.font-mono.text-sm{ 
+                name: "lookup_data[#{test_type}]", 
+                rows: "10",
+                placeholder: "Contoh:\n{\n  \"3444\": 100,\n  \"3422\": 99,\n  \"3401\": 98\n}",
+                id: "test_#{test_type}"
+              }= JSON.pretty_generate(@scoring_standard.lookup_data[test_type] || {})
+
+          .flex.gap-4.mt-6
+            = link_to "Kembali", manage_score_scoring_standards_path, class: "btn btn-ghost"
+            = form.submit "Simpan Perubahan", class: "btn btn-success text-white"
+
+    :javascript
+      // Auto-format JSON on blur
+      document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.addEventListener('blur', function() {
+          try {
+            const parsed = JSON.parse(this.value);
+            this.value = JSON.stringify(parsed, null, 2);
+            this.classList.remove('textarea-error');
+          } catch (e) {
+            this.classList.add('textarea-error');
+          }
+        });
+      });
+
+      // On form submit, convert all textareas to proper lookup_data structure
+      document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const lookupData = {};
+        let hasError = false;
+        
+        document.querySelectorAll('textarea').forEach(textarea => {
+          const testType = textarea.name.match(/lookup_data\[(\w+)\]/)[1];
+          try {
+            lookupData[testType] = JSON.parse(textarea.value);
+          } catch (error) {
+            alert(`Error di ${testType.toUpperCase()}: Format JSON tidak valid`);
+            textarea.focus();
+            hasError = true;
+            return;
+          }
+        });
+        
+        if (hasError) return;
+        
+        // Create hidden input with complete lookup_data
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'scoring_standard[lookup_data]';
+        hiddenInput.value = JSON.stringify(lookupData);
+        this.appendChild(hiddenInput);
+        
+        // Remove individual textarea names to avoid conflict
+        document.querySelectorAll('textarea').forEach(textarea => {
+          textarea.removeAttribute('name');
+        });
+        
+        this.submit();
+      });
+
+= render "layouts/dashboard"

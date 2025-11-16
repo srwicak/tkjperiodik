@@ -11,8 +11,8 @@
         %p.font-bold Anda belum mendaftar ujian apapun.
 
     - else
-      - upcoming = @registrations.select { |r| r.exam_session.end_time >= Time.current }
-      - past = @registrations.select { |r| r.exam_session.end_time < Time.current }
+      - upcoming = @registrations.select { |r| r.exam_session.start_time.to_date >= Date.today }
+      - past = @registrations.select { |r| r.exam_session.start_time.to_date < Date.today }
 
       - if upcoming.any?
         .space-y-6
@@ -81,21 +81,20 @@
                 %div.flex.flex-wrap.gap-4.items-center.mb-2
                   %span.text-gray-500 Nilai:
                   - if score_grade.present?
-                    %span.font-bold.text-green-700= " #{score_grade}"
-                    %span.text-gray-500= " (#{score_number})"
+                    %span.font-bold.text-green-700= " #{score_number}"
+                    %span.text-gray-500= " (#{score_grade})"
                   - else
                     %span.text-yellow-700 Nilai belum tersedia
                 .flex.flex-row.justify-end.mt-4.items-center.space-x-2{class: "md:space-x-2"}
-                  -# Temporarily hidden - print result buttons
-                  -# - if score_grade.present?
-                  -#   - if registration.score.result_report_slug.present?
-                  -#     = link_to result_report_slug_path(registration.score.result_report_slug), class: "btn bg-green-600 text-white hover:bg-green-700", target: "_blank" do
-                  -#       %i.ri-file-line
-                  -#       Lihat Hasil
-                  -#   - else
-                  -#     = button_to generate_result_report_path(registration.score.slug), method: :post, class: "btn bg-red-500 text-white hover:bg-red-600" do
-                  -#       %i.ri-printer-line
-                  -#       Cetak Hasil
+                  - if score_grade.present?
+                    - if registration.score.result_report_slug.present?
+                      = link_to result_report_slug_path(registration.score.result_report_slug), class: "btn bg-green-600 text-white hover:bg-green-700", target: "_blank" do
+                        %i.ri-file-line
+                        Lihat Hasil
+                    - else
+                      = button_to generate_result_report_path(registration.score.slug), method: :post, class: "btn bg-red-500 text-white hover:bg-red-600" do
+                        %i.ri-printer-line
+                        Cetak Hasil
 
                   = link_to show_module_history_path(registration.slug), class: "btn bg-indigo-600 text-white hover:bg-indigo-700" do
                     %i.ri-search-line

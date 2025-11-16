@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_11_16_104423) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_16_212501) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -127,6 +127,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_16_104423) do
     t.string "form_b_nrp"
     t.string "form_a_event_position"
     t.string "form_b_event_position"
+    t.boolean "allow_onspot_registration", default: false, null: false
     t.index ["created_by_id"], name: "index_exams_on_created_by_id"
     t.index ["slug"], name: "index_exams_on_slug", unique: true
     t.index ["updated_by_id"], name: "index_exams_on_updated_by_id"
@@ -217,6 +218,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_11_16_104423) do
     t.index ["registration_id"], name: "index_scores_on_registration_id", unique: true
     t.index ["result_report_slug"], name: "index_scores_on_result_report_slug", unique: true
     t.index ["slug"], name: "index_scores_on_slug", unique: true
+  end
+
+  create_table "scoring_standards", force: :cascade do |t|
+    t.integer "golongan", null: false
+    t.integer "jenis_kelamin", null: false
+    t.jsonb "lookup_data", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["golongan", "jenis_kelamin"], name: "index_scoring_standards_on_golongan_and_jenis_kelamin", unique: true
   end
 
   create_table "user_details", force: :cascade do |t|

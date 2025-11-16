@@ -2,31 +2,32 @@
 #
 # Table name: exams
 #
-#  id                     :bigint           not null, primary key
-#  descriptions           :text
-#  exam_date_end          :date
-#  exam_date_start        :date
-#  form_a_event_position  :string
-#  form_a_name            :string
-#  form_a_nrp             :string
-#  form_a_police_position :string
-#  form_a_rank            :string
-#  form_b_event_position  :string
-#  form_b_name            :string
-#  form_b_nrp             :string
-#  form_b_police_position :string
-#  form_b_rank            :string
-#  name                   :string           not null
-#  notes                  :text
-#  short_name             :string
-#  size                   :integer          not null
-#  slug                   :string           not null
-#  start_register         :date
-#  status                 :integer          default("draft"), not null
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
-#  created_by_id          :bigint
-#  updated_by_id          :bigint
+#  id                        :bigint           not null, primary key
+#  allow_onspot_registration :boolean          default(FALSE), not null
+#  descriptions              :text
+#  exam_date_end             :date
+#  exam_date_start           :date
+#  form_a_event_position     :string
+#  form_a_name               :string
+#  form_a_nrp                :string
+#  form_a_police_position    :string
+#  form_a_rank               :string
+#  form_b_event_position     :string
+#  form_b_name               :string
+#  form_b_nrp                :string
+#  form_b_police_position    :string
+#  form_b_rank               :string
+#  name                      :string           not null
+#  notes                     :text
+#  short_name                :string
+#  size                      :integer          not null
+#  slug                      :string           not null
+#  start_register            :date
+#  status                    :integer          default("draft"), not null
+#  created_at                :datetime         not null
+#  updated_at                :datetime         not null
+#  created_by_id             :bigint
+#  updated_by_id             :bigint
 #
 # Indexes
 #
@@ -60,8 +61,6 @@ class Exam < ApplicationRecord
     active: 1,
     archieve: 2,
   }
-
-  validate :check_and_handle_registrations, on: :update
 
   before_save :set_slug
   after_create :create_result_doc
@@ -110,6 +109,34 @@ class Exam < ApplicationRecord
     registrations.count
   end
 
+  # Check if on-spot registration is allowed and exam is today
+  def allow_onspot_registration?
+    allow_onspot_registration && active? && exam_today?
+  end
+
+  # Check if exam has any schedule today
+  def exam_today?
+    if has_schedules?
+      exam_schedules.where(exam_date: Date.current).exists?
+    else
+      exam_date_start == Date.current || 
+        (exam_date_start.present? && exam_date_end.present? && 
+         Date.current.between?(exam_date_start, exam_date_end))
+    end
+  end
+
+  # Get today's available sessions for on-spot registration
+  def todays_available_sessions
+    return ExamSession.none unless exam_today?
+    
+    today_schedules = exam_schedules.where(exam_date: Date.current)
+    exam_sessions
+      .joins(:exam_schedule)
+      .where(exam_schedule: today_schedules)
+      .where("size < max_size")
+      .order(:start_time)
+  end
+
   private
 
   # def register_dates_cannot_be_equal
@@ -126,13 +153,5 @@ class Exam < ApplicationRecord
 
   def set_slug
     self.slug = Nanoid.generate(size: 6) if slug.blank?
-  end
-
-  def check_and_handle_registrations
-    if registrations.exists?
-      if start_register_changed? || exam_date_start_changed? || exam_date_end_changed?
-        errors.add(:base, "Tidak dapat mengubah tanggal ujian jika ada pendaftar.")
-      end
-    end
   end
 end

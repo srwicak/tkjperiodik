@@ -6,8 +6,22 @@ Rails.application.routes.draw do
   root "dashboard#index"
 
   mount ActionCable.server => "/cable"
+  
+  # API endpoints
+  namespace :api do
+    get 'scoring_standards', to: 'scoring_standards#show'
+    get 'scoring_standards/all', to: 'scoring_standards#index'
+  end
 
   scope "/" do
+
+    # On-spot registration for same-day exams
+    scope "pendaftaran-langsung" do
+      get "/:exam_slug", to: "onspot_registrations#new", as: :new_onspot_registration
+      post "/:exam_slug", to: "onspot_registrations#create", as: :create_onspot_registration
+      get "/:exam_slug/berhasil/:registration_slug", to: "onspot_registrations#success", as: :success_onspot_registration
+      get "/:exam_slug/berhasil/:registration_slug/unduh", to: "onspot_registrations#download", as: :download_onspot_registration
+    end
 
     scope "ujian" do
       get "/", to: "module/exams#index", as: :index_module_exam
@@ -106,6 +120,22 @@ Rails.application.routes.draw do
         patch "/:slug", to: "manage/user/actives#update", as: :update_manage_user_active
         get "/:slug/ujian/:reg_slug", to: "manage/shared/registrations#show", as: :show_manage_shared_registration
       end
+      
+      # Fitur Lainnya - accessible by admin and operator
+      scope "manajemen-pengguna" do
+        get "tambah", to: "manage/user_management/users#new", as: :new_manage_user
+        post "tambah", to: "manage/user_management/users#create"
+      end
+
+      scope "manajemen-peserta" do
+        get "tambah", to: "manage/user_management/participants#new", as: :new_manage_participant
+        post "tambah", to: "manage/user_management/participants#mass_register"
+      end
+
+      scope "manajemen-borang" do
+        get "cari", to: "manage/user_management/forms#search", as: :search_manage_forms
+        post "data", to: "manage/user_management/forms#data"
+      end
 
       scope "surat" do
         get "template/data", to: "manage/result/templates#data", as: :data_manage_result_template
@@ -187,6 +217,15 @@ Rails.application.routes.draw do
         post "cari", to: "manage/score/scores#search", as: :search_manage_score
         get "data", to: "manage/score/scores#data", as: :data_manage_score
         get ":code/isi", to: "manage/score/qr_access#show", as: :qr_access_manage_score, constraints: { code: /[A-Z0-9\-]+/ }
+        
+        # Standar Penilaian sub-menu
+        scope "standar-penilaian" do
+          get "/", to: "manage/score/scoring_standards#index", as: :manage_score_scoring_standards
+          get "/:id/ubah", to: "manage/score/scoring_standards#edit", as: :edit_manage_score_scoring_standard
+          patch "/:id", to: "manage/score/scoring_standards#update", as: :manage_score_scoring_standard
+          put "/:id", to: "manage/score/scoring_standards#update"
+        end
+        
         get "/:slug", to: "manage/score/scores#show", as: :show_manage_score
         get "/:slug/buat-dokumen", to: "manage/score/scores#generate_doc", as: :generate_doc_manage_score
         get "/:slug/unduh", to: "manage/score/scores#download_doc", as: :download_doc_manage_score
