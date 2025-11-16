@@ -61,7 +61,7 @@ class User < ApplicationRecord
   validate :identity_length_must_be_valid
   validates :identity, presence: true, uniqueness: true
 
-  validate :password_complexity
+  # validate :password_complexity  # Disabled: allow numeric-only passwords (e.g., NRP/NIP as password)
   validates :password, presence: true, on: :create
   validates :password, confirmation: true, if: :password_present?
 
@@ -155,12 +155,13 @@ class User < ApplicationRecord
     password.present?
   end
 
-  def password_complexity
-    return unless password.present?
-    unless password.length >= 8 && password.match?(/\A(?=.*[a-zA-Z])(?=.*\d).+\z/)
-      errors.add(:password, :too_weak)
-    end
-  end
+  # Disabled: allow numeric-only passwords per client request
+  # def password_complexity
+  #   return unless password.present?
+  #   unless password.length >= 8 && password.match?(/\A(?=.*[a-zA-Z])(?=.*\d).+\z/)
+  #     errors.add(:password, :too_weak)
+  #   end
+  # end
 
   def password_required?
     # Validate the password only if the password is not empty or the user is new

@@ -67,7 +67,13 @@ class GeneratePdfJob < ApplicationJob
     code = "#{registration.score.code[0, 3]}-#{registration.score.code[-4, 4]}"
     
     # Generate QR code for quick access - use Rails URL helper for dynamic domain
-    qr_code_url = Rails.application.routes.url_helpers.qr_access_manage_score_url(code: code, host: ENV.fetch('APP_HOST', 'localhost:3000'))
+    # Auto-detect host based on environment
+    host = if Rails.env.production?
+             'tkjperiodik.com'
+           else
+             ENV.fetch('APP_HOST', 'localhost:3000')
+           end
+    qr_code_url = Rails.application.routes.url_helpers.qr_access_manage_score_url(code: code, host: host)
     qrcode = RQRCode::QRCode.new(qr_code_url)
     
     # 2025 Update - Exam name
@@ -95,10 +101,10 @@ class GeneratePdfJob < ApplicationJob
       form_b_rank_nrp = exam.form_b_rank.upcase
     end
 
-    # Print date using exam date (Jakarta, 10 Oktober 2025)
+    # Print date using exam session start time (Jakarta, 10 Oktober 2025)
     print_date = ""
-    if exam_schedule&.exam_date.present?
-      print_date = "Jakarta, #{I18n.l(exam_schedule.exam_date, format: :default)}"
+    if registration.exam_session&.start_time.present?
+      print_date = "Jakarta, #{I18n.l(registration.exam_session.start_time.to_date, format: :default)}"
     end
 
     # Template paths

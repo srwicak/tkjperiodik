@@ -26,10 +26,10 @@
                 %a.btn.btn-sm.btn-error.ml-2{ href: edit_module_profile_path } Lengkapi Profil
             .space-y-4.mb-6
               - @available_schedules.each do |schedule|
-                - # Generate all dates in range (include all days, no weekend filter)
+                - # Generate all dates in range, exclude weekends (Saturday=6, Sunday=0)
                 - start_date = schedule.exam_date
                 - end_date = schedule.exam_date_end.presence || schedule.exam_date
-                - date_range = (start_date..end_date).to_a
+                - date_range = (start_date..end_date).to_a.reject { |date| date.wday == 0 || date.wday == 6 }
                 - date_range.each do |exam_date|
                   .border.rounded-lg.p-4.cursor-pointer.transition-colors.hover:bg-base-200{ onclick: "selectSchedule(this, '#{schedule.id}_#{exam_date.to_s}')", data: { exam_date: exam_date.to_s, schedule_id: schedule.id } }
                     .flex.items-start.gap-3
