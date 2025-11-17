@@ -238,13 +238,19 @@ class GeneratePdfJob < ApplicationJob
         IO.binwrite(qr_temp_path, qr_png.to_s)
         
         # Add QR code image above the text (same X position as code text: 24)
-        pdf.image qr_temp_path, at: [24, 96], width: 60, height: 60
+        pdf.image qr_temp_path, at: [24, 116], width: 60, height: 60
         
         # Delete temp QR file
         File.delete(qr_temp_path) if File.exist?(qr_temp_path)
         
         # Code at bottom (below QR code with 8px spacing)
-        pdf.text_box "KODE REGISTRASI: #{code}", at: [24, 28], size: 10
+        pdf.text_box "KODE REGISTRASI: #{code}", at: [24, 48], size: 10
+        
+        # Registration date below code
+        if registration.created_at.present?
+          registration_time = registration.created_at.in_time_zone('Jakarta').strftime('%d-%m-%Y %H:%M:%S')
+          pdf.text_box "Waktu Mendaftar: #{registration_time} WIB", at: [24, 36], size: 10
+        end
       end
 
       # Generate overlay for Form B (if needed)
@@ -352,13 +358,19 @@ class GeneratePdfJob < ApplicationJob
           IO.binwrite(qr_temp_path, qr_png.to_s)
           
           # Add QR code image above the text (same X position as code text: 24)
-          pdf.image qr_temp_path, at: [24, 96], width: 60, height: 60
+          pdf.image qr_temp_path, at: [24, 116], width: 60, height: 60
           
           # Delete temp QR file
           File.delete(qr_temp_path) if File.exist?(qr_temp_path)
           
           # Code at bottom (below QR code with 8px spacing)
-          pdf.text_box "KODE REGISTRASI: #{code}", at: [24, 28], size: 10
+          pdf.text_box "KODE REGISTRASI: #{code}", at: [24, 48], size: 10
+          
+          # Registration date below code
+          if registration.created_at.present?
+            registration_time = registration.created_at.in_time_zone('Jakarta').strftime('%d-%m-%Y %H:%M:%S')
+            pdf.text_box "Waktu Mendaftar: #{registration_time} WIB", at: [24, 36], size: 10
+          end
         end
       end
 
