@@ -11,9 +11,10 @@ class Module::ExamsController < ApplicationController
     
     # 2025 Update - Check using exam schedules
     # Allow all users to see all schedules regardless of unit
+    # Show schedules where exam_date_end >= today OR (exam_date_end is NULL and exam_date >= today)
     @available_schedules = @exam.exam_schedules
       .includes(exam_sessions: :registrations)
-      .where("exam_date >= ?", Date.today)
+      .where("exam_date_end >= ? OR (exam_date_end IS NULL AND exam_date >= ?)", Date.today, Date.today)
       .order(:exam_date)
     
     # Check if all schedules are full
@@ -30,9 +31,10 @@ class Module::ExamsController < ApplicationController
     
     # 2025 Update - Get all available schedules regardless of unit
     # Eager load exam_sessions and their registrations for performance
+    # Show schedules where exam_date_end >= today OR (exam_date_end is NULL and exam_date >= today)
     @available_schedules = @exam.exam_schedules
       .includes(exam_sessions: :registrations)
-      .where("exam_date >= ?", Date.today)
+      .where("exam_date_end >= ? OR (exam_date_end IS NULL AND exam_date >= ?)", Date.today, Date.today)
       .order(:exam_date)
     
     if @available_schedules.empty?
