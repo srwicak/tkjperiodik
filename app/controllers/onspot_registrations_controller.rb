@@ -26,6 +26,7 @@ class OnspotRegistrationsController < ApplicationController
     # Validate identity length
     unless [8, 18].include?(identity&.length)
       flash.now[:alert] = "NRP harus 8 digit atau NIP harus 18 digit"
+      set_form_variables
       render :new, status: :unprocessable_entity
       return
     end
@@ -34,6 +35,7 @@ class OnspotRegistrationsController < ApplicationController
     available_session = @exam.todays_available_sessions.first
     unless available_session
       flash.now[:alert] = "Semua sesi ujian hari ini sudah penuh"
+      set_form_variables
       render :new, status: :unprocessable_entity
       return
     end
@@ -45,6 +47,7 @@ class OnspotRegistrationsController < ApplicationController
     
     unless dob_day.present? && dob_month.present? && dob_year.present?
       flash.now[:alert] = "Tanggal lahir wajib diisi"
+      set_form_variables
       render :new, status: :unprocessable_entity
       return
     end
@@ -55,6 +58,7 @@ class OnspotRegistrationsController < ApplicationController
       date_of_birth = Date.parse(date_of_birth_str)
     rescue ArgumentError
       flash.now[:alert] = "Format tanggal lahir tidak valid"
+      set_form_variables
       render :new, status: :unprocessable_entity
       return
     end
@@ -67,6 +71,7 @@ class OnspotRegistrationsController < ApplicationController
         # User exists, validate password
         unless user.valid_password?(password)
           flash.now[:alert] = "Kata sandi salah"
+          set_form_variables
           render :new, status: :unprocessable_entity
           return
         end
@@ -74,8 +79,28 @@ class OnspotRegistrationsController < ApplicationController
         # Check if already registered for this exam
         if Registration.joins(:exam_session).where(user_id: user.id, exam_sessions: { exam_id: @exam.id }).exists?
           flash.now[:alert] = "Anda sudah terdaftar untuk ujian ini"
+          set_form_variables
           render :new, status: :unprocessable_entity
           return
+        end
+
+        # Ensure user has user_detail (for existing users who might not have one)
+        unless user.user_detail
+          user_detail = user.build_user_detail(
+            name: params[:name]&.upcase&.strip,
+            gender: params[:gender],
+            rank: params[:rank],
+            position: params[:position]&.upcase&.strip,
+            unit: params[:unit],
+            date_of_birth: date_of_birth
+          )
+
+          unless user_detail.save
+            flash.now[:alert] = user_detail.errors.full_messages.join(", ")
+            set_form_variables
+            render :new, status: :unprocessable_entity
+            return
+          end
         end
       else
         # Create new user
@@ -90,6 +115,7 @@ class OnspotRegistrationsController < ApplicationController
 
         unless user.save
           flash.now[:alert] = user.errors.full_messages.join(", ")
+          set_form_variables
           render :new, status: :unprocessable_entity
           return
         end
@@ -106,6 +132,7 @@ class OnspotRegistrationsController < ApplicationController
 
         unless user_detail.save
           flash.now[:alert] = user_detail.errors.full_messages.join(", ")
+          set_form_variables
           render :new, status: :unprocessable_entity
           return
         end
@@ -128,6 +155,7 @@ class OnspotRegistrationsController < ApplicationController
 
       unless registration.save
         flash.now[:alert] = registration.errors.full_messages.join(", ")
+        set_form_variables
         render :new, status: :unprocessable_entity
         return
       end
@@ -137,11 +165,13 @@ class OnspotRegistrationsController < ApplicationController
     end
   rescue ActiveRecord::RecordInvalid => e
     flash.now[:alert] = e.message
+    set_form_variables
     render :new, status: :unprocessable_entity
   rescue => e
     Rails.logger.error "Onspot registration error: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
     flash.now[:alert] = "Terjadi kesalahan sistem. Silakan coba lagi."
+    set_form_variables
     render :new, status: :unprocessable_entity
   end
 
@@ -196,5 +226,12 @@ class OnspotRegistrationsController < ApplicationController
     unless @exam.allow_onspot_registration?
       redirect_to root_path, alert: "Pendaftaran langsung tidak tersedia untuk ujian ini"
     end
+  end
+
+  def set_form_variables
+    @police_ranks = UserDetail.ranks_for_police
+    @pns_ranks = UserDetail.ranks_for_pns
+    @units = UserDetail.units
+    @available_sessions = @exam.todays_available_sessions
   end
 end

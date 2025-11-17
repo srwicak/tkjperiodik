@@ -50,13 +50,13 @@ class Manage::UserManagement::ParticipantsController < ApplicationController
   end
 
   def find_available_session
-    tomorrow_start = Time.zone.now.beginning_of_day + 1.day
+    today_start = Time.zone.now.beginning_of_day
 
-    query = @exam.exam_sessions.where("size < max_size AND start_time >= ?", tomorrow_start).order(:start_time)
+    query = @exam.exam_sessions.where("size < max_size AND start_time >= ?", today_start).order(:start_time)
     session = query.first
 
     if session.nil?
-      session = @exam.exam_sessions.order(:start_time).find { |s| s.size < s.max_size && s.start_time.to_date >= tomorrow_start }
+      session = @exam.exam_sessions.order(:start_time).find { |s| s.size < s.max_size && s.start_time.to_date >= today_start }
     end
 
     raise ActiveRecord::RecordNotFound, "Tidak ada sesi tersedia" unless session
@@ -66,7 +66,12 @@ class Manage::UserManagement::ParticipantsController < ApplicationController
   def register_participant(participant)
     Exam.transaction do
       session = find_available_session
-      registration = session.registrations.build(user: participant, registration_type: params[:reg_type])
+      registration = session.registrations.build(
+        user: participant, 
+        registration_type: params[:reg_type],
+        tb: params[:tb].presence,
+        bb: params[:bb].presence
+      )
       
       # Calculate and set golongan
       if participant.user_detail.date_of_birth.present? && session.exam_schedule&.exam_date.present?

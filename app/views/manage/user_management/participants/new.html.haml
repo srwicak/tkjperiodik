@@ -22,9 +22,17 @@
               %option{ value: exam.slug}= exam.name
 
           %template(x-for="(identity, index) in identities" :key="index")
-            .identity-row.my-4
-              %input{ type: "text", name: "identities[]", "x-model": "identities[index]", placeholder: "Masukkan NRP (8 digit) atau NIP (18 digit)", class: "input input-bordered text-center w-[400px]", "x-bind:class": "{ 'border-red-500': status[index] && status[index] !== 'Sedang proses...' }", oninput: "this.value = this.value.replace(/[^0-9]/g, '');" }
-              %button{ type: "button", "x-show": "identities.length > 1", "@click": "removeIdentity(index)", class: "ml-4 btn btn-error text-white uppercase" }
+            .identity-row.my-4.flex.items-end.gap-2
+              .flex.flex-col
+                %label.text-xs.text-gray-500.mb-1 NRP/NIP
+                %input{ type: "text", name: "identities[]", "x-model": "identities[index]", placeholder: "8 atau 18 digit", class: "input input-bordered text-center w-[200px]", "x-bind:class": "{ 'border-red-500': status[index] && status[index] !== 'Sedang proses...' }", oninput: "this.value = this.value.replace(/[^0-9]/g, '');" }
+              .flex.flex-col
+                %label.text-xs.text-gray-500.mb-1 TB (cm)
+                %input{ type: "number", name: "tb[]", "x-model": "tb[index]", placeholder: "Mis: 170", min: "100", max: "250", class: "input input-bordered text-center w-[100px]" }
+              .flex.flex-col
+                %label.text-xs.text-gray-500.mb-1 BB (kg)
+                %input{ type: "number", name: "bb[]", "x-model": "bb[index]", placeholder: "Mis: 70", min: "30", max: "200", class: "input input-bordered text-center w-[100px]" }
+              %button{ type: "button", "x-show": "identities.length > 1", "@click": "removeIdentity(index)", class: "ml-2 btn btn-error text-white uppercase" }
                 %i.ri-delete-bin-line
               %span.ml-2(x-text="status[index]" class="text-red-500")
 
@@ -42,12 +50,16 @@
     return {
       identities: [''],
       registrationTypes: [''],
+      tb: [''],
+      bb: [''],
       status: [],
       selectedExam: '',
 
       addIdentity() {
         this.identities.push('');
         this.registrationTypes.push('');
+        this.tb.push('');
+        this.bb.push('');
         this.status.push('');
       },
 
@@ -55,6 +67,8 @@
         if (this.identities.length > 1) {
           this.identities.splice(index, 1);
           this.registrationTypes.splice(index, 1);
+          this.tb.splice(index, 1);
+          this.bb.splice(index, 1);
           this.status.splice(index, 1);
         }
       },
@@ -89,6 +103,8 @@
         for (let i = 0; i < this.identities.length; i++) {
           const identity = this.identities[i];
           const regType = this.registrationTypes[i] ? 'kenaikan_pangkat' : 'berkala' ;
+          const tbValue = this.tb[i];
+          const bbValue = this.bb[i];
 
           if (identity.trim() === '') {
             this.status[i] = 'Identitas tidak boleh kosong.';
@@ -103,7 +119,13 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
               },
-              body: JSON.stringify({ identity, exam_slug: this.selectedExam, reg_type: regType })
+              body: JSON.stringify({ 
+                identity, 
+                exam_slug: this.selectedExam, 
+                reg_type: regType,
+                tb: tbValue,
+                bb: bbValue
+              })
             });
 
             const result = await response.json();

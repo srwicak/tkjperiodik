@@ -5,6 +5,9 @@ Rails.application.routes.draw do
 
   root "dashboard#index"
 
+  # Public result report access
+  get 'hasil-ujian/:slug', to: 'module/scores#view_result_report', as: :public_result_report
+
   mount ActionCable.server => "/cable"
   
   # API endpoints
@@ -135,6 +138,11 @@ Rails.application.routes.draw do
       scope "manajemen-borang" do
         get "cari", to: "manage/user_management/forms#search", as: :search_manage_forms
         post "data", to: "manage/user_management/forms#data"
+      end
+
+      scope "hasil-ujian" do
+        get "cetak", to: "manage/result/print_results#index", as: :index_manage_result_print_results
+        post "cetak/data", to: "manage/result/print_results#data", as: :data_manage_result_print_results
       end
 
       scope "surat" do

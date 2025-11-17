@@ -1,0 +1,19 @@
+- content_for :title do
+  Cetak Hasil Ujian - Dasbor
+
+- content_for :content do
+  .mobile-message
+    .mt-8.bg-yellow-100.border-l-4.border-yellow-500.text-yellow-700.p-4
+      %p.font-bold Maaf, laman ini tidak bisa diakses dengan ponsel.
+
+  .desktop-content
+    .divider.divider-start.uppercase.text-gray-400.font-bold Cetak Hasil Ujian
+
+    .max-w-4xl.w-full.bg-white.p-6.rounded-xl
+      .font-bold.text-sm.mb-6
+        %p Halaman ini untuk mencetak hasil ujian peserta berdasarkan NRP (8 digit) atau NIP (18 digit).
+        %p Sistem akan menampilkan 3 ujian terakhir beserta status hasil ujian PDF yang bisa diunduh.
+
+      = render "find"
+
+= render "layouts/dashboard"

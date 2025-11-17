@@ -24,10 +24,11 @@ class GeneratePdfJob < ApplicationJob
       age_at_exam -= 1 if exam_date.month < dob.month || (exam_date.month == dob.month && exam_date.day < dob.day)
     end
     
-    # Determine which templates to use based on age
-    # < 51 years: use both ukj-a and ukj-b
-    # >= 51 years: use only ukj-a
-    use_both_forms = age_at_exam.present? && age_at_exam < 51
+    # Determine which templates to use based on gender and golongan
+    # Golongan 1-3: use form A + form B (male/female specific)
+    # Golongan 4 (51+ years): use only form A
+    use_both_forms = registration.golongan.present? && registration.golongan < 4
+    is_male = user_detail.gender # true = male, false = female
     
     name = user_detail.name.upcase
     # Combine rank and NRP (check how it's written in the file)
@@ -109,7 +110,8 @@ class GeneratePdfJob < ApplicationJob
 
     # Template paths
     template_a_path = Rails.root.join("private", "assets", "templates", "tkj-a.pdf")
-    template_b_path = Rails.root.join("private", "assets", "templates", "tkj-b.pdf")
+    template_b_filename = is_male ? "tkj-b-male.pdf" : "tkj-b-female.pdf"
+    template_b_path = Rails.root.join("private", "assets", "templates", template_b_filename)
     output_path = Rails.root.join("tmp", "pendaftaran_#{SecureRandom.hex}.pdf")
 
     unless File.exist?(template_a_path)
@@ -162,6 +164,16 @@ class GeneratePdfJob < ApplicationJob
         pdf.text_box date_of_birth_formatted, at: [x_pos, y_pos], size: 12
         y_pos -= 32
         pdf.text_box golongan, at: [x_pos, y_pos], size: 12
+        y_pos -= 32
+        tb_bb = ""
+        if registration.tb.present? && registration.bb.present?
+          tb_bb = "TB: #{registration.tb} CM / BB: #{registration.bb} KG"
+        elsif registration.tb.present?
+          tb_bb = "TB: #{registration.tb} CM"
+        elsif registration.bb.present?
+          tb_bb = "BB: #{registration.bb} KG"
+        end
+        pdf.text_box tb_bb, at: [x_pos, y_pos], size: 12
         
         # Print date (Jakarta, tanggal ujian) - lowered by 32px
         pdf.text_box print_date, at: [350, 438], size: 12, width: 220, align: :center, style: :bold
@@ -268,6 +280,16 @@ class GeneratePdfJob < ApplicationJob
           pdf.text_box date_of_birth_formatted, at: [x_pos, y_pos], size: 12
           y_pos -= 32
           pdf.text_box golongan, at: [x_pos, y_pos], size: 12
+          y_pos -= 32
+          tb_bb = ""
+          if registration.tb.present? && registration.bb.present?
+            tb_bb = "TB: #{registration.tb} CM / BB: #{registration.bb} KG"
+          elsif registration.tb.present?
+            tb_bb = "TB: #{registration.tb} CM"
+          elsif registration.bb.present?
+            tb_bb = "BB: #{registration.bb} KG"
+          end
+          pdf.text_box tb_bb, at: [x_pos, y_pos], size: 12
           
           # Print date (Jakarta, tanggal ujian) - lowered by 32px
           pdf.text_box print_date, at: [350, 238], size: 12, width: 220, align: :center, style: :bold
