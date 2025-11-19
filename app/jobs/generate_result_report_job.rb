@@ -98,9 +98,9 @@ class GenerateResultReportJob < ApplicationJob
     
     # Pilih template
     if is_police
-      age >= 51 ? "hasil-ujian-51-nrp.pdf" : "hasil-ujian-50-nrp.pdf"
+      age >= 51 ? "hasil-51-nrp.pdf" : "hasil-50-nrp.pdf"
     else
-      age >= 51 ? "hasil-ujian-51-nip.pdf" : "hasil-ujian-50-nip.pdf"
+      age >= 51 ? "hasil-51-nip.pdf" : "hasil-50-nip.pdf"
     end
   end
 
@@ -167,9 +167,10 @@ class GenerateResultReportJob < ApplicationJob
     exam_name = score.registration.exam_session.exam.name
     
     # Coba parse berbagai format nama ujian
-    # Format 1: "SEMESTER I T.A. 2024" atau "SEMESTER II TAHUN 2024"
-    # Format 2: "Semester 1 TA 2025"
-    match = exam_name.match(/[Ss]emester\s+([IVXLCDM]+|\d+).*?(?:[Tt]\.?[Aa]\.?|[Tt]ahun(?:\s+[Aa]nggaran)?)\s*(\d{4})/)
+    # Format 1: "TKJ PERIODIK SEMESTER II TAHUN 2025"
+    # Format 2: "SEMESTER I T.A. 2024" atau "SEMESTER II TAHUN 2024"
+    # Format 3: "Semester 1 TA 2025"
+    match = exam_name.match(/[Ss]emester\s+([IVXLCDM]+|\d+).*?[Tt]ahun(?:\s+[Aa]nggaran)?\s*(\d{4})/)
     
     if match
       semester_raw = match[1]
@@ -203,34 +204,36 @@ class GenerateResultReportJob < ApplicationJob
     pdf.font "Times"
 
     # Judul Periode Tes (center atas)
-    # Kertas A4 width = 595 points, center di 297.5
+    # Kertas LEGAL width = 612 points, height = 1008 points
     pdf.text_box periode_tes, 
       at: [0, 844],
       width: 612,
       height: 50,
       size: 14,
       align: :center
+    
+    # Gabungkan rank dan identity dalam satu baris (format: PANGKAT NRP/NIP 12345678)
+    rank_identity_combined = "#{rank}/#{identity}"
 
     # TODO: Sesuaikan koordinat dengan template PDF yang baru
     # Ini adalah contoh, perlu disesuaikan dengan posisi field di template
-    pdf.text_box name, at: [130, 812], size: 12
-    pdf.text_box position, at: [130, 788], size: 12
-    pdf.text_box unit, at: [130, 764], size: 12
-    pdf.text_box rank, at: [410, 812], size: 12
-    pdf.text_box identity, at: [410, 788], size: 12
-    pdf.text_box golongan_text, at: [410, 764], size: 12
+    pdf.text_box name, at: [146, 812], size: 12
+    pdf.text_box position, at: [146, 788], size: 12
+    pdf.text_box rank_identity_combined, at: [146, 764], size: 12
+    pdf.text_box unit, at: [146, 740], size: 12
+    pdf.text_box golongan_text, at: [422, 740], size: 12
 
     # Data nilai
-    pdf.text_box nilai_a.to_s, at: [500, 662], size: 12
+    pdf.text_box nilai_a.to_s, at: [500, 638], size: 12
     
     # Nilai B dan koordinat nilai akhir berbeda untuk usia < 51 vs 51+
     if nilai_b
       # Usia < 51: Ada Nilai A, B, dan Nilai Akhir
-      pdf.text_box nilai_b.to_s, at: [500, 634], size: 12
-      pdf.text_box nilai_akhir, at: [500, 604], size: 12 # Koordinat untuk template < 51
+      pdf.text_box nilai_b.to_s, at: [500, 608], size: 12
+      pdf.text_box nilai_akhir, at: [500, 580], size: 12 # Koordinat untuk template < 51
     else
       # Usia 51+: Hanya Nilai A dan Nilai Akhir (koordinat nilai akhir lebih tinggi)
-      pdf.text_box nilai_akhir, at: [500, 634], size: 12 # Koordinat untuk template 51+
+      pdf.text_box nilai_akhir, at: [500, 608], size: 12 # Koordinat untuk template 51+
     end
 
     

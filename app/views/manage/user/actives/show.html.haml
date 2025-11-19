@@ -37,6 +37,7 @@
     .divider.divider-start.uppercase.text-gray-400.font-bold detil akun pengguna
 
     %button.btn.btn-accent{ onclick: "status_modal.showModal()" } Ubah Status Pengguna
+    %button.btn.btn-primary.ml-2{ onclick: "profile_modal.showModal()" } Ubah Data Peserta
 
     .relative.overflow-x-auto.shadow-md.rounded-lg.my-8{ class: "xl:w-2/3 w-full" }
       %table.w-full.bg-white
@@ -105,6 +106,55 @@
             %button#save_button.btn.btn-success Simpan
             %button#cancel_button.btn Batal
 
+    %dialog#profile_modal.modal
+      .modal-box.max-w-2xl
+        %h3.text-lg.font-bold.uppercase.mb-4 ubah data peserta
+
+        .mb-4 
+          %p Ubah profil peserta
+          %p 
+            #{@id_cat}: 
+            %span.font-semibold #{@identity}
+
+        %form#profile_form
+          .mb-4
+            %label.block.text-sm.font-medium.mb-2{ for: "profile_name" } Nama Lengkap
+            %input#profile_name.input.input-bordered.w-full{ type: "text", name: "name", required: true }
+          
+          .mb-4
+            %label.block.text-sm.font-medium.mb-2{ for: "profile_dob" } Tanggal Lahir
+            %input#profile_dob.input.input-bordered.w-full{ type: "text", name: "date_of_birth", placeholder: "DD-MM-YYYY (contoh: 17-08-1945)", maxlength: "10" }
+            %p.text-xs.text-gray-500.mt-1.italic Format: DD-MM-YYYY (contoh: 17-08-1945)
+          
+          .mb-4
+            %label.block.text-sm.font-medium.mb-2{ for: "profile_rank" } Pangkat
+            %select#profile_rank.select.select-bordered.w-full{ name: "rank", required: true }
+              %option{value: ""} Pilih Pangkat
+          
+          .mb-4
+            %label.block.text-sm.font-medium.mb-2{ for: "profile_unit" } Satuan Kerja
+            %select#profile_unit.select.select-bordered.w-full{ name: "unit", required: true }
+              %option{value: ""} Pilih Satuan Kerja
+          
+          .mb-4
+            %label.block.text-sm.font-medium.mb-2{ for: "profile_position" } Jabatan
+            %input#profile_position.input.input-bordered.w-full{ type: "text", name: "position", required: true, placeholder: 'Masukkan jabatan atau tanda "-" jika tidak ada' }
+          
+          .mb-4
+            %label.block.text-sm.font-medium.mb-2 Gender
+            .flex.gap-4
+              %label.flex.items-center
+                %input#profile_gender_male.radio.radio-primary{ type: "radio", name: "gender", value: "true", required: true }
+                %span.ml-2 Pria
+              %label.flex.items-center
+                %input#profile_gender_female.radio.radio-primary{ type: "radio", name: "gender", value: "false" }
+                %span.ml-2 Wanita
+
+        .modal-action 
+          %form{ method:"dialog" }
+            %button#save_profile_button.btn.btn-success{ type: "button" } Simpan
+            %button#cancel_profile_button.btn Batal
+
 = render "layouts/dashboard"
 
 :javascript
@@ -158,6 +208,136 @@
     })
     .catch(error => console.error("Error:", error))
   })
+
+  // Profile modal functions
+  window.addEventListener('DOMContentLoaded', function() {
+    const profileModal = document.getElementById("profile_modal");
+    const dobField = document.getElementById("profile_dob");
+    
+    // Auto-format date field
+    if (dobField) {
+      dobField.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        if (value.length >= 2) {
+          value = value.slice(0, 2) + '-' + value.slice(2);
+        }
+        if (value.length >= 5) {
+          value = value.slice(0, 5) + '-' + value.slice(5, 9);
+        }
+        
+        e.target.value = value;
+      });
+    }
+
+    // Load profile data when modal opens
+    profileModal.addEventListener("show", function() {
+      loadProfileData();
+    });
+    
+    // Override the modal button to trigger data load
+    const showModalBtn = document.querySelector('button[onclick*="profile_modal"]');
+    if (showModalBtn) {
+      showModalBtn.onclick = function(e) {
+        e.preventDefault();
+        loadProfileData();
+        profileModal.showModal();
+      };
+    }
+  });
+
+  function loadProfileData() {
+    const path = window.location.pathname + '/ubah-profil';
+    
+    fetch(path, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById("profile_name").value = data.name || '';
+      document.getElementById("profile_dob").value = data.date_of_birth || '';
+      document.getElementById("profile_position").value = data.position || '';
+      
+      // Populate rank dropdown
+      const rankSelect = document.getElementById("profile_rank");
+      rankSelect.innerHTML = '<option value="">Pilih Pangkat</option>';
+      data.available_ranks.forEach(rank => {
+        const option = document.createElement('option');
+        option.value = rank;
+        option.textContent = rank;
+        if (rank === data.rank) option.selected = true;
+        rankSelect.appendChild(option);
+      });
+      
+      // Populate unit dropdown
+      const unitSelect = document.getElementById("profile_unit");
+      unitSelect.innerHTML = '<option value="">Pilih Satuan Kerja</option>';
+      data.available_units.forEach(unit => {
+        const option = document.createElement('option');
+        option.value = unit;
+        option.textContent = unit;
+        if (unit === data.unit) option.selected = true;
+        unitSelect.appendChild(option);
+      });
+      
+      // Set gender
+      if (data.gender === true) {
+        document.getElementById("profile_gender_male").checked = true;
+      } else {
+        document.getElementById("profile_gender_female").checked = true;
+      }
+    })
+    .catch(error => {
+      console.error("Error loading profile:", error);
+      alert("Gagal memuat data profil");
+    });
+  }
+
+  document.getElementById("save_profile_button").addEventListener("click", () => {
+    const path = window.location.pathname + '/ubah-profil';
+    
+    const formData = {
+      user_detail: {
+        name: document.getElementById("profile_name").value,
+        date_of_birth: document.getElementById("profile_dob").value,
+        rank: document.getElementById("profile_rank").value,
+        unit: document.getElementById("profile_unit").value,
+        position: document.getElementById("profile_position").value,
+        gender: document.querySelector('input[name="gender"]:checked').value
+      }
+    };
+    
+    fetch(path, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("profile_modal").close();
+        alert(data.message || "Profil berhasil diperbarui");
+        window.location.reload();
+      } else {
+        alert("Error: " + (data.error || "Gagal memperbarui profil"));
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Terjadi kesalahan saat memperbarui profil");
+    });
+  });
+
+  document.getElementById("profile_modal").addEventListener("close", function() {
+    document.getElementById("profile_form").reset();
+  });
 
 :javascript
   // Tanulator table

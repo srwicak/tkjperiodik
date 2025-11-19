@@ -24,11 +24,13 @@ class GeneratePdfJob < ApplicationJob
       age_at_exam -= 1 if exam_date.month < dob.month || (exam_date.month == dob.month && exam_date.day < dob.day)
     end
     
-    # Determine which templates to use based on gender and golongan
-    # Golongan 1-3: use form A + form B (male/female specific)
-    # Golongan 4 (51+ years): use only form A
-    use_both_forms = registration.golongan.present? && registration.golongan < 4
+    # Determine which template to use based on gender and golongan
+    # Golongan 1-3 male: ukj-50-m.pdf
+    # Golongan 1-3 female: ukj-50-f.pdf
+    # Golongan 4 male: ukj-51-m.pdf
+    # Golongan 4 female: ukj-51-f.pdf
     is_male = user_detail.gender # true = male, false = female
+    is_golongan_4 = registration.golongan.present? && registration.golongan == 4
     
     name = user_detail.name.upcase
     # Combine rank and NRP (check how it's written in the file)
@@ -91,37 +93,23 @@ class GeneratePdfJob < ApplicationJob
       form_a_rank_nrp = exam.form_a_rank.upcase
     end
 
-    # Data Penandatangan Form B
-    form_b_police_position = exam.form_b_police_position.present? ? exam.form_b_police_position.upcase : nil
-    form_b_exam_position = exam.form_b_event_position.present? ? exam.form_b_event_position.upcase : ""
-    form_b_name = exam.form_b_name.present? ? exam.form_b_name.upcase : ""
-    form_b_rank_nrp = ""
-    if exam.form_b_rank.present? && exam.form_b_nrp.present?
-      form_b_rank_nrp = "#{exam.form_b_rank.upcase} NRP #{exam.form_b_nrp}"
-    elsif exam.form_b_rank.present?
-      form_b_rank_nrp = exam.form_b_rank.upcase
-    end
-
     # Print date using exam session start time (Jakarta, 10 Oktober 2025)
     print_date = ""
     if registration.exam_session&.start_time.present?
       print_date = "Jakarta, #{I18n.l(registration.exam_session.start_time.to_date, format: :default)}"
     end
 
-    # Template paths
-    template_a_path = Rails.root.join("private", "assets", "templates", "tkj-a.pdf")
-    template_b_filename = is_male ? "tkj-b-male.pdf" : "tkj-b-female.pdf"
-    template_b_path = Rails.root.join("private", "assets", "templates", template_b_filename)
+    # Template paths - select based on golongan and gender
+    template_filename = if is_golongan_4
+                          is_male ? "ukj-51-m.pdf" : "ukj-51-f.pdf"
+                        else
+                          is_male ? "ukj-50-m.pdf" : "ukj-50-f.pdf"
+                        end
+    template_path = Rails.root.join("private", "assets", "templates", template_filename)
     output_path = Rails.root.join("tmp", "pendaftaran_#{SecureRandom.hex}.pdf")
 
-    unless File.exist?(template_a_path)
-      Rails.logger.error "Template file not found: #{template_a_path}"
-      registration.error!
-      return
-    end
-    
-    if use_both_forms && !File.exist?(template_b_path)
-      Rails.logger.error "Template file not found: #{template_b_path}"
+    unless File.exist?(template_path)
+      Rails.logger.error "Template file not found: #{template_path}"
       registration.error!
       return
     end
@@ -129,11 +117,10 @@ class GeneratePdfJob < ApplicationJob
     begin
       times_font_path = Rails.root.join("private", "assets", "fonts", "times.ttf")
       times_bold_font_path = Rails.root.join("private", "assets", "fonts", "times-b.ttf")
-      overlay_form_a_path = Rails.root.join("tmp", "overlay_form_a_#{SecureRandom.hex}.pdf")
-      overlay_form_b_path = Rails.root.join("tmp", "overlay_form_b_#{SecureRandom.hex}.pdf")
+      overlay_path = Rails.root.join("tmp", "overlay_#{SecureRandom.hex}.pdf")
 
-      # Generate overlay for Form A
-      Prawn::Document.generate(overlay_form_a_path, margin: 0, page_size: "LEGAL") do |pdf|
+      # Generate overlay for single page template
+      Prawn::Document.generate(overlay_path, margin: 0, page_size: "LEGAL") do |pdf|
         pdf.font_families.update("Times" => {
           normal: times_font_path,
           bold: times_bold_font_path,
@@ -153,18 +140,18 @@ class GeneratePdfJob < ApplicationJob
         )
         
         # Participant data - all uppercase, size 12
-        y_pos = 795
+        y_pos = 803
         x_pos = 184
         pdf.text_box name, at: [x_pos, y_pos], size: 12
-        y_pos -= 32
+        y_pos -= 24
         pdf.text_box rank_nrp, at: [x_pos, y_pos], size: 12
-        y_pos -= 32
+        y_pos -= 24
         pdf.text_box unit, at: [x_pos, y_pos], size: 12
-        y_pos -= 32
+        y_pos -= 23
         pdf.text_box date_of_birth_formatted, at: [x_pos, y_pos], size: 12
-        y_pos -= 32
+        y_pos -= 23
         pdf.text_box golongan, at: [x_pos, y_pos], size: 12
-        y_pos -= 32
+        y_pos -= 23
         tb_bb = ""
         if registration.tb.present? && registration.bb.present?
           tb_bb = "TB: #{registration.tb} CM / BB: #{registration.bb} KG"
@@ -175,11 +162,11 @@ class GeneratePdfJob < ApplicationJob
         end
         pdf.text_box tb_bb, at: [x_pos, y_pos], size: 12
         
-        # Print date (Jakarta, tanggal ujian) - lowered by 32px
-        pdf.text_box print_date, at: [350, 438], size: 12, width: 220, align: :center, style: :bold
+        # Print date (Jakarta, tanggal ujian) - raised 30 pixels
+        pdf.text_box print_date, at: [350, 166], size: 12, width: 220, align: :center, style: :bold
         
-        # Signer box for Form A (right side of page) - lowered by 32px
-        signer_y = 408
+        # Signer box - starting below print date
+        signer_y = 136
         signer_x = 350
         
         # Jabatan Polisi (kalau ada)
@@ -253,147 +240,15 @@ class GeneratePdfJob < ApplicationJob
         end
       end
 
-      # Generate overlay for Form B (if needed)
-      if use_both_forms
-        Prawn::Document.generate(overlay_form_b_path, margin: 0, page_size: "LEGAL") do |pdf|
-          pdf.font_families.update("Times" => {
-            normal: times_font_path,
-            bold: times_bold_font_path,
-            italic: times_font_path,
-            bold_italic: times_bold_font_path,
-          })
-          pdf.font "Times"
-          
-          # Exam name - centered, bold, underlined, size 14
-          pdf.formatted_text_box(
-            [{ text: exam_name, styles: [:bold, :underline] }],
-            at: [0, 844],
-            width: 612,
-            height: 50,
-            size: 14,
-            align: :center
-          )
-          
-          # Participant data - all uppercase, size 12
-          y_pos = 795
-          x_pos = 184
-          pdf.text_box name, at: [x_pos, y_pos], size: 12
-          y_pos -= 32
-          pdf.text_box rank_nrp, at: [x_pos, y_pos], size: 12
-          y_pos -= 32
-          pdf.text_box unit, at: [x_pos, y_pos], size: 12
-          y_pos -= 32
-          pdf.text_box date_of_birth_formatted, at: [x_pos, y_pos], size: 12
-          y_pos -= 32
-          pdf.text_box golongan, at: [x_pos, y_pos], size: 12
-          y_pos -= 32
-          tb_bb = ""
-          if registration.tb.present? && registration.bb.present?
-            tb_bb = "TB: #{registration.tb} CM / BB: #{registration.bb} KG"
-          elsif registration.tb.present?
-            tb_bb = "TB: #{registration.tb} CM"
-          elsif registration.bb.present?
-            tb_bb = "BB: #{registration.bb} KG"
-          end
-          pdf.text_box tb_bb, at: [x_pos, y_pos], size: 12
-          
-          # Print date (Jakarta, tanggal ujian) - lowered by 32px
-          pdf.text_box print_date, at: [350, 238], size: 12, width: 220, align: :center, style: :bold
-          
-          # Signer box for Form B (right side of page) - lowered by 32px
-          signer_y = 208
-          signer_x = 350
-          
-          # Jabatan Polisi (kalau ada)
-          if form_b_police_position.present?
-            pdf.text_box form_b_police_position, at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
-            signer_y -= 20
-            pdf.text_box "SEBAGAI", at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
-            signer_y -= 20
-          end
-          
-          # Jabatan Ujian
-          if form_b_exam_position.present?
-            pdf.text_box form_b_exam_position, at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
-            signer_y -= 20
-          end
-          
-          # Space for signature
-          signer_y -= 30
-          
-          # Nama
-          if form_b_name.present?
-            pdf.text_box form_b_name, at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
-            signer_y -= 20
-          else
-            # If no name, lower the line more
-            signer_y -= 30
-          end
-          
-          # Garis
-          pdf.stroke do
-            pdf.line [signer_x, signer_y], [signer_x + 220, signer_y]
-          end
-          signer_y -= 5
-          
-          # Rank NRP
-          if form_b_rank_nrp.present?
-            pdf.text_box form_b_rank_nrp, at: [signer_x, signer_y], size: 12, width: 220, align: :center, style: :bold
-          end          # QR Code and Code at bottom
-          # Generate QR code as PNG in memory
-          qr_png = qrcode.as_png(
-            bit_depth: 1,
-            border_modules: 0,
-            color_mode: ChunkyPNG::COLOR_GRAYSCALE,
-            color: 'black',
-            file: nil,
-            fill: 'white',
-            module_px_size: 3,
-            resize_exactly_to: false,
-            resize_gte_to: 60
-          )
-          
-          # Save QR code to temp file
-          qr_temp_path = Rails.root.join("tmp", "qr_#{SecureRandom.hex}.png")
-          IO.binwrite(qr_temp_path, qr_png.to_s)
-          
-          # Add QR code image above the text (same X position as code text: 24)
-          pdf.image qr_temp_path, at: [24, 116], width: 60, height: 60
-          
-          # Delete temp QR file
-          File.delete(qr_temp_path) if File.exist?(qr_temp_path)
-          
-          # Code at bottom (below QR code with 8px spacing)
-          pdf.text_box "KODE REGISTRASI: #{code}", at: [24, 48], size: 10
-          
-          # Registration date below code
-          if registration.created_at.present?
-            registration_time = registration.created_at.in_time_zone('Jakarta').strftime('%d-%m-%Y %H:%M:%S')
-            pdf.text_box "Waktu Mendaftar: #{registration_time} WIB", at: [24, 36], size: 10
-          end
-        end
-      end
-
-      # Load overlays and templates
-      overlay_form_a = CombinePDF.load(overlay_form_a_path)
+      # Load overlay and template
+      overlay = CombinePDF.load(overlay_path)
       
-      # Combine Form A
-      template_a_pdf = CombinePDF.load(template_a_path)
-      template_a_pdf.pages[0] << overlay_form_a.pages[0] if overlay_form_a.pages[0]
+      # Combine template with overlay
+      template_pdf = CombinePDF.load(template_path)
+      template_pdf.pages[0] << overlay.pages[0] if overlay.pages[0]
 
-      # Create final PDF
-      finish_pdf = CombinePDF.new
-      finish_pdf << template_a_pdf
-
-      # Add Form B if age < 51
-      if use_both_forms
-        overlay_form_b = CombinePDF.load(overlay_form_b_path)
-        template_b_pdf = CombinePDF.load(template_b_path)
-        template_b_pdf.pages[0] << overlay_form_b.pages[0] if overlay_form_b.pages[0]
-        finish_pdf << template_b_pdf
-      end
-
-      finish_pdf.save(output_path)
+      # Save final PDF
+      template_pdf.save(output_path)
 
       # Assign file to Shrine uploader
       File.open(output_path) do |file|
@@ -408,8 +263,7 @@ class GeneratePdfJob < ApplicationJob
 
       # Clean up the temporary files
       File.delete(output_path) if File.exist?(output_path)
-      File.delete(overlay_form_a_path) if File.exist?(overlay_form_a_path)
-      File.delete(overlay_form_b_path) if File.exist?(overlay_form_b_path) && use_both_forms
+      File.delete(overlay_path) if File.exist?(overlay_path)
     rescue => e
       Rails.logger.error "Failed to process document: #{e.message}"
       Rails.logger.error e.backtrace.join("\n")

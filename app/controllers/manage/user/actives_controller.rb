@@ -1,6 +1,6 @@
 class Manage::User::ActivesController < ApplicationController
   before_action -> { check_admin_status(redirect: true) }
-  before_action :set_user, only: [:show, :update]
+  before_action :set_user, only: [:show, :update, :edit_profile, :update_profile]
 
   def index
   end
@@ -79,6 +79,54 @@ class Manage::User::ActivesController < ApplicationController
     end
   end
 
+  def edit_profile
+    user = User.includes(:user_detail).find_by(slug: @slug, account_status: :active)
+    
+    unless user
+      redirect_to index_manage_user_active_path, alert: "User tidak ditemukan"
+      return
+    end
+
+    @user = user
+    @user_detail = user.user_detail
+    @available_ranks = user.is_police? ? UserDetail.ranks_for_police : UserDetail.ranks_for_pns
+    
+    render json: {
+      name: @user_detail.name,
+      date_of_birth: @user_detail.date_of_birth&.strftime('%d-%m-%Y'),
+      rank: @user_detail.rank,
+      unit: @user_detail.unit,
+      position: @user_detail.position,
+      gender: @user_detail.gender,
+      available_ranks: @available_ranks.keys,
+      available_units: UserDetail.units.keys
+    }
+  end
+
+  def update_profile
+    user = User.includes(:user_detail).find_by(slug: @slug, account_status: :active)
+    
+    unless user
+      render json: { success: false, error: "User tidak ditemukan" }, status: :not_found
+      return
+    end
+
+    # Convert date_of_birth dari DD-MM-YYYY ke YYYY-MM-DD jika ada
+    if profile_params[:date_of_birth].present?
+      date_str = profile_params[:date_of_birth]
+      if date_str.match(/^\d{2}-\d{2}-\d{4}$/)
+        day, month, year = date_str.split('-')
+        profile_params[:date_of_birth] = "#{year}-#{month}-#{day}"
+      end
+    end
+
+    if user.user_detail.update(profile_params)
+      render json: { success: true, message: "Profil peserta berhasil diperbarui" }
+    else
+      render json: { success: false, error: user.user_detail.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    end
+  end
+
   def data
     # Pagination
     page = params[:page].to_i
@@ -124,7 +172,12 @@ class Manage::User::ActivesController < ApplicationController
     @slug = params[:slug]
     redirect_to index_manage_user_active_path unless User.exists?(slug: @slug, account_status: :active)
   end
+
   def user_params
     params.require(:user).permit(:account_status, :account_status_reason)
+  end
+
+  def profile_params
+    params.require(:user_detail).permit(:name, :rank, :unit, :position, :gender, :date_of_birth)
   end
 end

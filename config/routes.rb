@@ -121,6 +121,9 @@ Rails.application.routes.draw do
 
         get "/:slug", to: "manage/user/actives#show", as: :show_manage_user_active
         patch "/:slug", to: "manage/user/actives#update", as: :update_manage_user_active
+        get "/:slug/ubah-profil", to: "manage/user/actives#edit_profile", as: :edit_profile_manage_user_active
+        patch "/:slug/ubah-profil", to: "manage/user/actives#update_profile"
+        put "/:slug/ubah-profil", to: "manage/user/actives#update_profile"
         get "/:slug/ujian/:reg_slug", to: "manage/shared/registrations#show", as: :show_manage_shared_registration
       end
       

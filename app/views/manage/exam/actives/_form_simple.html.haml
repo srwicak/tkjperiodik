@@ -60,8 +60,8 @@
 
     / Data Penandatangan untuk Surat
     .mb-6
-      %h3.text-xl.font-bold.text-gray-800.mb-4 Data Penandatangan Surat (Lembar 1)
-      %p.text-sm.text-gray-600.mb-4 Data ini akan digunakan untuk lembar 1 berkas pendaftaran
+      %h3.text-xl.font-bold.text-gray-800.mb-4 Data Penandatangan Surat
+      %p.text-sm.text-gray-600.mb-4 Data ini akan digunakan untuk berkas pendaftaran
 
       .space-y-4
         .form-control
@@ -90,41 +90,6 @@
           .form-control
             = form.label :form_a_nrp, "NRP", class: "label font-bold"
             = form.text_field :form_a_nrp, class: "input input-bordered w-full", placeholder: "12345678"
-
-    .divider.my-6
-
-    / Data Penandatangan untuk Surat Lembar 2
-    .mb-6
-      %h3.text-xl.font-bold.text-gray-800.mb-4 Data Penandatangan Surat (Lembar 2)
-      %p.text-sm.text-gray-600.mb-4 Data ini akan digunakan untuk lembar 2 berkas pendaftaran (bisa berbeda dengan lembar 1)
-
-      .space-y-4
-        .form-control
-          = form.label :form_b_event_position, "Jabatan Ujian (contoh: KETUA PELAKSANA)", class: "label font-bold"
-          = form.text_field :form_b_event_position, class: "input input-bordered w-full", placeholder: "KETUA PELAKSANA"
-          .label
-            %span.label-text-alt.text-gray-500 Jabatan dalam ujian (wajib diisi)
-
-        .form-control
-          = form.label :form_b_police_position, "Jabatan Polisi (contoh: KABAG BINJAS POLRI) - Opsional", class: "label font-bold"
-          = form.text_field :form_b_police_position, class: "input input-bordered w-full", placeholder: "KABAG BINJAS POLRI"
-          .label
-            %span.label-text-alt.text-gray-500 Jabatan polisi. Kosongkan jika tidak ada. Akan muncul: '[Jabatan Polisi] selaku [Jabatan Ujian]'
-
-        .form-control
-          = form.label :form_b_name, "Nama Penandatangan", class: "label font-bold"
-          = form.text_field :form_b_name, class: "input input-bordered w-full", placeholder: "Contoh: SUHARTO"
-          .label
-            %span.label-text-alt.text-gray-500 Nama lengkap penandatangan
-
-        .grid.grid-cols-1.md:grid-cols-2.gap-4
-          .form-control
-            = form.label :form_b_rank, "Pangkat (contoh: KOMBES POL)", class: "label font-bold"
-            = form.text_field :form_b_rank, class: "input input-bordered w-full", placeholder: "KOMBES POL"
-          
-          .form-control
-            = form.label :form_b_nrp, "NRP", class: "label font-bold"
-            = form.text_field :form_b_nrp, class: "input input-bordered w-full", placeholder: "12345678"
 
     .divider.my-6
 
