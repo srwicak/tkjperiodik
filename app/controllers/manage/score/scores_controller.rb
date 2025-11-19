@@ -148,31 +148,71 @@ class Manage::Score::ScoresController < ApplicationController
   def update
     Rails.logger.info "Received parameters: #{params.inspect}"
 
-    attrs = {
-      score_detail: score_params[:score_detail],
-      score_grade: score_params[:score_grade],
-      score_number: score_params[:score_number],
-      notes: score_params[:notes],
-      exam_present: true
-    }
+    # Check if this is a correction-only request (no score data)
+    is_correction_only = params[:correction_only] == 'true'
 
-    # set first input metadata if not present, otherwise update last edited metadata
-    if @score.first_input_by_id.nil?
-      attrs[:first_input_by_id] = current_user.id
-      attrs[:first_input_at] = Time.current
-      attrs[:last_edited_by_id] = current_user.id
-      attrs[:last_edited_at] = Time.current
-    else
-      attrs[:last_edited_by_id] = current_user.id
-      attrs[:last_edited_at] = Time.current
+    attrs = {}
+    
+    unless is_correction_only
+      attrs = {
+        score_detail: score_params[:score_detail],
+        score_grade: score_params[:score_grade],
+        score_number: score_params[:score_number],
+        notes: score_params[:notes],
+        exam_present: true
+      }
+
+      # set first input metadata if not present, otherwise update last edited metadata
+      if @score.first_input_by_id.nil?
+        attrs[:first_input_by_id] = current_user.id
+        attrs[:first_input_at] = Time.current
+        attrs[:last_edited_by_id] = current_user.id
+        attrs[:last_edited_at] = Time.current
+      else
+        attrs[:last_edited_by_id] = current_user.id
+        attrs[:last_edited_at] = Time.current
+      end
     end
 
-    if @score.update(attrs)
-      @registration.update(is_attending: true)
-      redirect_to show_manage_score_path(@score.slug), notice: 'Nilai telah sukses dirubah.'
-    else
-      render :edit
+    # Handle registration correction (TB, BB, Golongan)
+    registration_update_attrs = {}
+    if params[:registration].present?
+      if params[:registration][:tb].present?
+        registration_update_attrs[:tb] = params[:registration][:tb].to_i
+      end
+      if params[:registration][:bb].present?
+        registration_update_attrs[:bb] = params[:registration][:bb].to_i
+      end
+      if params[:registration][:golongan].present?
+        registration_update_attrs[:golongan] = params[:registration][:golongan].to_i
+      end
     end
+
+    ActiveRecord::Base.transaction do
+      # Update score only if not correction-only
+      if is_correction_only
+        success = true
+      else
+        success = @score.update(attrs)
+        @registration.update(is_attending: true) if success
+      end
+      
+      if success
+        # Update registration if corrections are provided
+        if registration_update_attrs.any?
+          @registration.update!(registration_update_attrs)
+          Rails.logger.info "Registration corrected for user #{@user.id}: #{registration_update_attrs.inspect}"
+          redirect_to edit_manage_score_path(@score.slug), notice: 'Data peserta ujian telah dikoreksi.'
+        else
+          redirect_to show_manage_score_path(@score.slug), notice: 'Nilai telah sukses dirubah.'
+        end
+      else
+        render :edit
+      end
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error "Failed to update registration: #{e.message}"
+    redirect_to edit_manage_score_path(@score.slug), alert: "Gagal mengubah data: #{e.message}"
   end
 
   def search

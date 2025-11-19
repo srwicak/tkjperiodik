@@ -140,18 +140,32 @@ class Module::ExamsController < ApplicationController
       # Set default registration type to berkala
       registration.registration_type = params[:reg_type] || 'berkala'
       
-      # Set golongan based on age category
-      if params[:golongan].present?
-        registration.golongan = params[:golongan]
-      else
-        # Calculate golongan as backup if not provided from form
-        if @user.user_detail.date_of_birth.present? && exam_date.present?
-          age_data = Registration.calculate_age_at_date(@user.user_detail.date_of_birth, exam_date)
-          if age_data
-            registration.golongan = Registration.age_category(age_data[:years]).to_i
-            Rails.logger.info "Golongan calculated server-side: #{registration.golongan} for user #{@user.id}"
+      # ALWAYS calculate golongan on backend (PRIMARY SOURCE)
+      # JavaScript value is only used as reference for validation/debugging
+      if @user.user_detail.date_of_birth.present? && exam_date.present?
+        age_data = Registration.calculate_age_at_date(@user.user_detail.date_of_birth, exam_date)
+        if age_data
+          backend_golongan = Registration.age_category(age_data[:years]).to_i
+          frontend_golongan = params[:golongan].to_i if params[:golongan].present?
+          
+          # Use backend calculation as primary
+          registration.golongan = backend_golongan
+          
+          # Log mismatch for debugging (Apple device issue detection)
+          if frontend_golongan.present? && frontend_golongan != backend_golongan
+            Rails.logger.warn "GOLONGAN MISMATCH for user #{@user.id}: Frontend=#{frontend_golongan}, Backend=#{backend_golongan}, DOB=#{@user.user_detail.date_of_birth}, ExamDate=#{exam_date}"
+          else
+            Rails.logger.info "Golongan calculated by backend: #{registration.golongan} for user #{@user.id} (age: #{age_data[:years]} years)"
           end
+        else
+          # Fallback: use frontend if backend calculation fails
+          registration.golongan = params[:golongan].to_i if params[:golongan].present?
+          Rails.logger.error "Backend age calculation failed for user #{@user.id}, using frontend value: #{registration.golongan}"
         end
+      else
+        # Fallback: use frontend if no DOB or exam_date
+        registration.golongan = params[:golongan].to_i if params[:golongan].present?
+        Rails.logger.warn "Missing DOB or exam_date for user #{@user.id}, using frontend golongan: #{registration.golongan}"
       end
       
       # Set TB and BB from params

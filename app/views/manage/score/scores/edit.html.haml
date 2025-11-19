@@ -9,7 +9,7 @@
     .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 informasi kepesertaan
 
     .max-w-4xl.w-full
-      = render "exam_user_info"
+      = render "exam_user_info", show_correction_button: true
 
     .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 informasi penilai
 
@@ -78,6 +78,72 @@
             %span.text-red-500 titik 
             bukan koma
       = render "form_simple"
+
+  -# Modal for correction
+  %dialog#correction_modal.modal
+    .modal-box.max-w-2xl
+      %h3.text-lg.font-bold.uppercase.mb-4 Koreksi Data Peserta Ujian
+      
+      .alert.alert-info.mb-4
+        %i.ri-information-line
+        %span.text-sm
+          Gunakan form ini untuk mengoreksi data ujian jika terjadi kesalahan input pada saat pendaftaran (misalnya: kesalahan golongan akibat error JavaScript di perangkat Apple).
+      
+      = form_with url: edit_manage_score_path(@score.slug), method: :patch, id: "correction-form" do |f|
+        = hidden_field_tag 'correction_only', 'true'
+        
+        .space-y-4
+          .form-control
+            %label.label
+              %span.label-text.font-semibold Tinggi Badan (TB) saat ujian
+            = f.number_field :tb, value: @registration.tb, class: "input input-bordered w-full", name: "registration[tb]", placeholder: "Contoh: 170", min: 100, max: 250
+            .label
+              %span.label-text-alt.text-gray-500 Dalam satuan centimeter (cm)
+          
+          .form-control
+            %label.label
+              %span.label-text.font-semibold Berat Badan (BB) saat ujian
+            = f.number_field :bb, value: @registration.bb, class: "input input-bordered w-full", name: "registration[bb]", placeholder: "Contoh: 65", min: 30, max: 200
+            .label
+              %span.label-text-alt.text-gray-500 Dalam satuan kilogram (kg)
+          
+          - if @age_at_exam.present?
+            .form-control
+              %label.label
+                %span.label-text.font-semibold Golongan Ujian
+              %select.select.select-bordered.w-full{ name: "registration[golongan]" }
+                %option{ value: "1", selected: @golongan == 1 } Golongan 1 (Di bawah 31 tahun)
+                %option{ value: "2", selected: @golongan == 2 } Golongan 2 (31-40 tahun)
+                %option{ value: "3", selected: @golongan == 3 } Golongan 3 (41-50 tahun)
+                %option{ value: "4", selected: @golongan == 4 } Golongan 4 (51 tahun ke atas)
+              .label
+                %span.label-text-alt.text-gray-500
+                  - age_detail = @registration.age_in_years_and_days_at_exam
+                  - if age_detail
+                    Umur saat ujian: #{age_detail[:years]} tahun #{age_detail[:months]} bulan #{age_detail[:days]} hari
+                  - else
+                    Umur saat ujian: #{@age_at_exam} tahun
+          
+          .alert.alert-warning
+            %i.ri-alert-line
+            %span.text-sm.font-semibold Perhatian: Perubahan golongan akan mempengaruhi standar penilaian ujian. Pastikan data yang dimasukkan sudah benar.
+        
+        .modal-action
+          %button.btn{ type: "button", onclick: "document.getElementById('correction_modal').close()" } Batal
+          %button.btn.btn-warning.text-white{ type: "button", onclick: "submitCorrectionForm()" } 
+            %i.ri-save-line
+            Simpan Koreksi
+
+:javascript
+  function openCorrectionModal() {
+    document.getElementById('correction_modal').showModal();
+  }
+  
+  function submitCorrectionForm() {
+    if (confirm('Apakah Anda yakin ingin menyimpan koreksi data ini?\n\nPerubahan golongan akan mempengaruhi standar penilaian. Pastikan data sudah benar.')) {
+      document.getElementById('correction-form').submit();
+    }
+  }
 
 
 

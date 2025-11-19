@@ -71,22 +71,40 @@
       %tr( class="transition-colors duration-300 hover:bg-slate-50" )
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Golongan Saat Ujian
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
-          - if @golongan.present?
-            - golongan_text = case @golongan
-            - when 1
-              - "Golongan 1 (Di bawah 31 tahun)"
-            - when 2
-              - "Golongan 2 (31-40 tahun)"
-            - when 3
-              - "Golongan 3 (41-50 tahun)"
-            - when 4
-              - "Golongan 4 (51 tahun ke atas)"
+          .flex.items-center.gap-3
+            .flex-1
+              - if @golongan.present?
+                - golongan_text = case @golongan
+                - when 1
+                  - "Golongan 1 (Di bawah 31 tahun)"
+                - when 2
+                  - "Golongan 2 (31-40 tahun)"
+                - when 3
+                  - "Golongan 3 (41-50 tahun)"
+                - when 4
+                  - "Golongan 4 (51 tahun ke atas)"
+                - else
+                  - "Golongan #{@golongan}"
+                %span.badge.badge-lg{ class: @golongan == 4 ? 'badge-error' : (@golongan == 3 ? 'badge-warning' : (@golongan == 2 ? 'badge-info' : 'badge-success')) }
+                  = golongan_text
+              - else
+                %span.text-gray-500.italic Data golongan belum tersedia (pendaftaran lama)
+            - if @age_at_exam.present? && local_assigns[:show_correction_button]
+              .flex-shrink-0
+                %button.btn.btn-sm.btn-warning{ type: "button", onclick: "openCorrectionModal()" }
+                  %i.ri-edit-line
+                  Koreksi Data Ujian
+      
+      - if @age_at_exam.present?
+        %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Umur Saat Ujian
+          %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+            - age_detail = @registration.age_in_years_and_days_at_exam
+            - if age_detail
+              %span.font-semibold.text-blue-700
+                = "#{age_detail[:years]} tahun #{age_detail[:months]} bulan #{age_detail[:days]} hari"
             - else
-              - "Golongan #{@golongan}"
-            %span.badge.badge-lg{ class: @golongan == 4 ? 'badge-error' : (@golongan == 3 ? 'badge-warning' : (@golongan == 2 ? 'badge-info' : 'badge-success')) }
-              = golongan_text
-          - else
-            %span.text-gray-500.italic Data golongan belum tersedia (pendaftaran lama)
+              %span= "#{@age_at_exam} tahun"
       
       %tr( class="transition-colors duration-300 hover:bg-slate-50" )
         %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tinggi Badan (TB)

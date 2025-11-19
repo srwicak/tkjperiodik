@@ -9,6 +9,12 @@
       .divider
       = render "user_info"
       
+      -# Warning for potential calculation issues on Apple devices
+      #apple-device-warning.alert.alert-warning.mb-4.hidden
+        %i.ri-error-warning-line
+        %span.font-semibold Perangkat Apple Terdeteksi:
+        %span Jika Anda mengalami masalah dengan kategori golongan yang tidak sesuai, silakan hubungi petugas atau gunakan perangkat lain (Android/Windows). Sistem akan menghitung ulang golongan Anda di server untuk memastikan akurasi.
+      
       - if @available_schedules.empty?
         .alert.alert-warning
           %i.ri-information-line
@@ -119,6 +125,23 @@
         %button.btn.btn-success.grow.text-white.uppercase{ type: "button", onclick: "document.getElementById('registration-form').submit()" } Konfirmasi
 
 :javascript
+  // Detect Apple devices (iOS Safari, iPadOS Safari, macOS Safari)
+  function isAppleDevice() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(userAgent);
+    const isMacOS = /macintosh|mac os x/.test(userAgent);
+    const isSafari = /safari/.test(userAgent) && !/chrome|crios|fxios/.test(userAgent);
+    return isIOS || (isMacOS && isSafari);
+  }
+  
+  // Show warning for Apple devices
+  if (isAppleDevice()) {
+    const warningElement = document.getElementById('apple-device-warning');
+    if (warningElement) {
+      warningElement.classList.remove('hidden');
+    }
+  }
+  
   // Validate TB and BB before showing modal
   function validateAndShowModal() {
     const tbField = document.getElementById('tb_field');
