@@ -54,6 +54,53 @@ class Superadmin::PromotesController < ApplicationController
     redirect_to index_superadmin_promote_path
   end
 
+  def toggle_operator_status
+    user = User.find_by!(slug: params[:slug])
+    
+    if user.nil? || user.user_detail.nil?
+      render json: { success: false, error: "User not found" }, status: :not_found
+      return
+    end
+
+    unless user.user_detail.is_operator_granted
+      render json: { success: false, error: "User is not an operator" }, status: :unprocessable_entity
+      return
+    end
+
+    new_status = !user.user_detail.is_operator_active
+    user.user_detail.update(is_operator_active: new_status)
+    
+    status_text = new_status ? "diaktifkan" : "dinonaktifkan"
+    render json: { 
+      success: true, 
+      is_active: new_status,
+      message: "Akses operator telah #{status_text}." 
+    }
+  end
+
+  def update_work_schedule
+    user = User.find_by!(slug: params[:slug])
+    
+    if user.nil? || user.user_detail.nil?
+      render json: { success: false, error: "User not found" }, status: :not_found
+      return
+    end
+
+    unless user.user_detail.is_operator_granted
+      render json: { success: false, error: "User is not an operator" }, status: :unprocessable_entity
+      return
+    end
+
+    schedule_params = params.require(:work_schedule).permit!.to_h
+    
+    user.user_detail.update(work_schedule: schedule_params)
+    
+    render json: { 
+      success: true, 
+      message: "Jadwal kerja operator berhasil diperbarui." 
+    }
+  end
+
 
   def promote_superadmin
     if @superadmin_count >= 3
@@ -138,6 +185,7 @@ class Superadmin::PromotesController < ApplicationController
     end
 
     paginated_users = paginated_users.map do |user|
+      user_detail = UserDetail.find_by(user_id: user[0])
       {
         id: user[0],
         identity: user[1],
@@ -145,6 +193,8 @@ class Superadmin::PromotesController < ApplicationController
         name: user[3],
         slug: user[4],
         account_status: user[5],
+        is_operator_active: user_detail&.is_operator_active || false,
+        work_schedule_status: user_detail&.work_schedule_status || "N/A"
       }
     end
 
@@ -171,6 +221,9 @@ class Superadmin::PromotesController < ApplicationController
           identity: user.identity,
           is_operator: user_detail.is_operator_granted,
           is_superadmin: user_detail.is_superadmin_granted,
+          is_operator_active: user_detail.is_operator_active,
+          work_schedule: user_detail.work_schedule,
+          work_schedule_status: user_detail.work_schedule_status,
           access_level: access_level,
           is_current_user: is_current_user,
           is_user_detail: true

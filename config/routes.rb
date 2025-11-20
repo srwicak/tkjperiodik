@@ -207,6 +207,8 @@ Rails.application.routes.draw do
         get "/:slug/kesatuan/:unit", to: "manage/exam/units#show", as: :show_manage_exam_unit
 
         get "/:slug/kesatuan/:unit/data", to: "manage/exam/units#data", as: :manage_exam_unit_data
+        
+        get "/:slug/kesatuan/:unit/download-excel", to: "manage/exam/units#download_excel", as: :download_excel_manage_exam_unit
 
         match "/:slug/sesi", to: redirect("/kelola/ujian"), via: :all
 
@@ -293,6 +295,8 @@ Rails.application.routes.draw do
           get "hapus/:slug", to: "superadmin/promotes#demote_operator", as: :remove_operator_superadmin_promote
           post "cari", to: "superadmin/promotes#search", as: :search_superadmin_promote
           get "data", to: "superadmin/promotes#data", as: :data_superadmin_promote
+          patch ":slug/toggle-status", to: "superadmin/promotes#toggle_operator_status", as: :toggle_status_superadmin_promote
+          patch ":slug/work-schedule", to: "superadmin/promotes#update_work_schedule", as: :update_schedule_superadmin_promote
         end
 
         scope "pengguna" do

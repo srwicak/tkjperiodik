@@ -5,6 +5,7 @@
 #  id                    :bigint           not null, primary key
 #  date_of_birth         :date
 #  gender                :boolean          not null
+#  is_operator_active    :boolean          default(TRUE), not null
 #  is_operator_granted   :boolean          default(FALSE), not null
 #  is_superadmin_granted :boolean          default(FALSE), not null
 #  name                  :string           default(""), not null
@@ -12,6 +13,7 @@
 #  position              :string
 #  rank                  :integer
 #  unit                  :integer
+#  work_schedule         :jsonb
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
 #  user_id               :bigint

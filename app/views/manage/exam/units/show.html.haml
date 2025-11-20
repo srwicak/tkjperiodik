@@ -26,38 +26,23 @@
     -# =render "upload_excel"
 
 
-    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 daftar peserta - kenaikan pangkat
+    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 daftar peserta
     .flex.justify-between
       .my-2.text-lg.font-bold Belum dinilai
       .my-2.text-lg
-        .btn.btn-primary.btn-sm#download-rank-no.uppercase download xlsx
-    #data-rank-no
-    .flex.justify-between
+    #data-no
+    .flex.justify-between.items-center
       .my-2.text-lg.font-bold Sudah dinilai
       .my-2.text-lg
-        .btn.btn-primary.btn-sm#download-rank-ok.uppercase download xlsx
-    #data-rank-ok
-    
-    .divider.divider-start.uppercase.text-gray-400.font-bold.mt-8 daftar peserta - berkala
-    .flex.justify-between
-      .my-2.text-lg.font-bold Belum dinilai
-      .my-2.text-lg
-        .btn.btn-primary.btn-sm#download-reg-no.uppercase download xlsx
-    #data-reg-no
-    .flex.justify-between
-      .my-2.text-lg.font-bold Sudah dinilai
-      .my-2.text-lg
-        .btn.btn-primary.btn-sm#download-reg-ok.uppercase download xlsx
-    #data-reg-ok
+        = link_to "Download Excel", download_excel_manage_exam_unit_path(params[:slug], params[:unit]), class: "btn btn-success btn-sm uppercase", method: :get
+    #data-ok
 
 = render "layouts/dashboard"
 
 :javascript
   var tableConfigs = [
-    { id: "#data-rank-ok", endpoint: "/kelola/ujian/#{params[:slug]}/kesatuan/#{params[:unit]}/data?registration_type=kenaikan_pangkat&with_score=true", buttonId: "#download-rank-ok", fileName: "kenaikan_pangkat_score.xlsx" },
-    { id: "#data-rank-no", endpoint: "/kelola/ujian/#{params[:slug]}/kesatuan/#{params[:unit]}/data?registration_type=kenaikan_pangkat&with_score=false", buttonId: "#download-rank-no", fileName: "kenaikan_pangkat_no_score.xlsx" },
-    { id: "#data-reg-ok", endpoint: "/kelola/ujian/#{params[:slug]}/kesatuan/#{params[:unit]}/data?registration_type=berkala&with_score=true", buttonId: "#download-reg-ok", fileName: "berkala_score.xlsx" },
-    { id: "#data-reg-no", endpoint: "/kelola/ujian/#{params[:slug]}/kesatuan/#{params[:unit]}/data?registration_type=berkala&with_score=false", buttonId: "#download-reg-no", fileName: "berkala_no_score.xlsx" }
+    { id: "#data-ok", endpoint: "/kelola/ujian/#{params[:slug]}/kesatuan/#{params[:unit]}/data?with_score=true" },
+    { id: "#data-no", endpoint: "/kelola/ujian/#{params[:slug]}/kesatuan/#{params[:unit]}/data?with_score=false" }
   ];
 
   tableConfigs.forEach((config) => {
@@ -114,10 +99,5 @@
           }
         }
       ]
-    });
-
-    // Trigger download with dynamic file name
-    document.querySelector(config.buttonId).addEventListener("click", function(){
-      table.download("xlsx", config.fileName, {sheetName: "My Data"});
     });
   });

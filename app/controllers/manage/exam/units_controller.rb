@@ -52,6 +52,25 @@ class Manage::Exam::UnitsController < ApplicationController
     }
   end
 
+  def download_excel
+    # Generate fresh Excel file from latest database data
+    service = ExamExcelExportService.new(@exam, params[:unit])
+    excel_data = service.generate_scored_participants
+
+    unit_name = params[:unit].tr("-", "_")
+    filename = "peserta_dinilai_#{@exam.slug}_#{unit_name}_#{Time.now.strftime('%Y%m%d_%H%M%S')}.xlsx"
+
+    # Prevent caching to ensure fresh data
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+
+    send_data excel_data,
+              filename: filename,
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              disposition: 'attachment'
+  end
+
   private
 
   def format_registrations(registrations)

@@ -26,6 +26,65 @@
       %button#filter-clear.btn.btn-error Muat ulang
     .mt-8#data
 
+    / Modal Jadwal Kerja
+    %dialog#schedule-modal.modal
+      .modal-box.max-w-3xl{class: "w-11/12"}
+        %h3.font-bold.text-lg Atur Jadwal Kerja Operator
+        .py-2.text-sm.text-gray-600
+          %span Operator:
+          %span#schedule-name.font-semibold
+        %input#schedule-slug{ type: "hidden" }
+        .divider
+        
+        .space-y-4
+          - days = { 'monday' => 'Senin', 'tuesday' => 'Selasa', 'wednesday' => 'Rabu', 'thursday' => 'Kamis', 'friday' => 'Jumat', 'saturday' => 'Sabtu', 'sunday' => 'Minggu' }
+          - days.each do |day_en, day_id|
+            .form-control.border.rounded-lg.p-3
+              .flex.items-center.justify-between
+                .flex.items-center.space-x-3
+                  %input{ type: "checkbox", id: "#{day_en}-enabled", class: "checkbox checkbox-primary" }
+                  %label.font-semibold= day_id
+                .flex.items-center.space-x-2
+                  %input{ type: "time", id: "#{day_en}-start", class: "input input-sm input-bordered", disabled: true }
+                  %span -
+                  %input{ type: "time", id: "#{day_en}-end", class: "input input-sm input-bordered", disabled: true }
+        
+        .modal-action
+          %button.btn.btn-primary{ onclick: "saveWorkSchedule()" } Simpan
+          %form{ method: "dialog" }
+            %button.btn Batal
+
+    / Modal Konfirmasi Hapus Operator
+    %dialog#delete-modal.modal
+      .modal-box
+        %h3.font-bold.text-lg.text-error
+          %i.ri-alert-line
+          Konfirmasi Hapus Operator
+        .py-4
+          %p.text-sm Apakah Anda yakin ingin menghapus operator ini?
+          .mt-2.p-3.bg-gray-100.rounded
+            %p.font-semibold#delete-operator-name
+            %p.text-sm.text-gray-600#delete-operator-identity
+          %p.text-sm.text-error.mt-3
+            %i.ri-information-line
+            Operator akan kehilangan akses ke fitur operator. Status operator akan dihapus secara permanen.
+        .modal-action
+          %a#delete-confirm-btn.btn.btn-error.text-white
+            %i.ri-delete-bin-line
+            Ya, Hapus Operator
+          %form{ method: "dialog" }
+            %button.btn Batal
+
+    :javascript
+      // Enable/disable time inputs based on checkbox
+      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+      days.forEach(day => {
+        document.getElementById(`${day}-enabled`).addEventListener('change', function() {
+          document.getElementById(`${day}-start`).disabled = !this.checked
+          document.getElementById(`${day}-end`).disabled = !this.checked
+        })
+      })
+
 = render "layouts/dashboard"
 
 :javascript
@@ -48,25 +107,68 @@
       frozen: true
     },
     columns:[
-      { title: "NRP/NIP", field: "identity", width: 180, resizable: false, headerSort: false, vertAlign: "middle" },
-      { title: "Nama", field: "name", width: 250, headerSort: false, vertAlign:"middle" },
-      { title: "Waktu Daftar", field: "created_at", width: 250, headerSort: false, vertAlign: "middle"},
+      { title: "NRP/NIP", field: "identity", width: 150, resizable: false, headerSort: false, vertAlign: "middle" },
+      { title: "Nama", field: "name", width: 200, headerSort: false, vertAlign:"middle" },
+      { 
+        title: "Status Akses", 
+        field: "is_operator_active", 
+        width: 120, 
+        headerSort: false, 
+        vertAlign: "middle",
+        hozAlign: "center",
+        formatter: (cell, formatterParams, onRendered) => {
+          let isActive = cell.getValue()
+          let badge = document.createElement("span")
+          badge.className = isActive ? "badge badge-success text-white" : "badge badge-error text-white"
+          badge.innerHTML = isActive ? "Aktif" : "Nonaktif"
+          return badge
+        }
+      },
+      { 
+        title: "Jadwal Kerja", 
+        field: "work_schedule_status", 
+        width: 250, 
+        headerSort: false, 
+        vertAlign: "middle",
+      },
+      { title: "Waktu Daftar", field: "created_at", width: 200, headerSort: false, vertAlign: "middle"},
       { 
         title: "Aksi" ,
-        width: 200,
+        width: 400,
         hozAlign: "center", 
         headerHozAlign: "center", 
         vertAlign: "middle",
         headerSort: false,
         formatter: (cell, formatterParams, onRendered) => {
-          let showButton = document.createElement("a")
-          showButton.className =  "btn btn-sm rounded-lg btn-error uppercase text-white text-xs"
-          showButton.innerHTML = "<i class=ri-corner-left-down-line></i>hapus"
-          showButton.href = "/superadmin/kelola/operator/hapus/" + cell.getRow().getData().slug
+          let rowData = cell.getRow().getData()
+          
+          // Toggle button
+          let toggleButton = document.createElement("button")
+          toggleButton.className = rowData.is_operator_active 
+            ? "btn btn-sm rounded-lg btn-warning uppercase text-white text-xs"
+            : "btn btn-sm rounded-lg btn-success uppercase text-white text-xs"
+          toggleButton.innerHTML = rowData.is_operator_active 
+            ? "<i class='ri-toggle-line'></i>Nonaktifkan"
+            : "<i class='ri-toggle-fill'></i>Aktifkan"
+          toggleButton.onclick = () => toggleOperatorStatus(rowData.slug)
+
+          // Schedule button
+          let scheduleButton = document.createElement("button")
+          scheduleButton.className = "btn btn-sm rounded-lg btn-info uppercase text-white text-xs"
+          scheduleButton.innerHTML = "<i class='ri-time-line'></i>Jadwal"
+          scheduleButton.onclick = () => openScheduleModal(rowData.slug, rowData.name)
+
+          // Delete button
+          let deleteButton = document.createElement("button")
+          deleteButton.className = "btn btn-sm rounded-lg btn-error uppercase text-white text-xs"
+          deleteButton.innerHTML = "<i class='ri-corner-left-down-line'></i>Hapus"
+          deleteButton.onclick = () => openDeleteModal(rowData.slug, rowData.name, rowData.identity)
 
           let container = document.createElement("div")
           container.className = "flex space-x-2"
-          container.appendChild(showButton)
+          container.appendChild(toggleButton)
+          container.appendChild(scheduleButton)
+          container.appendChild(deleteButton)
 
           return container          
         }
@@ -82,11 +184,95 @@
     }
   }
 
-
-
   document.getElementById("filter-search").addEventListener("click", updateFilter)
-
   document.getElementById("filter-clear").addEventListener("click", () => { window.location.reload() });
+
+  // Toggle operator status
+  function toggleOperatorStatus(slug) {
+    if (!confirm("Apakah Anda yakin ingin mengubah status akses operator ini?")) {
+      return
+    }
+
+    fetch(`/superadmin/kelola/operator/${slug}/toggle-status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message)
+        table.replaceData()
+      } else {
+        alert("Gagal mengubah status: " + data.error)
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error)
+      alert("Terjadi kesalahan saat mengubah status")
+    })
+  }
+
+  // Open schedule modal
+  function openScheduleModal(slug, name) {
+    document.getElementById('schedule-slug').value = slug
+    document.getElementById('schedule-name').textContent = name
+    document.getElementById('schedule-modal').showModal()
+  }
+
+  // Open delete confirmation modal
+  function openDeleteModal(slug, name, identity) {
+    document.getElementById('delete-operator-name').textContent = name
+    document.getElementById('delete-operator-identity').textContent = 'NRP/NIP: ' + identity
+    document.getElementById('delete-confirm-btn').href = '/superadmin/kelola/operator/hapus/' + slug
+    document.getElementById('delete-modal').showModal()
+  }
+
+  // Save work schedule
+  function saveWorkSchedule() {
+    const slug = document.getElementById('schedule-slug').value
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    
+    let schedule = {}
+    let hasSchedule = false
+
+    days.forEach(day => {
+      const enabled = document.getElementById(`${day}-enabled`).checked
+      if (enabled) {
+        const start = document.getElementById(`${day}-start`).value
+        const end = document.getElementById(`${day}-end`).value
+        if (start && end) {
+          schedule[day] = { start, end }
+          hasSchedule = true
+        }
+      }
+    })
+
+    fetch(`/superadmin/kelola/operator/${slug}/work-schedule`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ work_schedule: schedule })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message)
+        document.getElementById('schedule-modal').close()
+        table.replaceData()
+      } else {
+        alert("Gagal menyimpan jadwal: " + data.error)
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error)
+      alert("Terjadi kesalahan saat menyimpan jadwal")
+    })
+  }
 
 
 
