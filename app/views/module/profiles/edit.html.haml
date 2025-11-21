@@ -20,6 +20,12 @@
                 .my-4 
                   = current_user.identity
 
+            %tr( class="transition-colors duration-300 hover:bg-slate-50" )
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Nama Lengkap
+              %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )
+                = form.text_field :name, class: "input input-bordered my-2 w-full", placeholder: "Masukkan nama lengkap"
+                %p.text-xs.text-gray-500.mt-1.italic Hanya boleh berisi huruf, titik, koma, apostrof, dan tanda hubung
+
               %tr( class="transition-colors duration-300 hover:bg-slate-50" )
                 %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500 w-[200px]" ) Tanggal Lahir
                 %td( class="h-12 px-6 text-sm transition duration-300 border-t border-l first:border-l-0 border-slate-200 stroke-slate-500 text-slate-500" )

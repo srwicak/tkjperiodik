@@ -108,6 +108,9 @@
   }
 
   function greetingTime() {
+    // Cache nama user sekali saja di awal
+    const userName = "#{current_user.user_detail.name.split(' ').first}";
+    
     function getGreetingEmoji() {
       const hour = new Date().getHours();
       if (hour >= 5 && hour < 12) {
@@ -146,9 +149,8 @@
       const formattedDate = `${dayName}, ${day} ${month} ${year}`;
       const timeString = `${formattedDate} ${hours}:${minutes}:${seconds}`;
       const emoji = getGreetingEmoji();
-      const name = "#{current_user.user_detail.name.split(' ').first}";
 
-      greetingTextElement.innerHTML = `Selamat ${emoji}, <span class="font-semibold text-red-400">${name}</span><br>Waktu server: <span class="text-gray-500">${timeString}</span> WIB`;
+      greetingTextElement.innerHTML = `Selamat ${emoji}, <span class="font-semibold text-red-400">${userName}</span><br>Waktu server: <span class="text-gray-500">${timeString}</span> WIB`;
     }
 
     // Fetch server time once

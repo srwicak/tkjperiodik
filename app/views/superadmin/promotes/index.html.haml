@@ -236,7 +236,6 @@
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
     
     let schedule = {}
-    let hasSchedule = false
 
     days.forEach(day => {
       const enabled = document.getElementById(`${day}-enabled`).checked
@@ -245,7 +244,6 @@
         const end = document.getElementById(`${day}-end`).value
         if (start && end) {
           schedule[day] = { start, end }
-          hasSchedule = true
         }
       }
     })
